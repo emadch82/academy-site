@@ -1,0 +1,55 @@
+version: '3.8'
+
+# Docker Compose محلی برای توسعه
+# MongoDB + MinIO — بک‌اند خارج از Docker اجرا می‌شود (با tsx watch)
+#
+# اجرا: docker compose -f docker/docker-compose.dev.yml up -d
+# توقف: docker compose -f docker/docker-compose.dev.yml down -v
+
+services:
+  # ── MongoDB ──────────────────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7.0
+    container_name: amozesh-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: amozesh
+      MONGO_INITDB_ROOT_PASSWORD: amozesh_pass
+    volumes:
+      - mongodb_data:/data/db
+    command: mongod --auth
+
+  # ── MinIO (S3-compatible storage) ────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: amozesh-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"   # API
+      - "9001:9001"   # Console
+    environment:
+      MINIO_ROOT_USER: amozesh_minio_access
+      MINIO_ROOT_PASSWORD: amozesh_minio_secret_key
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
+  # ── Mongo Express (UI مدیریت DB — اختیاری) ────────────────────────────────
+  mongo-express:
+    image: mongo-express:1.0
+    container_name: amozesh-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: amozesh
+      ME_CONFIG_MONGODB_ADMINPASSWORD: amozesh_pass
+      ME_CONFIG_MONGODB_URL: mongodb://amozesh:amozesh_pass@mongodb:27017/
+    depends_on:
+      - mongodb
+
+volumes:
+  mongodb_data:
+  minio_data:
