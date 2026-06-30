@@ -1,18 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FiArrowRight, FiCheckCircle, FiUser, FiPhone, FiMail, FiCreditCard, FiShield, FiLock, FiTag, FiDownload } from 'react-icons/fi';
+import Cookies from 'js-cookie';
 import { useCart } from '@/contexts/cart-context';
 import { useDiscount } from '@/contexts/discount-context';
 import { useWallet } from '@/contexts/wallet-context';
 import { useInvoices } from '@/contexts/invoice-context';
 import { formatPrice } from '@/lib/courses-data';
+import { db, initializeDB } from '@/lib/store';
 import toast from 'react-hot-toast';
 
 export default function CheckoutPage() {
-  const { items, totalPrice, clearCart } = useCart();
+  const router = useRouter();
+  const { items, totalPrice, clearCart, addPurchased } = useCart();
   const { applyCode } = useDiscount();
   const { balance, deduct, canAfford } = useWallet();
   const { invoices, addInvoice } = useInvoices();
@@ -29,6 +33,16 @@ export default function CheckoutPage() {
     paymentMethod: 'online',
     note: '',
   });
+
+  useEffect(() => {
+    const raw = Cookies.get('amz_user');
+    if (raw) {
+      try {
+        const user = JSON.parse(raw);
+        setForm((prev) => ({ ...prev, fullName: user.name || '', email: user.identifier || '' }));
+      } catch {}
+    }
+  }, []);
 
   const finalPrice = totalPrice - (discountResult?.valid ? discountResult.discount : 0);
 
@@ -74,12 +88,6 @@ export default function CheckoutPage() {
               هماهنگی‌های لازم از طریق تلفن با شما تماس گرفته خواهد شد.
             </p>
             <div className="flex gap-3 justify-center">
-              <Link
-                href="/panel/courses"
-                className="px-8 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all"
-              >
-                پنل کاربری
-              </Link>
               <button
                 type="button"
                 onClick={() => {
@@ -101,7 +109,7 @@ export default function CheckoutPage() {
               </button>
               <Link
                 href="/courses"
-                className="px-8 py-3 rounded-xl border font-medium hover:bg-muted transition-colors"
+                className="px-8 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all"
               >
                 دوره‌های دیگر
               </Link>
@@ -119,6 +127,21 @@ export default function CheckoutPage() {
       return;
     }
     setIsSubmitting(true);
+
+    if (form.paymentMethod === 'online') {
+      const orderId = `ORD-${Date.now()}`;
+      localStorage.setItem('pendingPurchase', JSON.stringify({
+        courses: items.map((item) => item.course),
+        orderId,
+        total: finalPrice,
+      }));
+      setTimeout(() => {
+        router.push(`/payment?amount=${finalPrice}&orderId=${orderId}`);
+        setIsSubmitting(false);
+      }, 500);
+      return;
+    }
+
     if (form.paymentMethod === 'wallet') {
       if (!canAfford(finalPrice)) {
         toast.error('موجودی کیف پول کافی نیست');
@@ -139,6 +162,23 @@ export default function CheckoutPage() {
       customerPhone: form.phone,
       customerEmail: form.email || undefined,
       nationalCode: form.nationalCode || undefined,
+    });
+    addPurchased(items.map((item) => item.course), invoice.orderId);
+    initializeDB();
+    const userCookie = Cookies.get('amz_user');
+    const u = userCookie ? JSON.parse(userCookie) : null;
+    db.addTransaction({
+      userId: u?.id || 'guest',
+      userName: u?.name || form.fullName,
+      type: 'income',
+      amount: finalPrice,
+      description: `خرید ${items.length} دوره - ${items.map((i) => i.course.title).join(', ')}`,
+      date: new Date().toLocaleDateString('fa-IR'),
+      status: 'completed',
+      paymentMethod: form.paymentMethod === 'online' ? 'آنلاین' : form.paymentMethod === 'wallet' ? 'کیف پول' : 'نقدی',
+    });
+    items.forEach((item) => {
+      db.logActivity({ type: 'purchase', userId: u?.id || 'guest', userName: u?.name || 'ناشناس', detail: `خرید دوره «${item.course.title}»`, meta: `${item.course.price.toLocaleString('fa-IR')} تومان` });
     });
     setLastInvoiceId(invoice.id);
     clearCart();
@@ -242,7 +282,6 @@ export default function CheckoutPage() {
                       {[
                         { value: 'online', label: 'پرداخت آنلاین', desc: 'پرداخت از طریق درگاه بانکی', color: 'text-blue-500' },
                         { value: 'wallet', label: `پرداخت با کیف پول (${formatPrice(balance)} تومان)`, desc: 'پرداخت از موجودی کیف پول', color: 'text-purple-500' },
-                        { value: 'installment', label: 'پرداخت اقساطی', desc: 'هماهنگی در محل آموزشگاه', color: 'text-orange-500' },
                         { value: 'cash', label: 'پرداخت نقدی', desc: 'پرداخت در محل آموزشگاه', color: 'text-green-500' },
                       ].map((method) => (
                         <label

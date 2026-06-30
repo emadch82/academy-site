@@ -119,6 +119,16 @@ export interface ChatMessage {
   timestamp: string;
 }
 
+export interface ActivityLog {
+  id: string;
+  type: 'register' | 'login' | 'purchase' | 'review' | 'enrollment' | 'system';
+  userId: string;
+  userName: string;
+  detail: string;
+  meta?: string;
+  timestamp: string;
+}
+
 const STORAGE_KEY = 'amz_db';
 
 function getDB(): Record<string, any[]> {
@@ -326,6 +336,29 @@ const SEED_CHAT_MESSAGES: ChatMessage[] = [
   { id: 'cm16', chatId: 'ch4', sender: 'admin', senderName: 'پشتیبانی', text: 'مشکل بررسی و حل شد. الان میتونید شارژ کنید. موفق باشید! ✅', timestamp: '۱۴۰۴/۰۶/۱۲ ۱۶:۳۰' },
 ];
 
+const SEED_ACTIVITY_LOGS: ActivityLog[] = [
+  { id: 'al1', type: 'register', userId: 'u7', userName: 'علی محمدی', detail: 'ثبت‌نام جدید در سیستم', timestamp: '۱۴۰۴/۰۶/۱۵ ۱۰:۰۰' },
+  { id: 'al2', type: 'purchase', userId: 'u7', userName: 'علی محمدی', detail: 'خرید دوره «دوره جامع هوش مصنوعی»', meta: '۲,۵۰۰,۰۰۰ تومان', timestamp: '۱۴۰۴/۰۶/۱۵ ۱۰:۱۵' },
+  { id: 'al3', type: 'review', userId: 'u7', userName: 'علی محمدی', detail: 'امتیاز ۵ از ۵ به دوره «دوره جامع هوش مصنوعی»', meta: 'عالی بود، محتوا خیلی خوب و کاربردی بود', timestamp: '۱۴۰۴/۰۶/۱۵ ۱۱:۰۰' },
+  { id: 'al4', type: 'login', userId: 'u7', userName: 'علی محمدی', detail: 'ورود به سیستم', timestamp: '۱۴۰۴/۰۶/۱۵ ۰۹:۵۵' },
+  { id: 'al5', type: 'register', userId: 'u8', userName: 'سارا احمدی', detail: 'ثبت‌نام جدید در سیستم', timestamp: '۱۴۰۴/۰۶/۱۰ ۰۹:۰۰' },
+  { id: 'al6', type: 'purchase', userId: 'u8', userName: 'سارا احمدی', detail: 'خرید دوره «طراحی سایت با React»', meta: '۲,۰۰۰,۰۰۰ تومان', timestamp: '۱۴۰۴/۰۶/۱۰ ۰۹:۳۰' },
+  { id: 'al7', type: 'review', userId: 'u8', userName: 'سارا احمدی', detail: 'امتیاز ۵ از ۵ به دوره «طراحی سایت با React»', meta: 'بهترین دوره‌ای بود که شرکت کردم', timestamp: '۱۴۰۴/۰۶/۱۲ ۱۴:۰۰' },
+  { id: 'al8', type: 'login', userId: 'u8', userName: 'سارا احمدی', detail: 'ورود به سیستم', timestamp: '۱۴۰۴/۰۶/۱۰ ۰۸:۵۵' },
+  { id: 'al9', type: 'register', userId: 'u9', userName: 'رضا حسینی', detail: 'ثبت‌نام جدید در سیستم', timestamp: '۱۴۰۴/۰۶/۰۵ ۰۸:۰۰' },
+  { id: 'al10', type: 'purchase', userId: 'u9', userName: 'رضا حسینی', detail: 'خرید دوره «زبان انگلیسی تخصصی»', meta: '۱,۵۰۰,۰۰۰ تومان', timestamp: '۱۴۰۴/۰۶/۰۵ ۰۸:۳۰' },
+  { id: 'al11', type: 'login', userId: 'u9', userName: 'رضا حسینی', detail: 'ورود به سیستم', timestamp: '۱۴۰۴/۰۶/۰۵ ۰۷:۵۵' },
+  { id: 'al12', type: 'register', userId: 'u10', userName: 'نیلوفر احمدی', detail: 'ثبت‌نام جدید در سیستم', timestamp: '۱۴۰۴/۰۵/۲۰ ۱۵:۰۰' },
+  { id: 'al13', type: 'purchase', userId: 'u10', userName: 'نیلوفر احمدی', detail: 'خرید دوره «رباتیک ویژه»', meta: '۱,۸۰۰,۰۰۰ تومان', timestamp: '۱۴۰۴/۰۵/۲۰ ۱۵:۳۰' },
+  { id: 'al14', type: 'login', userId: 'u10', userName: 'نیلوفر احمدی', detail: 'ورود به سیستم', timestamp: '۱۴۰۴/۰۵/۲۰ ۱۴:۵۵' },
+  { id: 'al15', type: 'register', userId: 'u12', userName: 'زهرا کریمی', detail: 'ثبت‌نام جدید در سیستم', timestamp: '۱۴۰۴/۰۵/۱۰ ۱۲:۰۰' },
+  { id: 'al16', type: 'purchase', userId: 'u12', userName: 'زهرا کریمی', detail: 'خرید دوره «دوره جامع هوش مصنوعی»', meta: '۲,۵۰۰,۰۰۰ تومان', timestamp: '۱۴۰۴/۰۵/۱۰ ۱۲:۳۰' },
+  { id: 'al17', type: 'review', userId: 'u12', userName: 'زهرا کریمی', detail: 'امتیاز ۴ از ۵ به دوره «دوره جامع هوش مصنوعی»', meta: 'خیلی خوب بود ولی سرعت تدریس کمی بالا بود', timestamp: '۱۴۰۴/۰۶/۱۰ ۱۶:۰۰' },
+  { id: 'al18', type: 'system', userId: 'u1', userName: 'مدیر سیستم', detail: 'تنظیمات پرداخت به‌روزرسانی شد', timestamp: '۱۴۰۴/۰۶/۰۱ ۱۰:۰۰' },
+  { id: 'al19', type: 'system', userId: 'u1', userName: 'مدیر سیستم', detail: 'دوره جدید «پایگاه داده» ایجاد شد', timestamp: '۱۴۰۴/۰۵/۲۵ ۱۴:۰۰' },
+  { id: 'al20', type: 'system', userId: 'u1', userName: 'مدیر سیستم', detail: 'کد تخفیف «نجمایی۱۰» فعال شد', timestamp: '۱۴۰۴/۰۵/۱۵ ۱۱:۰۰' },
+];
+
 // ──── INITIALIZE ────
 
 export function initializeDB() {
@@ -351,6 +384,7 @@ export function initializeDB() {
     ]);
     setCollection('chats', SEED_CHATS);
     setCollection('chatMessages', SEED_CHAT_MESSAGES);
+    setCollection('activityLogs', SEED_ACTIVITY_LOGS);
   } else {
     const users = db.users as User[];
     const hasAdmin = users.some((u) => u.role === 'admin');
@@ -402,6 +436,9 @@ export function initializeDB() {
     if (!db.chatMessages || db.chatMessages.length === 0) {
       setCollection('chatMessages', SEED_CHAT_MESSAGES);
     }
+    if (!db.activityLogs || db.activityLogs.length === 0) {
+      setCollection('activityLogs', SEED_ACTIVITY_LOGS);
+    }
   }
 }
 
@@ -437,6 +474,8 @@ export const db = {
   // Notifications
   getNotifications: () => getCollection<Notification>('notifications'),
   addNotification: (n: Omit<Notification, 'id' | 'read'>) => addItem<Notification>('notifications', { ...n, id: generateId('n'), read: false, status: n.status || 'draft', target: n.target || 'all' }),
+  updateNotification: (id: string, updates: Partial<Notification>) => updateItem<Notification>('notifications', id, updates),
+  deleteNotification: (id: string) => deleteItem<Notification>('notifications', id),
 
   // Attendance
   getAttendance: () => getCollection<Attendance>('attendance'),
@@ -473,6 +512,7 @@ export const db = {
   // Chats
   getChats: () => getCollection<Chat>('chats'),
   getChatById: (id: string) => getCollection<Chat>('chats').find((c) => c.id === id),
+  addChat: (chat: Omit<Chat, 'id'>) => addItem<Chat>('chats', { ...chat, id: generateId('ch') }),
   updateChat: (id: string, updates: Partial<Chat>) => updateItem<Chat>('chats', id, updates),
   deleteChat: (id: string) => {
     deleteItem<Chat>('chats', id);
@@ -501,6 +541,14 @@ export const db = {
     const enrollments = getCollection<Enrollment>('enrollments').filter((e) => courseIds.includes(e.courseId));
     const studentIds = [...new Set(enrollments.map((e) => e.studentId))];
     return getCollection<User>('users').filter((u) => studentIds.includes(u.id));
+  },
+
+  // Activity Logs
+  getActivityLogs: () => getCollection<ActivityLog>('activityLogs'),
+  logActivity: (log: Omit<ActivityLog, 'id' | 'timestamp'>) => {
+    const now = new Date();
+    const ts = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    return addItem<ActivityLog>('activityLogs', { ...log, id: generateId('al'), timestamp: ts });
   },
 
   // Generic

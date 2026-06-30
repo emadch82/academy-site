@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiPhone, FiEye, FiEyeOff, FiBookOpen, FiCheckCircle } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import Cookies from 'js-cookie';
-import { db, initializeDB } from '@/lib/store';
+import { db, initializeDB, type User } from '@/lib/store';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -54,6 +54,8 @@ export default function RegisterPage() {
       status: 'active',
       joinDate: new Date().toLocaleDateString('fa-IR'),
     });
+
+    db.logActivity({ type: 'register', userId: newUser.id, userName: newUser.fullName, detail: 'ثبت‌نام جدید در سیستم' });
 
     const token = `amz_student_${Date.now()}`;
     Cookies.set('amz_access', token, { expires: 1 });
@@ -216,19 +218,6 @@ export default function RegisterPage() {
                 />
               </div>
             </div>
-
-            {/* Terms */}
-            <label className="flex items-start gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                className="mt-1 rounded border-gray-300 text-primary focus:ring-primary"
-                required
-              />
-              <span className="text-sm text-muted-foreground">
-                <Link href="/terms" className="text-primary hover:underline">قوانین و مقررات</Link> و{' '}
-                <Link href="/privacy" className="text-primary hover:underline">حریم خصوصی</Link> را مطالعه کرده و می‌پذیرم
-              </span>
-            </label>
 
             <button
               type="submit"

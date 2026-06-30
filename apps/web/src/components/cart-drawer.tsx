@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiTrash2, FiArrowLeft, FiArrowRight, FiShoppingCart } from 'react-icons/fi';
+import { FiX, FiTrash2, FiArrowLeft, FiArrowRight, FiShoppingCart, FiCheckCircle } from 'react-icons/fi';
 import { useCart } from '@/contexts/cart-context';
 import { useDrawer } from '@/contexts/drawer-context';
 import { formatPrice } from '@/lib/courses-data';
 
 export function CartDrawer() {
   const [isOpen, setIsOpen] = useState(false);
-  const { items, removeItem, totalItems, totalPrice } = useCart();
+  const { items, removeItem, totalItems, totalPrice, purchased } = useCart();
   const { setCartOpen } = useDrawer();
 
   const openDrawer = () => { setIsOpen(true); setCartOpen(true); };
@@ -79,7 +79,7 @@ export function CartDrawer() {
 
             {/* Items */}
             <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-              {items.length === 0 ? (
+              {items.length === 0 && purchased.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full px-6 text-center" style={{ minHeight: 300 }}>
                   <div className="h-20 w-20 rounded-2xl bg-muted flex items-center justify-center mb-5">
                     <FiShoppingCart className="h-10 w-10 text-muted-foreground/50" />
@@ -153,6 +153,37 @@ export function CartDrawer() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {/* Purchased Courses */}
+              {purchased.length > 0 && (
+                <div className="px-4 pt-4 pb-2">
+                  <div className="flex items-center gap-2 mb-3">
+                    <FiCheckCircle className="h-4 w-4 text-green-500" />
+                    <span className="text-sm font-bold">خریداری شده</span>
+                  </div>
+                  <div className="space-y-2">
+                    {purchased.map((item) => (
+                      <Link
+                        key={item.course.id}
+                        href={`/courses/${item.course.id}`}
+                        onClick={closeDrawer}
+                        className="flex items-center gap-3 rounded-lg p-2 border bg-green-500/5 hover:bg-green-500/10 transition-colors"
+                      >
+                        <img
+                          src={item.course.imageUrl}
+                          alt={item.course.title}
+                          className="w-12 h-12 rounded-lg object-cover"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold line-clamp-1">{item.course.title}</p>
+                          <p className="text-[10px] text-muted-foreground">{item.course.teacher}</p>
+                        </div>
+                        <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full shrink-0">خریداری شده</span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

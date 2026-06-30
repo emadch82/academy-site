@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   FiBell,
@@ -22,6 +22,7 @@ import {
 import toast from 'react-hot-toast';
 import { db, initializeDB, type Notification } from '@/lib/store';
 import { useHydrated } from '@/hooks/use-hydrated';
+import { useNotifications } from '@/contexts/notification-context';
 
 const TYPE_CONFIG: Record<string, { label: string; color: string; bg: string; icon: typeof FiInfo }> = {
   info: { label: 'اطلاعاتی', color: 'text-blue-500', bg: 'bg-blue-500/10', icon: FiInfo },
@@ -54,9 +55,12 @@ const SEED_NOTIFICATIONS: Omit<Notification, 'id' | 'read'>[] = [
 
 export default function NotificationsPage() {
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const { addNotification: pushToSite } = useNotifications();
+  const hydrated = useHydrated();
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
@@ -70,16 +74,9 @@ export default function NotificationsPage() {
     setNotifications(items);
   };
 
-  useMemo(() => {
+  useEffect(() => {
     loadNotifications();
   }, []);
-
-  const hydrated = useHydrated();
-  if (!hydrated) return <div className="p-6 text-muted-foreground">در حال بارگذاری...</div>;
-
-  const filtered = notifications.filter((n) => {
-    return typeFilter === 'all' || n.type === typeFilter;
-  });
 
   const stats = useMemo(() => {
     const all = db.getNotifications();
@@ -89,6 +86,14 @@ export default function NotificationsPage() {
       draft: all.filter((n) => n.status === 'draft').length,
     };
   }, [notifications]);
+
+  const filtered = notifications.filter((n) => {
+    const matchType = typeFilter === 'all' || n.type === typeFilter;
+    const matchStatus = statusFilter === 'all' || n.status === statusFilter;
+    return matchType && matchStatus;
+  });
+
+  if (!hydrated) return <div className="p-6 text-muted-foreground">در حال بارگذاری...</div>;
 
   const openCreate = () => {
     setEditingId(null);
@@ -139,6 +144,10 @@ export default function NotificationsPage() {
       n.id === id ? { ...n, status: 'sent' as const } : n
     );
     db.setCollection('notifications', items);
+    const sent = items.find((n: Notification) => n.id === id);
+    if (sent) {
+      pushToSite({ title: sent.title, message: sent.message, type: sent.type, link: sent.target === 'course' ? '/courses' : undefined });
+    }
     toast.success('اعلان ارسال شد');
     loadNotifications();
   };
@@ -186,20 +195,39 @@ export default function NotificationsPage() {
         </div>
       </div>
 
-      {/* Filter */}
-      <div className="flex items-center gap-2">
-        <FiFilter className="h-4 w-4 text-muted-foreground" />
-        <select
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          className="px-4 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-        >
-          <option value="all">همه انواع</option>
-          <option value="info">اطلاعاتی</option>
-          <option value="success">موفقیت</option>
-          <option value="warning">هشدار</option>
-          <option value="error">خطا</option>
-        </select>
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div className="flex items-center gap-2">
+          <FiFilter className="h-4 w-4 text-muted-foreground" />
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="px-4 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+          >
+            <option value="all">همه انواع</option>
+            <option value="info">اطلاعاتی</option>
+            <option value="success">موفقیت</option>
+            <option value="warning">هشدار</option>
+            <option value="error">خطا</option>
+          </select>
+        </div>
+        <div className="flex gap-1">
+          {[
+            { value: 'all', label: 'همه' },
+            { value: 'sent', label: 'ارسال شده (نمایش در سایت)' },
+            { value: 'draft', label: 'پیش‌نویس' },
+          ].map((f) => (
+            <button
+              key={f.value}
+              onClick={() => setStatusFilter(f.value)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                statusFilter === f.value ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Notifications List */}

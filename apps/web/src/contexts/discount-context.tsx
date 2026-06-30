@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { db, initializeDB } from '@/lib/store';
 
 interface DiscountCode {
   code: string;
@@ -10,23 +11,40 @@ interface DiscountCode {
   active: boolean;
 }
 
-const DISCOUNT_CODES: DiscountCode[] = [
-  { code: 'نجمایی۱۰', percent: 10, maxDiscount: 200000, minAmount: 500000, active: true },
-  { code: 'خوش‌آمدید', percent: 15, maxDiscount: 300000, minAmount: 1000000, active: true },
-  { code: 'دانشجو۵', percent: 5, maxDiscount: 100000, minAmount: 200000, active: true },
-  { code: 'تخفیف ویژه', percent: 20, maxDiscount: 500000, minAmount: 2000000, active: true },
-];
-
 interface DiscountContextType {
   applyCode: (code: string, amount: number) => { valid: boolean; discount: number; message: string };
   validateCode: (code: string) => DiscountCode | null;
+  refreshDiscounts: () => void;
 }
 
 const DiscountContext = createContext<DiscountContextType | null>(null);
 
 export function DiscountProvider({ children }: { children: ReactNode }) {
+  const [codes, setCodes] = useState<DiscountCode[]>([]);
+
+  const loadDiscounts = () => {
+    try {
+      initializeDB();
+      const stored = db.getCollection<{ code: string; percent: number; maxDiscount: number; minAmount: number; status: string }>('discounts');
+      const mapped: DiscountCode[] = stored.map((d) => ({
+        code: d.code,
+        percent: d.percent,
+        maxDiscount: d.maxDiscount,
+        minAmount: d.minAmount,
+        active: d.status === 'active',
+      }));
+      setCodes(mapped);
+    } catch {
+      setCodes([]);
+    }
+  };
+
+  useEffect(() => {
+    loadDiscounts();
+  }, []);
+
   const validateCode = (code: string): DiscountCode | null => {
-    return DISCOUNT_CODES.find((dc) => dc.code === code && dc.active) || null;
+    return codes.find((dc) => dc.code === code && dc.active) || null;
   };
 
   const applyCode = (code: string, amount: number) => {
@@ -37,8 +55,10 @@ export function DiscountProvider({ children }: { children: ReactNode }) {
     return { valid: true, discount, message: `${dc.percent}% تخفیف اعمال شد` };
   };
 
+  const refreshDiscounts = () => loadDiscounts();
+
   return (
-    <DiscountContext.Provider value={{ applyCode, validateCode }}>
+    <DiscountContext.Provider value={{ applyCode, validateCode, refreshDiscounts }}>
       {children}
     </DiscountContext.Provider>
   );

@@ -29,7 +29,7 @@ export default function CourseDetailPage() {
   const router = useRouter();
   const id = params.id as string;
   const course = getCourseById(id);
-  const { addItem, isInCart } = useCart();
+  const { addItem, isInCart, isPurchased } = useCart();
   const { getAverageRating, getReviewCount } = useReviews();
   const [reviewRefresh, setReviewRefresh] = useState(0);
 
@@ -151,7 +151,12 @@ export default function CourseDetailPage() {
                     </div>
                   </div>
 
-                  {course && isInCart(course.id) ? (
+                  {course && isPurchased(course.id) ? (
+                    <div className="flex items-center justify-center gap-2 w-full bg-green-500/10 text-green-600 py-3.5 rounded-xl font-bold text-lg">
+                      <FiCheckCircle className="h-5 w-5" />
+                      خریداری شده
+                    </div>
+                  ) : course && isInCart(course.id) ? (
                     <Link
                       href="/cart"
                       className="flex items-center justify-center gap-2 w-full bg-green-500 text-white py-3.5 rounded-xl font-bold hover:bg-green-600 transition-all hover:shadow-lg active:scale-[0.98]"

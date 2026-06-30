@@ -84,7 +84,6 @@ export default function FinancePage() {
   const refresh = () => setTransactions([...db.getTransactions()]);
 
   const hydrated = useHydrated();
-  if (!hydrated) return <div className="p-6 text-muted-foreground">در حال بارگذاری...</div>;
 
   const filtered = useMemo(() => {
     return transactions.filter((t) => {
@@ -95,6 +94,8 @@ export default function FinancePage() {
       return matchSearch && matchType && matchStatus;
     });
   }, [transactions, searchQuery, typeFilter, statusFilter]);
+
+  if (!hydrated) return <div className="p-6 text-muted-foreground">در حال بارگذاری...</div>;
 
   const totalIncome = transactions
     .filter((t) => t.type === 'income' && t.status === 'completed')

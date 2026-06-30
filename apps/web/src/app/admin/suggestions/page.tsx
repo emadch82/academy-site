@@ -33,6 +33,11 @@ export default function SuggestionsAdminPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [showFilter, setShowFilter] = useState(false);
 
+  const loadSuggestions = () => {
+    const data = db.getCollection<Suggestion>('suggestions');
+    setSuggestions(data);
+  };
+
   useEffect(() => {
     initializeDB();
     loadSuggestions();
@@ -40,11 +45,6 @@ export default function SuggestionsAdminPage() {
 
   const hydrated = useHydrated();
   if (!hydrated) return <div className="p-6 text-muted-foreground">در حال بارگذاری...</div>;
-
-  const loadSuggestions = () => {
-    const data = db.getCollection<Suggestion>('suggestions');
-    setSuggestions(data);
-  };
 
   const filtered = suggestions.filter((s) => {
     const matchesSearch = s.title.includes(search) || s.author.includes(search);

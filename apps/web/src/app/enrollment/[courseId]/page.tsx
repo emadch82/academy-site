@@ -31,7 +31,6 @@ type PersonalInfo = z.infer<typeof personalInfoSchema>;
 
 const paymentMethods = [
   { id: 'online', label: 'پرداخت آنلاین', icon: FiCreditCard, description: 'پرداخت امن از طریق درگاه بانکی' },
-  { id: 'installment', label: 'اقساطی', icon: FiBookOpen, description: 'پرداخت در ۳ قسط مساوی' },
   { id: 'inperson', label: 'حضوری', icon: FiUser, description: 'پرداخت در محل آموزشگاه' },
 ];
 

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { FiSearch, FiClock, FiStar, FiUsers, FiArrowLeft, FiArrowRight, FiShoppingCart, FiCheck } from 'react-icons/fi';
+import { FiSearch, FiClock, FiStar, FiUsers, FiArrowLeft, FiArrowRight, FiShoppingCart, FiCheck, FiCheckCircle } from 'react-icons/fi';
 import { courses, formatPrice } from '@/lib/courses-data';
 import { useCart } from '@/contexts/cart-context';
 import Cookies from 'js-cookie';
@@ -16,7 +16,7 @@ export default function CoursesPage() {
   const router = useRouter();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('همه');
-  const { addItem, removeItem, isInCart } = useCart();
+  const { addItem, removeItem, isInCart, isPurchased } = useCart();
 
   const requireAuth = (callback: () => void) => {
     if (!Cookies.get('amz_access')) {
@@ -138,6 +138,12 @@ export default function CoursesPage() {
                     <div className="absolute top-3 left-3 bg-background/80 backdrop-blur text-xs px-2 py-1 rounded-full">
                       {course.sessions} جلسه
                     </div>
+                    {isPurchased(course.id) && (
+                      <div className="absolute bottom-3 left-3 bg-green-500 text-white text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1">
+                        <FiCheckCircle className="h-3 w-3" />
+                        خریداری شده
+                      </div>
+                    )}
                   </div>
 
                   <div className="p-5 space-y-3 flex-1 flex flex-col">
@@ -169,7 +175,12 @@ export default function CoursesPage() {
                           {formatPrice(course.price)}
                         </span>
                       </div>
-                      {isInCart(course.id) ? (
+                      {isPurchased(course.id) ? (
+                        <div className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-green-500/10 text-green-600 text-sm font-bold">
+                          <FiCheckCircle className="h-4 w-4" />
+                          خریداری شده
+                        </div>
+                      ) : isInCart(course.id) ? (
                         <button
                           type="button"
                           onClick={(e) => handleRemoveFromCart(e, course.id)}

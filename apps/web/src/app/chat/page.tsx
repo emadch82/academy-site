@@ -4,57 +4,70 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiArrowLeft, FiSend, FiMessageCircle, FiUser, FiBox } from 'react-icons/fi';
-
-interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'support';
-  date: string;
-}
-
-const AUTO_REPLIES = [
-  'سلام! چطور می‌تونم کمکتون کنم؟',
-  'لطفاً صبر کنید، پشتیبانی در حال بررسی درخواست شماست.',
-  'ممنون از پیامتون. به زودی پاسخ می‌دهیم.',
-  'آیا سوال دیگه‌ای دارید؟',
-  'خیلی خوب، درخواست شما ثبت شد.',
-];
+import Cookies from 'js-cookie';
+import { db, initializeDB, type Chat, type ChatMessage } from '@/lib/store';
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    { id: '1', text: 'سلام! به پشتیبانی آموزشگاه نجوای قلم خوش آمدید.', sender: 'support', date: new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }) },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
+  const [chatId, setChatId] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const userCookie = typeof window !== 'undefined' ? Cookies.get('amz_user') : null;
+  const user = userCookie ? JSON.parse(userCookie) : null;
+
+  useEffect(() => {
+    initializeDB();
+    if (user?.id) {
+      let existing = db.getChats().find((c: Chat) => c.userId === user.id && c.status === 'open');
+      if (!existing) {
+        existing = db.addChat({
+          userId: user.id,
+          userName: user.name || 'کاربر',
+          subject: 'پشتیبانی عمومی',
+          status: 'open',
+          unreadCount: 0,
+          createdAt: formatNow(),
+          updatedAt: formatNow(),
+        });
+      }
+      setChatId(existing.id);
+      setMessages(db.getChatMessages(existing.id));
+    }
+  }, []);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
-    const userMsg: Message = {
-      id: `u_${Date.now()}`,
-      text: input,
-      sender: 'user',
-      date: new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }),
-    };
-    setMessages((prev) => [...prev, userMsg]);
-    setInput('');
-    setIsTyping(true);
+  useEffect(() => {
+    if (!chatId) return;
+    const interval = setInterval(() => {
+      const newMsgs = db.getChatMessages(chatId);
+      setMessages(newMsgs);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [chatId]);
 
-    setTimeout(() => {
-      const reply = AUTO_REPLIES[Math.floor(Math.random() * AUTO_REPLIES.length)];
-      const supportMsg: Message = {
-        id: `s_${Date.now()}`,
-        text: reply,
-        sender: 'support',
-        date: new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }),
-      };
-      setMessages((prev) => [...prev, supportMsg]);
-      setIsTyping(false);
-    }, 1500);
+  function formatNow() {
+    const now = new Date();
+    return `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  }
+
+  const sendMessage = () => {
+    if (!input.trim() || !chatId) return;
+    db.addChatMessage({
+      chatId,
+      sender: 'user',
+      senderName: user?.name || 'کاربر',
+      text: input.trim(),
+      timestamp: formatNow(),
+    });
+    db.updateChat(chatId, { updatedAt: formatNow() });
+    setInput('');
+    setMessages(db.getChatMessages(chatId));
+    setIsTyping(true);
+    setTimeout(() => setIsTyping(false), 2000);
   };
 
   return (
@@ -78,6 +91,12 @@ export default function ChatPage() {
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto container mx-auto px-4 py-6 max-w-2xl space-y-4">
+        {messages.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            <FiMessageCircle className="h-12 w-12 mx-auto mb-4 opacity-40" />
+            <p>پیام خود را ارسال کنید تا پشتیبانی پاسخ دهد</p>
+          </div>
+        )}
         {messages.map((msg) => (
           <motion.div key={msg.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`flex gap-3 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}>
             <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${msg.sender === 'user' ? 'bg-primary/10' : 'bg-green-100'}`}>
@@ -87,7 +106,7 @@ export default function ChatPage() {
               <div className={`rounded-2xl px-4 py-3 ${msg.sender === 'user' ? 'bg-primary text-primary-foreground rounded-tl-sm' : 'bg-muted rounded-tr-sm'}`}>
                 <p className="text-sm">{msg.text}</p>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">{msg.date}</p>
+              <p className="text-xs text-muted-foreground mt-1">{msg.timestamp}</p>
             </div>
           </motion.div>
         ))}

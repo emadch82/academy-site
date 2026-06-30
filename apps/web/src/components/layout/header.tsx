@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { FiMenu, FiX, FiUser, FiBookOpen, FiGrid, FiFileText, FiBell, FiMessageCircle, FiUsers, FiZap } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { FiMenu, FiX, FiUser, FiBookOpen, FiGrid, FiFileText, FiBell, FiMessageCircle, FiUsers, FiZap, FiLogOut, FiShield } from 'react-icons/fi';
+import Cookies from 'js-cookie';
 import { CartDrawer } from '@/components/cart-drawer';
 import { useWallet } from '@/contexts/wallet-context';
 import { useCart } from '@/contexts/cart-context';
@@ -19,9 +21,25 @@ const navigation = [
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<{ role: string; name: string } | null>(null);
+  const router = useRouter();
   const { balance } = useWallet();
   const { items } = useCart();
   const { unreadCount } = useNotifications();
+
+  useEffect(() => {
+    const raw = Cookies.get('amz_user');
+    if (raw) {
+      try { setUser(JSON.parse(raw)); } catch {}
+    }
+  }, []);
+
+  const logout = () => {
+    Cookies.remove('amz_access');
+    Cookies.remove('amz_user');
+    setUser(null);
+    router.push('/auth/login');
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -58,10 +76,28 @@ export function Header() {
               {unreadCount > 0 && <span className="absolute -top-1 -left-1 h-4 w-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">{unreadCount}</span>}
             </Link>
             <CartDrawer />
-            <Link href="/auth/login" className="text-sm font-medium transition-colors hover:text-primary">ورود</Link>
-            <Link href="/auth/register" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-              <FiUser className="ml-2 h-4 w-4" /> ثبت‌نام
-            </Link>
+            {user ? (
+              <div className="flex items-center gap-3">
+                {user.role === 'admin' && (
+                  <Link href="/admin" className="flex items-center gap-1.5 text-sm font-medium hover:text-primary transition-colors">
+                    <FiShield className="h-4 w-4" />
+                    پنل مدیریت
+                  </Link>
+                )}
+                <span className="text-sm font-medium">{user.name}</span>
+                <button onClick={logout} className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-600 transition-colors">
+                  <FiLogOut className="h-4 w-4" />
+                  خروج
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link href="/auth/login" className="text-sm font-medium transition-colors hover:text-primary">ورود</Link>
+                <Link href="/auth/register" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+                  <FiUser className="ml-2 h-4 w-4" /> ثبت‌نام
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -101,10 +137,19 @@ export function Header() {
                   </Link>
                 ))}
               </div>
-              <div className="flex gap-2 mt-4">
-                <Link href="/auth/login" className="flex-1 text-center px-4 py-2 text-sm font-medium border rounded-md hover:bg-muted">ورود</Link>
-                <Link href="/auth/register" className="flex-1 text-center px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90">ثبت‌نام</Link>
-              </div>
+              {user ? (
+                <div className="flex gap-2 mt-4">
+                  {user.role === 'admin' && (
+                    <Link href="/admin" className="flex-1 text-center px-4 py-2 text-sm font-medium border rounded-md hover:bg-muted">پنل مدیریت</Link>
+                  )}
+                  <button onClick={logout} className="flex-1 text-center px-4 py-2 text-sm font-medium bg-red-500 text-white rounded-md hover:bg-red-600">خروج</button>
+                </div>
+              ) : (
+                <div className="flex gap-2 mt-4">
+                  <Link href="/auth/login" className="flex-1 text-center px-4 py-2 text-sm font-medium border rounded-md hover:bg-muted">ورود</Link>
+                  <Link href="/auth/register" className="flex-1 text-center px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90">ثبت‌نام</Link>
+                </div>
+              )}
             </nav>
           </div>
         )}

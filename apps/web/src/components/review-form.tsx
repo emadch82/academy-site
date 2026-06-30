@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { FiStar, FiUser, FiMessageSquare, FiSend } from 'react-icons/fi';
 import { useReviews } from '@/contexts/reviews-context';
 import { useCart } from '@/contexts/cart-context';
+import { db, initializeDB } from '@/lib/store';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -41,6 +42,10 @@ export function ReviewForm({ courseId, onReviewAdded }: ReviewFormProps) {
     setIsSubmitting(true);
     await new Promise((r) => setTimeout(r, 500));
     addReview(courseId, userName || 'کاربر', rating, comment.trim());
+    initializeDB();
+    const userCookie = Cookies.get('amz_user');
+    const u = userCookie ? JSON.parse(userCookie) : null;
+    db.logActivity({ type: 'review', userId: u?.id || 'guest', userName: u?.name || userName || 'ناشناس', detail: `امتیاز ${rating} از ۵ به دوره ثبت کرد`, meta: comment.trim().slice(0, 100) });
     setRating(0);
     setComment('');
     setUserName('');

@@ -6,6 +6,7 @@ import { FiMessageCircle, FiUser, FiClock, FiCheck, FiSearch, FiSend, FiTrash2, 
 import toast from 'react-hot-toast';
 import { db, initializeDB, type Chat, type ChatMessage } from '@/lib/store';
 import { useHydrated } from '@/hooks/use-hydrated';
+import { useNotifications } from '@/contexts/notification-context';
 
 export default function ChatsPage() {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -14,6 +15,7 @@ export default function ChatsPage() {
   const [search, setSearch] = useState('');
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { addNotification: pushToSite } = useNotifications();
 
   useEffect(() => {
     initializeDB();
@@ -64,6 +66,16 @@ export default function ChatsPage() {
       text: newMessage.trim(),
       timestamp: ts,
     });
+
+    const chat = db.getChatById(selectedChatId);
+    if (chat) {
+      pushToSite({
+        title: 'پاسخ پشتیبانی',
+        message: newMessage.trim().slice(0, 100),
+        type: 'info',
+        link: '/chat',
+      });
+    }
 
     setNewMessage('');
     loadMessages(selectedChatId);

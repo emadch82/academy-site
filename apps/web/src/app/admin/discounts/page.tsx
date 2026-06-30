@@ -34,6 +34,11 @@ export default function DiscountsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
 
+  const loadDiscounts = () => {
+    const data = db.getCollection<Discount>('discounts');
+    setDiscounts(data);
+  };
+
   useEffect(() => {
     initializeDB();
     loadDiscounts();
@@ -41,11 +46,6 @@ export default function DiscountsPage() {
 
   const hydrated = useHydrated();
   if (!hydrated) return <div className="p-6 text-muted-foreground">در حال بارگذاری...</div>;
-
-  const loadDiscounts = () => {
-    const data = db.getCollection<Discount>('discounts');
-    setDiscounts(data);
-  };
 
   const filtered = discounts.filter((d) => d.code.includes(search));
   const totalUsed = discounts.reduce((a, d) => a + d.usedCount, 0);

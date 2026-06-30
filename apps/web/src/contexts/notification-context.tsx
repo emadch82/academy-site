@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { db, initializeDB, type Notification as StoreNotification } from '@/lib/store';
 
 export interface Notification {
   id: string;
@@ -19,18 +20,48 @@ interface NotificationContextType {
   markAsRead: (id: string) => void;
   markAllRead: () => void;
   clearAll: () => void;
+  refreshFromDb: () => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | null>(null);
 
-const MOCK_NOTIFICATIONS: Notification[] = [
-  { id: 'n1', title: 'دوره جدید اضافه شد', message: 'دوره جامع هوش مصنوعی به لیست دوره‌ها اضافه شد.', type: 'info', read: false, date: '۱۴۰۵/۰۳/۱۵', link: '/courses/ai-2025' },
-  { id: 'n2', title: 'تخفیف ویژه', message: 'کد تخفیف «خوش‌آمدید» با ۱۵٪ تخفیف فعال شد.', type: 'success', read: false, date: '۱۴۰۵/۰۳/۱۴' },
-  { id: 'n3', title: 'یادآوری پرداخت', message: 'مهلت پرداخت قسط دوم شما رو به اتمام است.', type: 'warning', read: true, date: '۱۴۰۵/۰۳/۱۰' },
-];
-
 export function NotificationProvider({ children }: { children: ReactNode }) {
-  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  const loadFromDb = () => {
+    try {
+      initializeDB();
+      const allSent = db.getNotifications().filter((n: StoreNotification) => n.status === 'sent');
+      const UNWANTED = ['یادآوری پرداخت اقساط', 'یادآوری کلاس React فردا', 'اعلام نتایج آزمون HTML'];
+      const today = new Date().toLocaleDateString('fa-IR');
+      allSent.forEach((n) => {
+        if (UNWANTED.some((u) => n.title.includes(u) || n.message.includes(u))) {
+          db.deleteNotification(n.id);
+        } else {
+          const newTitle = n.title.replace('پاییز', 'تابستان');
+          const newMessage = n.message.replace('پاییز', 'تابستان');
+          db.updateNotification(n.id, { title: newTitle, message: newMessage, date: today } as any);
+        }
+      });
+      const filtered = db.getNotifications().filter((n: StoreNotification) => n.status === 'sent');
+      const mapped: Notification[] = filtered.map((n) => ({
+        id: n.id,
+        title: n.title,
+        message: n.message,
+        type: n.type,
+        read: false,
+        date: n.date,
+        link: n.target === 'course' ? '/courses' : undefined,
+      }));
+      setNotifications(mapped);
+    } catch {
+      setNotifications([]);
+    }
+  };
+
+  useEffect(() => {
+    loadFromDb();
+  }, []);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -54,8 +85,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const clearAll = () => setNotifications([]);
 
+  const refreshFromDb = () => loadFromDb();
+
   return (
-    <NotificationContext.Provider value={{ notifications, unreadCount, addNotification, markAsRead, markAllRead, clearAll }}>
+    <NotificationContext.Provider value={{ notifications, unreadCount, addNotification, markAsRead, markAllRead, clearAll, refreshFromDb }}>
       {children}
     </NotificationContext.Provider>
   );
