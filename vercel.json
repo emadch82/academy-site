@@ -1,6 +1,6 @@
 {
+  "rootDirectory": "apps/web",
   "installCommand": "npm install -g pnpm@9.12.0 && pnpm install --no-frozen-lockfile",
-  "buildCommand": "pnpm --filter @amozesh/web build",
-  "framework": "nextjs",
-  "outputDirectory": "apps/web/.next"
+  "buildCommand": "npx next build",
+  "framework": "nextjs"
 }
