@@ -41,6 +41,7 @@ export function AutoPlayVideo({ src, poster, className }: { src: string; poster?
         ref={ref}
         loop
         muted
+        autoPlay
         playsInline
         preload="metadata"
         className={`w-full h-full object-cover ${ready ? '' : 'absolute inset-0 opacity-0'}`}
