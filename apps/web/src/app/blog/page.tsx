@@ -60,7 +60,7 @@ export default function BlogPage() {
             animate={{ opacity: 1, x: 0 }}
             className="flex-1 rounded-2xl overflow-hidden border w-full"
           >
-            <AutoPlayVideo src="/videos/blog-motion.mp4" className="w-full h-auto object-contain" />
+            <AutoPlayVideo src="/videos/blog-motion.mp4" poster="/videos/blog-poster.jpg" className="w-full h-auto" />
           </motion.div>
         </div>
 
