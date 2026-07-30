@@ -1,8 +1,7 @@
 'use client';
 
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
-import { FiTarget, FiEye, FiHeart, FiAward, FiUsers, FiBookOpen, FiCheckCircle } from 'react-icons/fi';
+import { motion } from 'framer-motion';
+import { FiTarget, FiEye, FiHeart, FiAward, FiCheckCircle } from 'react-icons/fi';
 
 const values = [
   { icon: FiTarget, title: 'کیفیت', description: 'ارائه بهترین خدمات آموزشی با استانداردهای بین‌المللی' },
@@ -26,16 +25,8 @@ const teachers = [
 ];
 
 export default function AboutPage() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"]
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-
   return (
-    <main ref={ref} className="min-h-screen">
+    <main className="min-h-screen">
       {/* Hero */}
       <section className="relative pt-32 pb-12 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" />
