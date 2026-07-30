@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiArrowRight, FiClock, FiUser } from 'react-icons/fi';
 import { blogPosts } from '@/lib/blog-data';
-import { AutoPlayVideo } from '@/components/auto-play-video';
 
 const categories = ['همه', 'یادگیری زبان', 'آموزش کودکان', 'مکالمه', 'آزمون آیلتس', 'TTC', 'فرهنگی'];
 
@@ -27,14 +26,6 @@ export default function BlogPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="rounded-2xl overflow-hidden border mb-8"
-        >
-          <AutoPlayVideo src="/videos/blog-motion.mp4" poster="/videos/blog-poster.jpg" className="w-full h-auto" />
-        </motion.div>
-
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

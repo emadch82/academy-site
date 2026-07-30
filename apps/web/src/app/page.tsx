@@ -110,7 +110,7 @@ export default function HomePage() {
   const progressWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
-    <main ref={containerRef} style={{ height: "800vh" }} className="overflow-x-hidden">
+    <main ref={containerRef} style={{ height: "800vh", position: 'relative' }} className="overflow-x-hidden">
       {/* Sticky Video Background */}
       <div className="fixed top-0 left-0 w-screen h-screen z-0 overflow-hidden">
         <motion.div style={{ scale: videoScale }} className="w-full h-full will-change-transform">
