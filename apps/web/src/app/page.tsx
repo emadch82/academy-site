@@ -37,6 +37,14 @@ export default function HomePage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoDuration, setVideoDuration] = useState(0);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [scrollHeight, setScrollHeight] = useState('800vh');
+
+  useEffect(() => {
+    const check = () => setScrollHeight(window.innerWidth < 768 ? '500vh' : '800vh');
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -62,11 +70,13 @@ export default function HomePage() {
     return () => video.removeEventListener('loadedmetadata', onReady);
   }, []);
 
-  // Direct scroll-to-video sync
+  // Direct scroll-to-video sync with RAF for smooth mobile performance
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
     const video = videoRef.current;
     if (!video || !videoDuration) return;
-    video.currentTime = progress * videoDuration;
+    requestAnimationFrame(() => {
+      video.currentTime = progress * videoDuration;
+    });
   });
 
   /* ─── Section Animations (scroll ranges) ─── */
@@ -107,11 +117,11 @@ export default function HomePage() {
   const progressWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
-    <main ref={containerRef} style={{ height: "800vh" }}>
+    <main ref={containerRef} style={{ height: scrollHeight }} className="overflow-x-hidden">
       {/* Sticky Video Background */}
-      <div className="fixed inset-0 z-0">
-        <motion.div style={{ scale: videoScale }} className="w-full h-full">
-          <video ref={videoRef} muted playsInline preload="auto" className="w-full h-full object-cover">
+      <div className="fixed top-0 left-0 w-screen h-screen z-0 overflow-hidden">
+        <motion.div style={{ scale: videoScale }} className="w-full h-full will-change-transform">
+          <video ref={videoRef} muted playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover">
             <source src="/motion/VIRA_language_institute_animation_1080p_202607281703_gwr_video_mvp.mp4" type="video/mp4" />
           </video>
         </motion.div>
@@ -122,7 +132,7 @@ export default function HomePage() {
       </div>
 
       {/* Sticky Content Container */}
-      <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center">
+      <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center" style={{ WebkitOverflowScrolling: 'touch' }}>
         <div className="container mx-auto px-4 relative z-10 w-full">
 
           {/* ═══════ HERO ═══════ */}
