@@ -21,7 +21,9 @@ export function ReviewForm({ courseId, onReviewAdded }: ReviewFormProps) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState('');
-  const [userName, setUserName] = useState('');
+  const userCookie = typeof window !== 'undefined' ? Cookies.get('amz_user') : null;
+  const currentUser = userCookie ? JSON.parse(userCookie) : null;
+  const [userName, setUserName] = useState(currentUser?.name || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {

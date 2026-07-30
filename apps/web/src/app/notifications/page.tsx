@@ -24,7 +24,7 @@ export default function NotificationsPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-12">
+      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 pt-24 pb-12">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Link href="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6 transition-colors">

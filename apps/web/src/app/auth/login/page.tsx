@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiBookOpen } from 'react-icons/fi';
+import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import Cookies from 'js-cookie';
 import { db, initializeDB } from '@/lib/store';
@@ -57,18 +57,18 @@ export default function LoginPage() {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <FiBookOpen className="h-10 w-10 text-primary" />
-            <span className="text-2xl font-bold">آموزشگاه نجوای قلم</span>
+          <Link href="/" className="inline-flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
+              <span className="text-xl font-bold text-white">V</span>
+            </div>
+            <span className="text-2xl font-bold">آموزشگاه زبان ویرا</span>
           </Link>
-          <p className="text-muted-foreground mt-2">برای دسترسی به پنل وارد شوید</p>
         </div>
 
         {/* Login Form */}
         <div className="bg-background rounded-2xl border p-8 shadow-lg">
           <form onSubmit={handlePasswordSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium mb-2">ایمیل یا موبایل</label>
               <div className="relative">
                 <FiMail className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
@@ -76,14 +76,13 @@ export default function LoginPage() {
                   value={formData.identifier}
                   onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
                   className="w-full pr-10 pl-4 py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  placeholder="ایمیل یا شماره موبایل"
+                  placeholder="لطفا ایمیل یا شماره موبایل خود را وارد نمایید"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">رمز عبور</label>
               <div className="relative">
                 <FiLock className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
@@ -91,7 +90,7 @@ export default function LoginPage() {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="w-full pr-10 pl-10 py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  placeholder="رمز عبور خود را وارد کنید"
+                  placeholder="لطفا رمز عبور خود را وارد نمایید"
                   required
                 />
                 <button

@@ -5,27 +5,27 @@ import { FiUsers, FiBookOpen, FiDollarSign, FiTrendingUp, FiBarChart2, FiPieChar
 import { useHydrated } from '@/hooks/use-hydrated';
 
 const monthlyData = [
-  { month: 'فروردین', revenue: 45000000, students: 18, courses: 4 },
-  { month: 'اردیبهشت', revenue: 62000000, students: 25, courses: 5 },
-  { month: 'خرداد', revenue: 58000000, students: 22, courses: 5 },
-  { month: 'تیر', revenue: 71000000, students: 28, courses: 6 },
-  { month: 'مرداد', revenue: 65000000, students: 24, courses: 6 },
-  { month: 'شهریور', revenue: 80000000, students: 32, courses: 7 },
-  { month: 'مهر', revenue: 75000000, students: 30, courses: 8 },
-  { month: 'آبان', revenue: 88000000, students: 35, courses: 9 },
-  { month: 'آذر', revenue: 92000000, students: 38, courses: 10 },
-  { month: 'دی', revenue: 85000000, students: 33, courses: 10 },
-  { month: 'بهمن', revenue: 95000000, students: 40, courses: 11 },
-  { month: 'اسفند', revenue: 78000000, students: 28, courses: 11 },
+  { month: 'فروردین', revenue: 15000000, students: 18, courses: 8 },
+  { month: 'اردیبهشت', revenue: 22000000, students: 25, courses: 8 },
+  { month: 'خرداد', revenue: 20000000, students: 22, courses: 8 },
+  { month: 'تیر', revenue: 25000000, students: 28, courses: 8 },
+  { month: 'مرداد', revenue: 18000000, students: 20, courses: 8 },
+  { month: 'شهریور', revenue: 30000000, students: 32, courses: 8 },
+  { month: 'مهر', revenue: 35000000, students: 35, courses: 8 },
+  { month: 'آبان', revenue: 32000000, students: 33, courses: 8 },
+  { month: 'آذر', revenue: 28000000, students: 30, courses: 8 },
+  { month: 'دی', revenue: 25000000, students: 28, courses: 8 },
+  { month: 'بهمن', revenue: 30000000, students: 32, courses: 8 },
+  { month: 'اسفند', revenue: 20000000, students: 22, courses: 8 },
 ];
 
 const courseStats = [
-  { name: 'هوش مصنوعی', students: 45, revenue: 112500000, growth: 15 },
-  { name: 'طراحی سایت', students: 38, revenue: 76000000, growth: 12 },
-  { name: 'زبان انگلیسی', students: 32, revenue: 64000000, growth: 8 },
-  { name: 'رباتیک', students: 20, revenue: 40000000, growth: 22 },
-  { name: 'فن بیان', students: 25, revenue: 50000000, growth: -5 },
-  { name: 'نقاشی', students: 15, revenue: 22500000, growth: 30 },
+  { name: 'دوره کودکان', students: 12, revenue: 0, growth: 10 },
+  { name: 'دوره نوجوانان', students: 10, revenue: 0, growth: 15 },
+  { name: 'دوره بزرگسالان', students: 18, revenue: 0, growth: 12 },
+  { name: 'مکالمه SPO', students: 10, revenue: 0, growth: 20 },
+  { name: 'دوره TTC', students: 8, revenue: 0, growth: 5 },
+  { name: 'آزمون MOC (آیلتس)', students: 12, revenue: 0, growth: 25 },
 ];
 
 const maxRevenue = Math.max(...monthlyData.map((d) => d.revenue));
@@ -44,7 +44,7 @@ export default function ReportsPage() {
           { label: 'درآمد کل سال', value: new Intl.NumberFormat('fa-IR').format(monthlyData.reduce((a, d) => a + d.revenue, 0)), color: 'text-green-500', bg: 'bg-green-500/10', icon: FiDollarSign },
           { label: 'میانگین ماهانه', value: new Intl.NumberFormat('fa-IR').format(Math.round(monthlyData.reduce((a, d) => a + d.revenue, 0) / 12)), color: 'text-blue-500', bg: 'bg-blue-500/10', icon: FiTrendingUp },
           { label: 'بهترین ماه', value: 'بهمن', color: 'text-purple-500', bg: 'bg-purple-500/10', icon: FiBarChart2 },
-          { label: 'رشد سالانه', value: '+۱۸٪', color: 'text-orange-500', bg: 'bg-orange-500/10', icon: FiTrendingUp },
+          { label: 'رشد سالانه', value: '+۲۰٪', color: 'text-orange-500', bg: 'bg-orange-500/10', icon: FiTrendingUp },
         ].map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="bg-background rounded-xl border p-4">
             <div className="flex items-center justify-between mb-2">

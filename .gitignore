@@ -5,3 +5,9 @@ dist/
 .env.local
 *.log
 .turbo/
+*.tsbuildinfo
+motion/
+web-hosting/
+web-hosting.zip
+index.html
+helpcode.txt

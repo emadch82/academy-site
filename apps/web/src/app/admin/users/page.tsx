@@ -23,14 +23,12 @@ import { useHydrated } from '@/hooks/use-hydrated';
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'مدیر',
-  staff: 'کارمند',
   teacher: 'مدرس',
   student: 'دانشجو',
 };
 
 const ROLE_COLORS: Record<string, string> = {
   admin: 'bg-purple-100 text-purple-700',
-  staff: 'bg-indigo-100 text-indigo-700',
   teacher: 'bg-blue-100 text-blue-700',
   student: 'bg-gray-100 text-gray-700',
 };
@@ -156,7 +154,6 @@ export default function UsersPage() {
           <option value="all">همه نقش‌ها</option>
           <option value="student">دانشجو</option>
           <option value="teacher">مدرس</option>
-          <option value="staff">کارمند</option>
           <option value="admin">مدیر</option>
         </select>
         <select
@@ -297,7 +294,7 @@ export default function UsersPage() {
               <div>
                 <label className="block text-sm font-medium mb-2">نقش جدید</label>
                 <div className="grid grid-cols-2 gap-2">
-                  {(['admin', 'staff', 'teacher', 'student'] as const).map((role) => (
+                  {(['admin', 'teacher', 'student'] as const).map((role) => (
                     <button
                       key={role}
                       onClick={() => handleRoleChange(editingUser.id, role)}
@@ -382,7 +379,6 @@ export default function UsersPage() {
                 >
                   <option value="student">دانشجو</option>
                   <option value="teacher">مدرس</option>
-                  <option value="staff">کارمند</option>
                   <option value="admin">مدیر</option>
                 </select>
               </div>

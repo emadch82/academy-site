@@ -3,74 +3,44 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FiSearch, FiStar, FiBookOpen, FiUsers } from 'react-icons/fi';
+import { FiSearch, FiStar, FiBookOpen, FiAward } from 'react-icons/fi';
 
 const teachers = [
   {
     id: '1',
-    name: 'دکتر محمد احمدی',
-    specialty: 'برنامه‌نویسی وب',
-    bio: 'بیش از ۱۰ سال تجربه در برنامه‌نویسی وب و آموزش',
-    rating: 4.9,
-    students: 1250,
-    courses: 12,
-    qualifications: ['دکترای کامپیوتر', '_MCIA Certified'],
-    avatar: '/teachers/teacher1.jpg',
+    name: 'نسیم خدابخش',
+    specialty: 'مدیریت مجموعه',
+    bio: 'موسس و مدیریت آکادمی زبان ویرا',
+    qualifications: ['PhD Candidate in TEFL', 'MA in TEFL', 'BA in English Literature'],
+    experience: 'بیش از ۱۰ سال سابقه تدریس',
+    avatar: '/images/nasim.jpg',
   },
   {
     id: '2',
-    name: 'سارا رضایی',
-    specialty: 'طراحی گرافیک',
-    bio: 'طراح گرافیک حرفه‌ای با سابقه کار در برندهای بزرگ',
-    rating: 4.8,
-    students: 980,
-    courses: 8,
-    qualifications: ['کارشناسی ارشد طراحی', 'Adobe Certified'],
-    avatar: '/teachers/teacher2.jpg',
+    name: 'غزال امیرسلیمانی',
+    specialty: 'مدرس کودک و نوجوان',
+    bio: 'مدرس تخصصی کودک و نوجوان با تجربه آموزش در محیط‌های خلاقانه',
+    qualifications: ['TTC معتبر'],
+    experience: 'بیش از ۳ سال سابقه تدریس کودک و نوجوان',
+    avatar: '/images/female-avatar.png',
   },
   {
     id: '3',
-    name: 'علی محمدی',
-    specialty: 'مدیریت پروژه',
-    bio: 'مشاور مدیریت پروژه با تجربه بین‌المللی',
-    rating: 4.7,
-    students: 750,
-    courses: 6,
-    qualifications: ['PMP', 'PRINCE2', 'MBA'],
-    avatar: '/teachers/teacher3.jpg',
+    name: 'زهرا مردانی',
+    specialty: 'مدرس TTC و بزرگسال',
+    bio: 'مدرس TTC و بزرگسال با سابقه تدریس گسترده',
+    qualifications: ['فوق لیسانس آموزش زبان انگلیسی', 'مدرک TESOL'],
+    experience: 'بیش از ۱۰ سال سابقه تدریس',
+    avatar: '/images/zahra.jpg',
   },
   {
     id: '4',
-    name: 'زهرا کریمی',
-    specialty: 'هوش مصنوعی',
-    bio: 'پژوهشگر هوش مصنوعی و یادگیری عمیق',
-    rating: 4.9,
-    students: 1100,
-    courses: 10,
-    qualifications: ['دکترای AI', 'Google AI Certified'],
-    avatar: '/teachers/teacher4.jpg',
-  },
-  {
-    id: '5',
-    name: 'امین قاسمی',
-    specialty: 'بازاریابی دیجیتال',
-    bio: 'متخصص بازاریابی آنلاین و سئو',
-    rating: 4.7,
-    students: 890,
-    courses: 7,
-    qualifications: ['Google Analytics', 'HubSpot Certified'],
-    avatar: '/teachers/teacher5.jpg',
-  },
-  {
-    id: '6',
-    name: 'لیلا نوری',
-    specialty: 'زبان انگلیسی',
-    bio: 'مدرس بین‌المللی زبان انگلیسی با TESOL',
-    rating: 4.5,
-    students: 1560,
-    courses: 9,
-    qualifications: ['TESOL', 'IELTS 8.5'],
-    avatar: '/teachers/teacher6.jpg',
+    name: 'سوگل سرشوقی',
+    specialty: 'مدرس کودک و نوجوان',
+    bio: 'مدرس تخصصی کودک و نوجوان با مدرک بین‌المللی',
+    qualifications: ['BA in English Literature', 'TTC'],
+    experience: 'بیش از ۷ سال سابقه تدریس',
+    avatar: '/images/female-avatar.png',
   },
 ];
 
@@ -86,16 +56,16 @@ export default function TeachersPage() {
   return (
     <main className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-16">
+      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 pt-24 pb-16">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center"
           >
-            <h1 className="text-4xl font-bold mb-4">اساتید مجرب</h1>
+            <h1 className="text-4xl font-bold mb-4">پرسنل مجموعه</h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              با بهترین اساتید بازار کار یاد بگیرید
+              با مجرب‌ترین اساتید آموزش زبان انگلیسی در اصفهان آشنا شوید
             </p>
           </motion.div>
 
@@ -117,67 +87,55 @@ export default function TeachersPage() {
 
       {/* Teachers Grid */}
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredTeachers.map((teacher, index) => (
             <motion.div
               key={teacher.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <Link href={`/teachers/${teacher.id}`} className="group block">
-                <div className="bg-background rounded-xl border p-6 transition-all hover:shadow-lg hover:border-primary/50">
-                  {/* Avatar */}
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-xl font-bold text-primary">
-                      {teacher.name.charAt(0)}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold group-hover:text-primary transition-colors">
-                        {teacher.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">{teacher.specialty}</p>
-                    </div>
-                  </div>
-
-                  {/* Bio */}
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{teacher.bio}</p>
-
-                  {/* Qualifications */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {teacher.qualifications.slice(0, 2).map((q) => (
-                      <span key={q} className="text-xs bg-muted px-2 py-1 rounded">
-                        {q}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-3 gap-4 pt-4 border-t">
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-1 text-yellow-500">
-                        <FiStar className="h-4 w-4 fill-current" />
-                        <span className="font-medium">{teacher.rating}</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground">امتیاز</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <FiUsers className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{teacher.students.toLocaleString('fa-IR')}</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground">دانشجو</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <FiBookOpen className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{teacher.courses}</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground">دوره</div>
-                    </div>
+              <div className="bg-background/80 backdrop-blur-sm rounded-2xl border overflow-hidden group hover:shadow-xl hover:border-primary/30 transition-all duration-300">
+                {/* Avatar */}
+                <div className="relative h-64 overflow-hidden">
+                  <img
+                    src={teacher.avatar}
+                    alt={teacher.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <h3 className="text-xl font-bold text-white">{teacher.name}</h3>
+                    <p className="text-sm text-primary-foreground/80">{teacher.specialty}</p>
                   </div>
                 </div>
-              </Link>
+
+                {/* Content */}
+                <div className="p-5 space-y-4">
+                  <p className="text-sm text-muted-foreground">{teacher.bio}</p>
+
+                  {/* Qualifications */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <FiAward className="h-4 w-4 text-primary" />
+                      <span className="text-xs font-medium">مدارک</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {teacher.qualifications.map((q) => (
+                        <span key={q} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-md">
+                          {q}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Experience */}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground pt-3 border-t">
+                    <FiBookOpen className="h-4 w-4" />
+                    <span>{teacher.experience}</span>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           ))}
         </div>

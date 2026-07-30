@@ -39,7 +39,7 @@ export default function CheckoutPage() {
     if (raw) {
       try {
         const user = JSON.parse(raw);
-        setForm((prev) => ({ ...prev, fullName: user.name || '', email: user.identifier || '' }));
+        setForm((prev) => ({ ...prev, fullName: user.name || '', email: user.identifier || '', phone: user.phone || '' }));
       } catch {}
     }
   }, []);
@@ -93,7 +93,7 @@ export default function CheckoutPage() {
                 onClick={() => {
                   const inv = invoices.find((i) => i.id === lastInvoiceId);
                   if (inv) {
-                    const text = `فاکتور خرید - آموزشگاه نجوای قلم\nتاریخ: ${inv.date}\nشماره: ${inv.orderId}\n\n${inv.items.map((it) => `${it.title}: ${formatPrice(it.price)}`).join('\n')}\n\nجمع: ${formatPrice(inv.subtotal)}\nتخفیف: ${formatPrice(inv.discount)}\nپرداختی: ${formatPrice(inv.total)}\nروش: ${inv.paymentMethod === 'online' ? 'آنلاین' : inv.paymentMethod === 'wallet' ? 'کیف پول' : inv.paymentMethod === 'installment' ? 'اقساطی' : 'نقدی'}`;
+                    const text = `فاکتور خرید - آموزشگاه زبان ویرا\nتاریخ: ${inv.date}\nشماره: ${inv.orderId}\n\n${inv.items.map((it) => `${it.title}: ${formatPrice(it.price)}`).join('\n')}\n\nجمع: ${formatPrice(inv.subtotal)}\nتخفیف: ${formatPrice(inv.discount)}\nپرداختی: ${formatPrice(inv.total)}\nروش: ${inv.paymentMethod === 'online' ? 'آنلاین' : inv.paymentMethod === 'wallet' ? 'کیف پول' : inv.paymentMethod === 'installment' ? 'اقساطی' : 'نقدی'}`;
                     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -188,7 +188,7 @@ export default function CheckoutPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-12">
+      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 pt-24 pb-12">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Link

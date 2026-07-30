@@ -22,31 +22,31 @@ interface GalleryImage {
   imageUrl: string;
 }
 
-const CATEGORIES = ['کلاس', 'کارگاه', 'مراسم', 'تجهیزات'];
+const CATEGORIES = ['کلاس', 'اساتید', 'مراسم', 'محوطه'];
 
 const SEED_GALLERY: GalleryImage[] = [
-  { id: 'g1', title: 'کلاس آموزشی هوش مصنوعی', category: 'کلاس', imageUrl: '/images/gallery1.jpg' },
-  { id: 'g2', title: 'کارگاه عملی برنامه‌نویسی', category: 'کارگاه', imageUrl: '/images/gallery2.jpg' },
-  { id: 'g3', title: 'مراسم افتتاحیه آموزشگاه', category: 'مراسم', imageUrl: '/images/gallery3.jpg' },
-  { id: 'g4', title: 'تجهیزات آزمایشگاه رباتیک', category: 'تجهیزات', imageUrl: '/images/gallery4.jpg' },
-  { id: 'g5', title: 'کلاس طراحی وب', category: 'کلاس', imageUrl: '/images/gallery5.jpg' },
-  { id: 'g6', title: 'کارگاه نقاشی دیجیتال', category: 'کارگاه', imageUrl: '/images/gallery6.jpg' },
-  { id: 'g7', title: 'مراسم اختتامیه دوره زبان', category: 'مراسم', imageUrl: '/images/gallery7.jpg' },
-  { id: 'g8', title: 'تجهیزات کارگاه گرافیک', category: 'تجهیزات', imageUrl: '/images/gallery8.jpg' },
-  { id: 'g9', title: 'کلاس زبان انگلیسی', category: 'کلاس', imageUrl: '/images/gallery9.jpg' },
-  { id: 'g10', title: 'کارگاه مدیریت پروژه', category: 'کارگاه', imageUrl: '/images/gallery10.jpg' },
-  { id: 'g11', title: 'مراسم جشن فارغ‌التحصیلی', category: 'مراسم', imageUrl: '/images/gallery11.jpg' },
-  { id: 'g12', title: 'تجهیزات سالن کامپیوتر', category: 'تجهیزات', imageUrl: '/images/gallery12.jpg' },
-  { id: 'g13', title: 'کلاس پایگاه داده', category: 'کلاس', imageUrl: '/images/gallery13.jpg' },
-  { id: 'g14', title: 'کارگاه فن بیان', category: 'کارگاه', imageUrl: '/images/gallery14.jpg' },
-  { id: 'g15', title: 'مراسم اهداء گواهینامه', category: 'مراسم', imageUrl: '/images/gallery15.jpg' },
+  { id: 'g1', title: 'کلاس زبان کودکان', category: 'کلاس', imageUrl: '/images/children.jpg' },
+  { id: 'g2', title: 'کلاس زبان بزرگسالان', category: 'کلاس', imageUrl: '/images/adult.jpg' },
+  { id: 'g3', title: 'کلاس مکالمه SPO', category: 'کلاس', imageUrl: '/images/conversation.jpg' },
+  { id: 'g4', title: 'کلاس TTC', category: 'کلاس', imageUrl: '/images/ttc.jpg' },
+  { id: 'g5', title: 'آزمون MOC (آیلتس)', category: 'کلاس', imageUrl: '/images/moc.jpg' },
+  { id: 'g6', title: 'استاد نسیم خدابخش', category: 'اساتید', imageUrl: '/images/nasim.jpg' },
+  { id: 'g7', title: 'استاد زهرا مردانی', category: 'اساتید', imageUrl: '/images/zahra.jpg' },
+  { id: 'g8', title: 'مراسم افتتاحیه', category: 'مراسم', imageUrl: '/images/vira-slide1.jpg' },
+  { id: 'g9', title: 'مراسم اختتامیه', category: 'مراسم', imageUrl: '/images/vira-slide2.jpg' },
+  { id: 'g10', title: 'محوطه آموزشگاه', category: 'محوطه', imageUrl: '/images/vira-slide3.jpg' },
+  { id: 'g11', title: 'لوگوی آموزشگاه', category: 'محوطه', imageUrl: '/images/vira-logo.jpg' },
+  { id: 'g12', title: 'تیم آموزشی', category: 'اساتید', imageUrl: '/images/speech.jpg' },
+  { id: 'g13', title: 'کلاس آنلاین', category: 'کلاس', imageUrl: '/images/online.jpg' },
+  { id: 'g14', title: 'معرفی کتاب و فیلم', category: 'کلاس', imageUrl: '/images/book-movie.jpg' },
+  { id: 'g15', title: 'مراسم جشن فارغ‌التحصیلی', category: 'مراسم', imageUrl: '/images/vira-news.jpg' },
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
   کلاس: 'bg-blue-100 text-blue-700',
-  کارگاه: 'bg-green-100 text-green-700',
+  اساتید: 'bg-green-100 text-green-700',
   مراسم: 'bg-purple-100 text-purple-700',
-  تجهیزات: 'bg-amber-100 text-amber-700',
+  محوطه: 'bg-amber-100 text-amber-700',
 };
 
 export default function AdminGalleryPage() {

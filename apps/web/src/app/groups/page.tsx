@@ -6,10 +6,10 @@ import { motion } from 'framer-motion';
 import { FiArrowLeft, FiUsers, FiMessageCircle, FiSend, FiBookOpen, FiHash } from 'react-icons/fi';
 
 const MOCK_GROUPS = [
-  { id: '1', name: 'هوش مصنوعی - سطح ۱', members: 12, description: 'گروه کلاس هوش مصنوعی', unread: 3 },
-  { id: '2', name: 'طراحی سایت - سطح ۲', members: 10, description: 'گروه کلاس طراحی سایت', unread: 0 },
-  { id: '3', name: 'زبان انگلیسی - مکالمه', members: 15, description: 'گروه کلاس زبان', unread: 7 },
-  { id: '4', name: 'رباتیک - ویژه', members: 8, description: 'گروه کلاس رباتیک', unread: 1 },
+  { id: '1', name: 'دوره کودکان', members: 12, description: 'گروه کلاس کودکان', unread: 3 },
+  { id: '2', name: 'دوره بزرگسالان', members: 18, description: 'گروه کلاس بزرگسالان', unread: 0 },
+  { id: '3', name: 'مکالمه SPO', members: 10, description: 'گروه کلاس مکالمه', unread: 7 },
+  { id: '4', name: 'دوره TTC', members: 8, description: 'گروه کلاس تربیت مدرس', unread: 1 },
 ];
 
 const MOCK_MESSAGES: Record<string, { id: string; sender: string; text: string; time: string }[]> = {
@@ -40,7 +40,7 @@ export default function ClassGroupsPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-12">
+      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 pt-24 pb-12">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Link href="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6 transition-colors">

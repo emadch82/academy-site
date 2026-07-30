@@ -43,7 +43,7 @@ export default function QuizPage() {
   if (!quizStarted) {
     return (
       <main className="min-h-screen bg-background">
-        <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-12">
+        <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 pt-24 pb-12">
           <div className="container mx-auto px-4">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-lg mx-auto text-center">
               <div className="h-24 w-24 rounded-3xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto mb-6">

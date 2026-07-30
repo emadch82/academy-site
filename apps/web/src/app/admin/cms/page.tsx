@@ -61,17 +61,17 @@ const COLLECTIONS = {
 } as const;
 
 const SEED_ARTICLES: Article[] = [
-  { id: 'ca1', title: 'آموزش React از صفر تا صد', content: 'در این مقاله به صورت جامع با فریمورک React و مفاهیم پایه آن آشنا خواهید شد.', status: 'published' },
-  { id: 'ca2', title: 'راهنمای جامع طراحی رابط کاربری', content: 'اصول و مبانی طراحی UI/UX و نکات کلیدی برای ساخت رابط کاربری جذاب.', status: 'published' },
-  { id: 'ca3', title: 'نکات کلیدی یادگیری زبان انگلیسی', content: 'بهترین روش‌ها و استراتژی‌ها برای یادگیری سریع زبان انگلیسی.', status: 'draft' },
-  { id: 'ca4', title: 'مبانی برنامه‌نویسی پایتون', content: 'آشنایی با مفاهیم اولیه برنامه‌نویسی پایتون و کاربردهای آن.', status: 'published' },
+  { id: 'ca1', title: '۱۰ روش مؤثر یادگیری زبان انگلیسی', content: 'روش‌های عملی و اثبات‌شده برای یادگیری سریعتر زبان انگلیسی.', status: 'published' },
+  { id: 'ca2', title: 'روش‌های آموزش زبان به کودکان', content: 'بهترین متدهای آموزش زبان برای کودکان ۵ تا ۱۰ سال.', status: 'published' },
+  { id: 'ca3', title: 'نکات کلیدی تقویت مکالمه', content: 'راهکارهای عملی برای بهبود مهارت Speaking و Listening.', status: 'draft' },
+  { id: 'ca4', title: 'معرفی کتاب و فیلم', content: 'معرفی انواع کتاب و فیلم متناسب با سطح زبان هر فرد.', status: 'published' },
 ];
 
 const SEED_BANNERS: Banner[] = [
-  { id: 'cb1', title: 'بنر دوره React', imageUrl: '/images/banner-react.jpg', link: '/courses/react', active: true },
-  { id: 'cb2', title: 'تخفیف ویژه فتوشاپ', imageUrl: '/images/banner-photoshop.jpg', link: '/courses/photoshop', active: true },
-  { id: 'cb3', title: 'ثبت‌نام زبان انگلیسی', imageUrl: '/images/banner-english.jpg', link: '/courses/english', active: false },
-  { id: 'cb4', title: 'دوره‌های جدید پاییز', imageUrl: '/images/banner-autumn.jpg', link: '/courses', active: true },
+  { id: 'cb1', title: 'ثبت‌نام دوره کودکان', imageUrl: '/images/children.jpg', link: '/courses/children', active: true },
+  { id: 'cb2', title: 'دوره مکالمه SPO', imageUrl: '/images/conversation.jpg', link: '/courses/conversation', active: true },
+  { id: 'cb3', title: 'آمادگی آیلتس', imageUrl: '/images/moc.jpg', link: '/courses/moc', active: true },
+  { id: 'cb4', title: 'دوره‌های آنلاین', imageUrl: '/images/online.jpg', link: '/courses/online', active: true },
 ];
 
 const SEED_FAQ: FaqItem[] = [
@@ -82,10 +82,10 @@ const SEED_FAQ: FaqItem[] = [
 ];
 
 const SEED_COMMENTS: Comment[] = [
-  { id: 'cc1', author: 'علی محمدی', content: 'دوره React عالی بود، ممنون از استاد احمدی', course: 'برنامه‌نویسی وب با React', date: '۱۴۰۳/۰۸/۱۵', status: 'approved' },
-  { id: 'cc2', author: 'سارا رضایی', content: 'فتوشاپ رو خیلی خوب توضیح دادید', course: 'طراحی گرافیک با Photoshop', date: '۱۴۰۳/۰۸/۱۴', status: 'approved' },
-  { id: 'cc3', author: 'محمد حسینی', content: 'لطفا دوره‌های بیشتری در زیر برنامه‌نویسی بذارید', course: 'عمومی', date: '۱۴۰۳/۰۸/۱۳', status: 'pending' },
-  { id: 'cc4', author: 'زهرا کریمی', content: 'محیط آموزشگاه خیلی صمیمی و عالیه', course: 'عمومی', date: '۱۴۰۳/۰۸/۱۲', status: 'approved' },
+  { id: 'cc1', author: 'سارا محمدی', content: 'کلاس مکالمه SPO خیلی عالی بود، ممنون از خانم مردانی', course: 'دوره مکالمه SPO', date: '۱۴۰۵/۰۴/۱۵', status: 'approved' },
+  { id: 'cc2', author: 'علی رضایی', content: 'محیط آموزشگاه خیلی صمیمی و عالیه', course: 'عمومی', date: '۱۴۰۵/۰۴/۱۴', status: 'approved' },
+  { id: 'cc3', author: 'مریم حسینی', content: 'دوره کودکان عالیه، پسرم خیلی لذت می‌بره', course: 'دوره کودکان', date: '۱۴۰۵/۰۴/۱۳', status: 'approved' },
+  { id: 'cc4', author: 'رضا عباسی', content: 'لطفا دوره‌های بیشتری برای آمادگی آیلتس بذارید', course: 'عمومی', date: '۱۴۰۵/۰۴/۱۲', status: 'pending' },
 ];
 
 function generateId(prefix: string): string {

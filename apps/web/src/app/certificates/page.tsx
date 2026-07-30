@@ -15,8 +15,9 @@ interface Certificate {
 }
 
 const MOCK_CERTIFICATES: Certificate[] = [
-  { id: 'CERT-001', courseName: 'دوره جامع هوش مصنوعی', studentName: 'کاربر نمونه', date: '۱۴۰۵/۰۳/۱۵', grade: 'خوب' },
-  { id: 'CERT-002', courseName: 'طراحی سایت با React', studentName: 'کاربر نمونه', date: '۱۴۰۵/۰۲/۲۰', grade: 'عالی' },
+  { id: 'CERT-001', courseName: 'دوره مکالمه SPO', studentName: 'کاربر نمونه', date: '۱۴۰۵/۰۴/۱۵', grade: 'عالی' },
+  { id: 'CERT-002', courseName: 'دوره بزرگسالان - سطح Intermediate', studentName: 'کاربر نمونه', date: '۱۴۰۵/۰۳/۲۰', grade: 'خوب' },
+  { id: 'CERT-003', courseName: 'دوره کودکان - First Friends', studentName: 'کاربر نمونه', date: '۱۴۰۵/۰۲/۱۰', grade: 'عالی' },
 ];
 
 export default function CertificatesPage() {
@@ -25,7 +26,7 @@ export default function CertificatesPage() {
   const downloadCertificate = (cert: Certificate) => {
     const text = `
 ╔══════════════════════════════════════════╗
-║         آموزشگاه نجوای قلم              ║
+║         آموزشگاه زبان ویرا              ║
 ║     گواهینامه پایان دوره                 ║
 ╚══════════════════════════════════════════╝
 
@@ -41,7 +42,7 @@ ${cert.studentName}
 نمره: ${cert.grade}
 
 تاریخ صدور: ${cert.date}
-آموزشگاه نجوای قلم
+آموزشگاه زبان ویرا
     `;
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -54,7 +55,7 @@ ${cert.studentName}
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-12">
+      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 pt-24 pb-12">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Link href="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6 transition-colors">

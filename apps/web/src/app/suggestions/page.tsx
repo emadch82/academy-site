@@ -17,10 +17,10 @@ interface Suggestion {
 }
 
 const MOCK_SUGGESTIONS: Suggestion[] = [
-  { id: 's1', title: 'دوره هوش مصنوعی پیشرفته', description: 'پیشنهاد برگزاری دوره هوش مصنوعی سطح پیشرفته با تمرکز بر GPT و LLM', author: 'امیر محمدی', date: '۱۴۰۵/۰۳/۱۰', votes: 25, status: 'implemented' },
-  { id: 's2', title: 'کلاس شبانه', description: 'برگزاری کلاس‌ها در ساعات عصر و شب برای شاغلین', author: 'سارا رضایی', date: '۱۴۰۵/۰۳/۰۸', votes: 18, status: 'accepted' },
-  { id: 's3', title: 'آزمون آنلاین', description: 'سیستم آزمون آنلاین برای ارزیابی دانشجویان', author: 'رضا حسینی', date: '۱۴۰۵/۰۳/۰۵', votes: 32, status: 'implemented' },
-  { id: 's4', title: 'گواهینامه دیجیتال', description: 'صدور گواهینامه دیجیتال برای دوره‌های تکمیل شده', author: 'نیلوفر احمدی', date: '۱۴۰۵/۰۳/۰۱', votes: 15, status: 'reviewing' },
+  { id: 's1', title: 'کلاس مکالمه فشرده', description: 'برگزاری کلاس‌های مکالمه فشرده هفتگی برای تقویت Speaking', author: 'سارا محمدی', date: '۱۴۰۵/۰۴/۱۰', votes: 25, status: 'implemented' },
+  { id: 's2', title: 'آزمون تعیین سطح آنلاین', description: 'سیستم آزمون آنلاین برای تعیین سطح زبان‌آموزان', author: 'مریم حسینی', date: '۱۴۰۵/۰۴/۰۵', votes: 32, status: 'implemented' },
+  { id: 's3', title: 'کلاب کتاب انگلیسی', description: 'برگزاری جلسات هفتگی کلاب کتاب با خواندن کتاب‌های انگلیسی', author: 'نیلوفر احمدی', date: '۱۴۰۵/۰۴/۰۱', votes: 15, status: 'reviewing' },
+  { id: 's4', title: 'دوره آمادگی آیلتس', description: 'برگزاری دوره تخصصی آمادگی آزمون IELTS با اساتید مجرب', author: 'رضا عباسی', date: '۱۴۰۵/۰۳/۲۸', votes: 28, status: 'accepted' },
 ];
 
 const STATUS_MAP = {
@@ -34,6 +34,7 @@ export default function SuggestionsPage() {
   const [suggestions, setSuggestions] = useState<Suggestion[]>(MOCK_SUGGESTIONS);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: '', description: '' });
+  const [liked, setLiked] = useState<Set<string>>(new Set());
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,13 +58,26 @@ export default function SuggestionsPage() {
   };
 
   const handleVote = (id: string) => {
-    setSuggestions((prev) => prev.map((s) => (s.id === id ? { ...s, votes: s.votes + 1 } : s)));
-    toast.success('نظر شما ثبت شد');
+    const isLiked = liked.has(id);
+    setLiked((prev) => {
+      const next = new Set(prev);
+      if (isLiked) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+    setSuggestions((prev) =>
+      prev.map((s) =>
+        s.id === id ? { ...s, votes: s.votes + (isLiked ? -1 : 1) } : s
+      )
+    );
   };
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-12">
+      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 pt-24 pb-12">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Link href="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6 transition-colors">
@@ -101,8 +115,8 @@ export default function SuggestionsPage() {
           {suggestions.map((s, i) => (
             <motion.div key={s.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="bg-background rounded-2xl border p-6">
               <div className="flex items-start gap-4">
-                <button type="button" onClick={() => handleVote(s.id)} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0">
-                  <FiThumbsUp className="h-5 w-5" />
+                <button type="button" onClick={() => handleVote(s.id)} className={`flex flex-col items-center gap-1 transition-colors shrink-0 ${liked.has(s.id) ? 'text-primary' : 'text-muted-foreground hover:text-primary'}`}>
+                  <FiThumbsUp className={`h-5 w-5 ${liked.has(s.id) ? 'fill-primary' : ''}`} />
                   <span className="text-sm font-bold">{s.votes}</span>
                 </button>
                 <div className="flex-1 min-w-0">

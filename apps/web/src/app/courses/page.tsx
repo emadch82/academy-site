@@ -10,7 +10,7 @@ import { useCart } from '@/contexts/cart-context';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 
-const categories = ['همه', 'برنامه‌نویسی', 'زبان', 'هوش مصنوعی', 'مهارت‌های نرم', 'هنر'];
+const categories = ['همه', 'کودکان', 'نوجوانان', 'بزرگسالان', 'مکالمه', 'TTC', 'آزمون', 'فرهنگی', 'آنلاین'];
 
 export default function CoursesPage() {
   const router = useRouter();
@@ -58,7 +58,7 @@ export default function CoursesPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-16">
+      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 pt-24 pb-16">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -72,7 +72,7 @@ export default function CoursesPage() {
                 <FiArrowRight className="h-4 w-4" />
                 بازگشت
               </Link>
-              <h1 className="text-2xl sm:text-4xl font-bold text-center flex-1">دوره‌های آموزشگاه نجوای قلم</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-center flex-1">دپارتمان‌های آموزشی آموزشگاه زبان ویرا</h1>
               <div className="w-16 shrink-0 hidden sm:block" />
             </div>
             <p className="text-muted-foreground max-w-2xl mx-auto mt-3 text-center">

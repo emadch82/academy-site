@@ -1,21 +1,429 @@
-import { HeroSection } from '@/components/sections/hero';
-import { StatsSection } from '@/components/sections/stats';
-import { FeaturedCourses } from '@/components/sections/featured-courses';
-import { WhyUsSection } from '@/components/sections/why-us';
-import { AboutSection } from '@/components/sections/about';
-import { TestimonialsSection } from '@/components/sections/testimonials';
-import { ContactSection } from '@/components/sections/contact';
+'use client';
 
+import { useRef, useEffect, useState } from 'react';
+import { motion, useScroll, useTransform, useMotionValueEvent, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
+import { FiArrowLeft, FiPlay, FiUsers, FiBookOpen, FiAward, FiCalendar, FiStar, FiPhone, FiMapPin, FiCheck, FiSend, FiInstagram } from 'react-icons/fi';
+import { FaWhatsapp, FaTelegram } from 'react-icons/fa';
+
+/* ─── Data ─── */
+const departments = [
+  { id: 'children', title: 'کودکان', icon: '🎮', color: 'from-pink-500 to-rose-500', desc: '۵ تا ۱۰ سال - آموزش با بازی', age: '۵-۱۰ سال' },
+  { id: 'junior', title: 'نوجوانان', icon: '📚', color: 'from-blue-500 to-cyan-500', desc: '۱۴ تا ۱۶ سال - برنامه تخصصی', age: '۱۴-۱۶ سال' },
+  { id: 'adult', title: 'بزرگسالان', icon: '🎓', color: 'from-violet-500 to-purple-500', desc: 'از پایه تا پیشرفته' },
+  { id: 'conversation', title: 'مکالمه SPO', icon: '💬', color: 'from-amber-500 to-orange-500', desc: 'فقط Listening و Speaking' },
+  { id: 'ttc', title: 'تربیت مدرس', icon: '👨‍🏫', color: 'from-emerald-500 to-green-500', desc: 'مدرک بین‌المللی TTC' },
+  { id: 'moc', title: 'آزمون MOC', icon: '✈️', color: 'from-sky-500 to-blue-500', desc: 'ماک آیلتس آکادمیک' },
+  { id: 'online', title: 'آنلاین', icon: '💻', color: 'from-indigo-500 to-violet-500', desc: 'Virtual Learning' },
+  { id: 'book-movie', title: 'کتاب و فیلم', icon: '📖', color: 'from-teal-500 to-cyan-500', desc: 'معرفی متناسب با سطح' },
+];
+
+const teachers = [
+  { name: 'نسیم خدابخش', role: 'مدیریت مجموعه', qual: 'PhD Candidate in TEFL', img: '/images/nasim.jpg' },
+  { name: 'غزال امیرسلیمانی', role: 'مدرس کودک و نوجوان', qual: 'TTC معتبر', img: '/images/female-avatar.png' },
+  { name: 'زهرا مردانی', role: 'مدرس TTC و بزرگسال', qual: 'فوق لیسانس, TESOL', img: '/images/zahra.jpg' },
+  { name: 'سوگل سرشوقی', role: 'مدرس کودک و نوجوان', qual: 'BA in English Lit, TTC', img: '/images/female-avatar.png' },
+];
+
+const testimonials = [
+  { name: 'سارا محمدی', course: 'مکالمه SPO', text: 'کلاس‌های SPO خیلی به مکالمه‌ام کمک کرد. بهترین آموزشگاه زبانی که رفتم.' },
+  { name: 'علی رضایی', course: 'بزرگسالان', text: 'خانم مردانی واقعا استاد خوبی هستند. پیشرفت چشمگیری در زبان داشتم.' },
+  { name: 'مریم حسینی', course: 'کودکان', text: 'پسرم عاشق کلاس‌های ویرا شده. خانم امیرسلیمانی محیط خلاقانه‌ای درست کرده.' },
+];
+
+/* ─── Main Component ─── */
 export default function HomePage() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoDuration, setVideoDuration] = useState(0);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
+
+  // Load video and get duration
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const onReady = () => {
+      video.currentTime = 0;
+      video.pause();
+      setVideoDuration(video.duration);
+      setVideoLoaded(true);
+    };
+
+    video.addEventListener('loadedmetadata', onReady);
+    // Fallback if metadata already loaded
+    if (video.readyState >= 1) onReady();
+
+    return () => video.removeEventListener('loadedmetadata', onReady);
+  }, []);
+
+  // Direct scroll-to-video sync
+  useMotionValueEvent(scrollYProgress, "change", (progress) => {
+    const video = videoRef.current;
+    if (!video || !videoDuration) return;
+    video.currentTime = progress * videoDuration;
+  });
+
+  /* ─── Section Animations (scroll ranges) ─── */
+  const videoScale = useTransform(scrollYProgress, [0, 0.05, 0.95, 1], [1.1, 1, 1, 1.1]);
+  const videoBrightness = useTransform(scrollYProgress, [0, 0.1, 0.9, 1], [0.5, 0.8, 0.8, 0.5]);
+
+  // Section 0: Hero text
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.08], [1, 0.9]);
+  const heroY = useTransform(scrollYProgress, [0, 0.08], [0, -80]);
+
+  // Section 1: Stats
+  const statsOpacity = useTransform(scrollYProgress, [0.06, 0.1, 0.18, 0.22], [0, 1, 1, 0]);
+  const statsY = useTransform(scrollYProgress, [0.06, 0.1, 0.18, 0.22], [60, 0, 0, -60]);
+  const statsScale = useTransform(scrollYProgress, [0.06, 0.1, 0.18, 0.22], [0.9, 1, 1, 0.9]);
+
+  // Section 2: Departments
+  const deptOpacity = useTransform(scrollYProgress, [0.2, 0.24, 0.36, 0.4], [0, 1, 1, 0]);
+  const deptY = useTransform(scrollYProgress, [0.2, 0.24, 0.36, 0.4], [60, 0, 0, -60]);
+
+  // Section 3: Teachers
+  const teacherOpacity = useTransform(scrollYProgress, [0.38, 0.42, 0.54, 0.58], [0, 1, 1, 0]);
+  const teacherY = useTransform(scrollYProgress, [0.38, 0.42, 0.54, 0.58], [60, 0, 0, -60]);
+
+  // Section 4: About
+  const aboutOpacity = useTransform(scrollYProgress, [0.56, 0.6, 0.72, 0.76], [0, 1, 1, 0]);
+  const aboutY = useTransform(scrollYProgress, [0.56, 0.6, 0.72, 0.76], [60, 0, 0, -60]);
+
+  // Section 5: Testimonials
+  const testOpacity = useTransform(scrollYProgress, [0.74, 0.78, 0.88, 0.92], [0, 1, 1, 0]);
+  const testY = useTransform(scrollYProgress, [0.74, 0.78, 0.88, 0.92], [60, 0, 0, -60]);
+
+  // Section 6: Contact
+  const contactOpacity = useTransform(scrollYProgress, [0.9, 0.94, 1, 1], [0, 1, 1, 1]);
+  const contactY = useTransform(scrollYProgress, [0.9, 0.94], [60, 0]);
+
+  // Progress
+  const progressWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+
   return (
-    <main className="flex flex-col min-h-screen">
-      <HeroSection />
-      <StatsSection />
-      <FeaturedCourses />
-      <WhyUsSection />
-      <AboutSection />
-      <TestimonialsSection />
-      <ContactSection />
+    <main ref={containerRef} style={{ height: "800vh" }}>
+      {/* Sticky Video Background */}
+      <div className="fixed inset-0 z-0">
+        <motion.div style={{ scale: videoScale }} className="w-full h-full">
+          <video ref={videoRef} muted playsInline preload="auto" className="w-full h-full object-cover">
+            <source src="/motion/VIRA_language_institute_animation_1080p_202607281703_gwr_video_mvp.mp4" type="video/mp4" />
+          </video>
+        </motion.div>
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/40" />
+        {/* Bottom gradient */}
+        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/90 to-transparent" />
+      </div>
+
+      {/* Sticky Content Container */}
+      <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center">
+        <div className="container mx-auto px-4 relative z-10 w-full">
+
+          {/* ═══════ HERO ═══════ */}
+          <motion.div
+            style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <div className="text-center max-w-3xl px-4">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm font-medium text-white mb-6 sm:mb-8"
+              >
+                <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-green-400 animate-pulse" />
+                ثبت‌نام دوره‌های جدید آغاز شد
+              </motion.div>
+
+              <div className="h-56 sm:h-48 md:h-64" />
+
+              <motion.p
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                className="text-base sm:text-lg md:text-xl text-white/80 max-w-xl mx-auto mb-6 sm:mb-10 leading-relaxed"
+              >
+                آموزش تخصصی زبان انگلیسی از پایه تا پیشرفته
+                <br />
+                با بهترین اساتید در اصفهان
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9 }}
+                className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center"
+              >
+                <Link href="/courses" className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white text-black px-6 py-3 sm:px-8 sm:py-4 text-sm font-bold hover:bg-white/90 transition-all hover:scale-105 shadow-xl">
+                  ثبت‌نام دوره‌ها
+                  <FiArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+                </Link>
+                <Link href="/contact" className="group inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-white px-6 py-3 sm:px-8 sm:py-4 text-sm font-medium hover:bg-primary/90 transition-all hover:scale-105">
+                  <FiPhone className="h-4 w-4" />
+                  ۰۳۱-۳۷۷۵۹۵۵۶
+                </Link>
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* ═══════ STATS ═══════ */}
+          <motion.div
+            style={{ opacity: statsOpacity, y: statsY, scale: statsScale }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <div className="w-full max-w-4xl px-4">
+              <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-white text-center mb-6 sm:mb-12">
+                آموزشگاه زبان ویرا در <span className="text-primary">یک نگاه</span>
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
+                {[
+                  { icon: FiCalendar, value: '۱۵+', label: 'سال سابقه', color: 'from-blue-500 to-cyan-500' },
+                  { icon: FiUsers, value: '۵۰+', label: 'دانش‌آموز', color: 'from-violet-500 to-purple-500' },
+                  { icon: FiBookOpen, value: '۸', label: 'دپارتمان', color: 'from-amber-500 to-orange-500' },
+                  { icon: FiAward, value: '۴', label: 'استاد مجرب', color: 'from-emerald-500 to-green-500' },
+                ].map((s, i) => (
+                  <motion.div
+                    key={s.label}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={videoLoaded ? { opacity: 1, y: 0 } : {}}
+                    transition={{ delay: 0.2 + i * 0.1 }}
+                    className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center hover:bg-white/15 transition-all"
+                  >
+                    <div className={`inline-flex h-10 w-10 sm:h-14 sm:w-14 rounded-lg sm:rounded-xl bg-gradient-to-br ${s.color} items-center justify-center mb-2 sm:mb-4 shadow-lg`}>
+                      <s.icon className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-black text-white mb-1">{s.value}</div>
+                    <div className="text-xs sm:text-sm text-white/70">{s.label}</div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* ═══════ DEPARTMENTS ═══════ */}
+          <motion.div
+            style={{ opacity: deptOpacity, y: deptY }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <div className="w-full max-w-5xl px-4">
+              <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-white text-center mb-2 sm:mb-4">
+                دپارتمان‌های <span className="text-primary">آموزشی</span>
+              </h2>
+              <p className="text-white/60 text-center mb-6 sm:mb-10 max-w-lg mx-auto text-sm sm:text-base">دوره‌های متنوع برای تمام سنین و سطوح</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+                {departments.map((d, i) => (
+                  <motion.div
+                    key={d.id}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={videoLoaded ? { opacity: 1, scale: 1 } : {}}
+                    transition={{ delay: 0.1 + i * 0.05 }}
+                    className="group"
+                  >
+                    <Link href={`/courses/${d.id}`} className="block bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center hover:bg-white/20 transition-all hover:scale-105 hover:border-white/40">
+                      <div className={`inline-flex h-10 w-10 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl bg-gradient-to-br ${d.color} items-center justify-center mb-2 sm:mb-3 text-xl sm:text-2xl shadow-lg`}>
+                        {d.icon}
+                      </div>
+                      <h3 className="text-xs sm:text-sm font-bold text-white mb-1">{d.title}</h3>
+                      <p className="text-[10px] sm:text-xs text-white/60 line-clamp-2">{d.desc}</p>
+                      {d.age && <span className="inline-block mt-1 sm:mt-2 text-[9px] sm:text-[10px] bg-white/10 rounded-full px-1.5 sm:px-2 py-0.5 text-white/80">{d.age}</span>}
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* ═══════ TEACHERS ═══════ */}
+          <motion.div
+            style={{ opacity: teacherOpacity, y: teacherY }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <div className="w-full max-w-4xl px-4">
+              <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-white text-center mb-2 sm:mb-4">
+                تیم <span className="text-primary">حرفه‌ای</span> ما
+              </h2>
+              <p className="text-white/60 text-center mb-6 sm:mb-10 text-sm sm:text-base">اساتید مجرب با مدارک بین‌المللی</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
+                {teachers.map((t, i) => (
+                  <motion.div
+                    key={t.name}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={videoLoaded ? { opacity: 1, y: 0 } : {}}
+                    transition={{ delay: 0.1 + i * 0.1 }}
+                    className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl overflow-hidden hover:bg-white/15 transition-all hover:scale-105"
+                  >
+                    <div className="relative h-28 sm:h-40 overflow-hidden">
+                      <img src={t.img} alt={t.name} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    </div>
+                    <div className="p-3 sm:p-4 -mt-6 sm:-mt-8 relative">
+                      <h3 className="text-xs sm:text-sm font-bold text-white">{t.name}</h3>
+                      <p className="text-[10px] sm:text-xs text-primary">{t.role}</p>
+                      <p className="text-[9px] sm:text-[10px] text-white/50 mt-0.5 sm:mt-1">{t.qual}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* ═══════ ABOUT ═══════ */}
+          <motion.div
+            style={{ opacity: aboutOpacity, y: aboutY }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <div className="w-full max-w-4xl px-4 grid md:grid-cols-2 gap-4 sm:gap-8 items-center">
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-5 sm:p-8">
+                <h2 className="text-xl sm:text-2xl font-black text-white mb-3 sm:mb-4">
+                  درباره <span className="text-primary">آکادمی ویرا</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-white/80 leading-relaxed mb-3 sm:mb-4">
+                  آموزشگاه زبان ویرا با بیش از ۱۵ سال سابقه درخشان در خیابان رودکی اصفهان، یکی از معتبرترین مراکز آموزش زبان انگلیسی است.
+                </p>
+                <p className="text-xs sm:text-sm text-white/80 leading-relaxed mb-4 sm:mb-6">
+                  ما با بهره‌گیری از مجرب‌ترین اساتید و مدرن‌ترین متدهای آموزشی، محیطی پویا و خلاقانه برای یادگیری زبان فراهم کرده‌ایم.
+                </p>
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                  {['اساتید مجرب', 'کلاس‌های تعاملی', 'مدرک TTC', 'پشتیبانی ۲۴ ساعته'].map(f => (
+                    <div key={f} className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-white/80">
+                      <FiCheck className="h-3 w-3 sm:h-4 sm:w-4 text-primary shrink-0" />
+                      <span>{f}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-5 sm:p-8 text-center">
+                <div className="text-4xl sm:text-6xl font-black bg-gradient-to-l from-blue-400 via-primary to-purple-400 bg-clip-text text-transparent mb-2">۱۵+</div>
+                <div className="text-sm sm:text-lg text-white/80 mb-4 sm:mb-6">سال تجربه درخشان</div>
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                  <div className="bg-white/10 rounded-xl p-3 sm:p-4">
+                    <div className="text-xl sm:text-2xl font-bold text-white">۸+</div>
+                    <div className="text-[10px] sm:text-xs text-white/60">دپارتمان</div>
+                  </div>
+                  <div className="bg-white/10 rounded-xl p-3 sm:p-4">
+                    <div className="text-xl sm:text-2xl font-bold text-white">۵۰+</div>
+                    <div className="text-[10px] sm:text-xs text-white/60">دانش‌آموز</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* ═══════ TESTIMONIALS ═══════ */}
+          <motion.div
+            style={{ opacity: testOpacity, y: testY }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <div className="w-full max-w-4xl px-4">
+              <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-white text-center mb-2 sm:mb-4">
+                نظرات <span className="text-primary">دانش‌آموزان</span>
+              </h2>
+              <p className="text-white/60 text-center mb-6 sm:mb-10 text-sm sm:text-base">تجربه واقعی زبان‌آموزان ما</p>
+              <div className="grid md:grid-cols-3 gap-3 sm:gap-5">
+                {testimonials.map((t, i) => (
+                  <motion.div
+                    key={t.name}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={videoLoaded ? { opacity: 1, y: 0 } : {}}
+                    transition={{ delay: 0.1 + i * 0.1 }}
+                    className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6"
+                  >
+                    <div className="flex items-center gap-0.5 sm:gap-1 mb-2 sm:mb-3">
+                      {[...Array(5)].map((_, j) => (
+                        <FiStar key={j} className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-yellow-400 fill-yellow-400" />
+                      ))}
+                    </div>
+                    <p className="text-xs sm:text-sm text-white/80 mb-3 sm:mb-4 leading-relaxed">{t.text}</p>
+                    <div className="border-t border-white/10 pt-2 sm:pt-3">
+                      <div className="text-xs sm:text-sm font-bold text-white">{t.name}</div>
+                      <div className="text-[10px] sm:text-xs text-primary">{t.course}</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* ═══════ CONTACT ═══════ */}
+          <motion.div
+            style={{ opacity: contactOpacity, y: contactY }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <div className="w-full max-w-4xl px-4 grid md:grid-cols-2 gap-4 sm:gap-8 items-center">
+              <div className="space-y-3 sm:space-y-4">
+                <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 sm:mb-2">
+                  تماس <span className="text-primary">با ما</span>
+                </h2>
+                <p className="text-white/60 text-xs sm:text-sm mb-4 sm:mb-6">برای مشاوره و ثبت‌نام با ما در تماس باشید</p>
+                {[
+                  { icon: FiPhone, text: '۰۳۱-۳۷۷۵۹۵۵۶', label: 'تلفن' },
+                  { icon: FiMapPin, text: 'اصفهان، خیابان رودکی، کوچه شهید سلیمانی (84)', label: 'آدرس' },
+                ].map(c => (
+                  <div key={c.label} className="flex items-center gap-2 sm:gap-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg sm:rounded-xl p-3 sm:p-4">
+                    <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
+                      <c.icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                    </div>
+                    <div>
+                      <div className="text-[10px] sm:text-xs text-white/50">{c.label}</div>
+                      <div className="text-xs sm:text-sm text-white font-medium">{c.text}</div>
+                    </div>
+                  </div>
+                ))}
+                <div className="flex gap-2 sm:gap-3 pt-1 sm:pt-2">
+                  {[
+                    { icon: FiInstagram, color: 'from-pink-500 to-rose-500' },
+                    { icon: FaWhatsapp, color: 'from-green-500 to-emerald-500' },
+                    { icon: FaTelegram, color: 'from-sky-500 to-blue-500' },
+                  ].map((s, i) => (
+                    <a key={i} href="#" className={`h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br ${s.color} flex items-center justify-center text-white hover:scale-110 transition-transform`}>
+                      <s.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+                <form onSubmit={e => e.preventDefault()} className="space-y-3 sm:space-y-4">
+                  <input type="text" placeholder="نام و نام خانوادگی" className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    <input type="email" placeholder="ایمیل" className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    <input type="tel" placeholder="تلفن" className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                  </div>
+                  <textarea rows={3} placeholder="پیام شما..." className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none" />
+                  <button type="submit" className="w-full py-2.5 sm:py-3 rounded-xl bg-gradient-to-l from-primary to-primary/80 text-white font-bold text-xs sm:text-sm hover:shadow-lg hover:shadow-primary/25 transition-all flex items-center justify-center gap-2">
+                    <FiSend className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    ارسال پیام
+                  </button>
+                </form>
+              </div>
+            </div>
+          </motion.div>
+
+        </div>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="fixed bottom-0 left-0 right-0 h-1 bg-white/5 z-50">
+        <motion.div style={{ width: progressWidth }} className="h-full bg-gradient-to-r from-primary via-blue-500 to-secondary" />
+      </div>
+
+      {/* Scroll Hint */}
+      <motion.div
+        style={{ opacity: useTransform(scrollYProgress, [0, 0.02], [1, 0]) }}
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50"
+      >
+        <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 1.5, repeat: Infinity }} className="flex flex-col items-center gap-2">
+          <span className="text-xs text-white/60">اسکرول کنید</span>
+          <div className="w-5 h-8 rounded-full border border-white/30 flex justify-center pt-1.5">
+            <div className="w-1 h-2 rounded-full bg-white/60 animate-bounce" />
+          </div>
+        </motion.div>
+      </motion.div>
     </main>
   );
 }

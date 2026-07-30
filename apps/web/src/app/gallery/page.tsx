@@ -6,24 +6,19 @@ import { motion } from 'framer-motion';
 import { FiArrowRight, FiX, FiZoomIn } from 'react-icons/fi';
 
 const galleryImages = [
-  { id: 1, src: '/images/gallery1.jpg', alt: 'هوش مصنوعی', category: 'هوش مصنوعی' },
-  { id: 2, src: '/images/gallery2.jpg', alt: 'برنامه‌نویسی', category: 'برنامه‌نویسی' },
-  { id: 3, src: '/images/gallery3.jpg', alt: 'طراحی وب', category: 'طراحی سایت' },
-  { id: 4, src: '/images/gallery4.jpg', alt: 'آموزش زبان', category: 'زبان انگلیسی' },
-  { id: 5, src: '/images/gallery5.jpg', alt: 'رباتیک', category: 'رباتیک' },
-  { id: 6, src: '/images/gallery6.jpg', alt: 'فن بیان', category: 'فن بیان' },
-  { id: 7, src: '/images/gallery7.jpg', alt: 'نقاشی', category: 'نقاشی' },
-  { id: 8, src: '/images/gallery8.jpg', alt: 'مدیریت پروژه', category: 'مدیریت پروژه' },
-  { id: 9, src: '/images/gallery9.jpg', alt: 'طراحی گرافیک', category: 'گرافیک' },
-  { id: 10, src: '/images/gallery10.jpg', alt: 'یادگیری ماشین', category: 'هوش مصنوعی' },
-  { id: 11, src: '/images/gallery11.jpg', alt: 'لاگ‌های کدنویسی', category: 'برنامه‌نویسی' },
-  { id: 12, src: '/images/gallery12.jpg', alt: 'ارائه و سخنرانی', category: 'فن بیان' },
-  { id: 13, src: '/images/gallery13.jpg', alt: 'پایتون', category: 'برنامه‌نویسی' },
-  { id: 14, src: '/images/gallery14.jpg', alt: 'کارگاه آموزشی', category: 'کارگاه' },
-  { id: 15, src: '/images/gallery15.jpg', alt: 'کار گروهی', category: 'کارگاه' },
+  { id: 1, src: '/images/vira-slide2.jpg', alt: 'کلاس آموزشگاه زبان ویرا', category: 'آموزشگاه' },
+  { id: 2, src: '/images/vira-slide1.jpg', alt: 'کتاب‌های American English File', category: 'کتاب‌ها' },
+  { id: 3, src: '/images/vira-slide3.jpg', alt: 'کتاب‌های First Friends ویژه کودکان', category: 'کتاب‌ها' },
+  { id: 4, src: '/images/vira-news.jpg', alt: 'آغاز ثبت نام ترم جدید', category: 'اخبار' },
+  { id: 5, src: '/images/nasim.jpg', alt: 'نسیم خدابخش - موسس و مدیریت', category: 'اساتید' },
+  { id: 6, src: '/images/zahra.jpg', alt: 'زهرا مردانی - مدرس TTC و بزرگسال', category: 'اساتید' },
+  { id: 7, src: '/images/vira-logo.jpg', alt: 'لوگوی آموزشگاه زبان ویرا', category: 'آموزشگاه' },
+  { id: 8, src: '/images/english.jpg', alt: 'محیط آموزشی', category: 'آموزشگاه' },
+  { id: 9, src: '/images/speech.jpg', alt: 'کلاس مکالمه', category: 'کلاس‌ها' },
+  { id: 10, src: '/images/about.jpg', alt: 'فضای آموزشگاه', category: 'آموزشگاه' },
 ];
 
-const categories = ['همه', 'هوش مصنوعی', 'برنامه‌نویسی', 'طراحی سایت', 'زبان انگلیسی', 'رباتیک', 'فن بیان', 'نقاشی', 'مدیریت پروژه', 'گرافیک', 'کارگاه'];
+const categories = ['همه', 'آموزشگاه', 'کتاب‌ها', 'کلاس‌ها', 'اساتید', 'اخبار'];
 
 export default function GalleryPage() {
   const [selectedCategory, setSelectedCategory] = useState('همه');
@@ -33,7 +28,7 @@ export default function GalleryPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-12">
+      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 pt-24 pb-12">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Link href="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6 transition-colors">
@@ -47,9 +42,9 @@ export default function GalleryPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-wrap gap-2 mb-8 justify-center">
+        <div className="flex gap-2 mb-8 justify-start overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
           {categories.map((cat) => (
-            <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === cat ? 'bg-primary text-primary-foreground shadow-md' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>
+            <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all whitespace-nowrap shrink-0 ${selectedCategory === cat ? 'bg-primary text-primary-foreground shadow-md' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>
               {cat}
             </button>
           ))}

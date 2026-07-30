@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { FiUser, FiMail, FiLock, FiPhone, FiEye, FiEyeOff, FiBookOpen, FiCheckCircle } from 'react-icons/fi';
+import { FiUser, FiMail, FiLock, FiPhone, FiEye, FiEyeOff, FiCheckCircle } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import Cookies from 'js-cookie';
 import { db, initializeDB, type User } from '@/lib/store';
@@ -120,9 +120,11 @@ export default function RegisterPage() {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <FiBookOpen className="h-10 w-10 text-primary" />
-            <span className="text-2xl font-bold">آموزشگاه نجوای قلم</span>
+          <Link href="/" className="inline-flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
+              <span className="text-xl font-bold text-white">V</span>
+            </div>
+            <span className="text-2xl font-bold">آموزشگاه زبان ویرا</span>
           </Link>
           <p className="text-muted-foreground mt-2">حساب کاربری جدید ایجاد کنید</p>
         </div>
@@ -132,7 +134,6 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Full Name */}
             <div>
-              <label className="block text-sm font-medium mb-2">نام و نام خانوادگی *</label>
               <div className="relative">
                 <FiUser className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
@@ -140,7 +141,7 @@ export default function RegisterPage() {
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                   className="w-full pr-10 pl-4 py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  placeholder="نام کامل خود را وارد کنید"
+                  placeholder="لطفا نام و نام خانوادگی خود را وارد نمایید"
                   required
                 />
               </div>
@@ -148,7 +149,6 @@ export default function RegisterPage() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium mb-2">ایمیل *</label>
               <div className="relative">
                 <FiMail className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
@@ -156,8 +156,7 @@ export default function RegisterPage() {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="w-full pr-10 pl-4 py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  placeholder="example@email.com"
-                  dir="ltr"
+                  placeholder="لطفا ایمیل خود را وارد نمایید"
                   required
                 />
               </div>
@@ -165,16 +164,14 @@ export default function RegisterPage() {
 
             {/* Mobile */}
             <div>
-              <label className="block text-sm font-medium mb-2">شماره موبایل *</label>
               <div className="relative">
                 <FiPhone className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
                   type="tel"
                   value={formData.mobile}
                   onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                  className="w-full pr-10 pl-4 py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  placeholder="09123456789"
-                  dir="ltr"
+                  className="w-full pr-10 pl-4 py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 text-right"
+                  placeholder="لطفا شماره موبایل خود را وارد نمایید"
                   required
                 />
               </div>
@@ -182,7 +179,6 @@ export default function RegisterPage() {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium mb-2">رمز عبور *</label>
               <div className="relative">
                 <FiLock className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
@@ -190,7 +186,7 @@ export default function RegisterPage() {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="w-full pr-10 pl-10 py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  placeholder="حداقل ۶ کاراکتر"
+                  placeholder="لطفا رمز عبور خود را وارد نمایید"
                   required
                 />
                 <button
@@ -205,7 +201,6 @@ export default function RegisterPage() {
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-sm font-medium mb-2">تکرار رمز عبور *</label>
               <div className="relative">
                 <FiLock className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
@@ -213,7 +208,7 @@ export default function RegisterPage() {
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                   className="w-full pr-10 pl-4 py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  placeholder="رمز عبور را مجدداً وارد کنید"
+                  placeholder="لطفا رمز عبور را مجدداً وارد نمایید"
                   required
                 />
               </div>

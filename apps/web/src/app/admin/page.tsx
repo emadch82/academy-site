@@ -76,7 +76,7 @@ export default function AdminDashboard() {
         className="bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-6 text-primary-foreground"
       >
         <h1 className="text-2xl font-bold mb-2">داشبورد مدیریت</h1>
-        <p className="opacity-90">خوش آمدید. وضعیت کلی آموزشگاه نجوای قلم را مشاهده کنید.</p>
+        <p className="opacity-90">خوش آمدید. وضعیت کلی آموزشگاه زبان ویرا را مشاهده کنید.</p>
       </motion.div>
 
       {/* Stats Grid */}

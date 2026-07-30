@@ -14,25 +14,25 @@ import '@/styles/globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'آموزشگاه نجوای قلم | مرکز تخصصی نخبه پروری',
-    template: '%s | آموزشگاه نجوای قلم',
+    default: 'آموزشگاه زبان ویرا | آموزش تخصصی زبان انگلیسی',
+    template: '%s | آموزشگاه زبان ویرا',
   },
-  description: 'آموزشگاه نجوای قلم، مرکز تخصصی نخبه پروری در اصفهان - دوره‌های هوش مصنوعی، طراحی سایت، برنامه‌نویسی، زبان انگلیسی و بیشتر',
-  keywords: ['آموزشگاه', 'نجوای قلم', 'نخبه پروری', 'اصفهان', 'هوش مصنوعی', 'طراحی سایت', 'برنامه‌نویسی', 'زبان انگلیسی', 'رباتیک'],
-  authors: [{ name: 'Najva Ghalam Academy' }],
-  creator: 'Najva Ghalam',
+  description: 'آموزشگاه زبان ویرا، مرکز تخصصی آموزش زبان انگلیسی در اصفهان - دوره‌های کودکان، نوجوانان، بزرگسالان، مکالمه و TTC',
+  keywords: ['آموزشگاه زبان', 'زبان ویرا', 'آموزش زبان انگلیسی', 'اصفهان', 'دوره زبان', 'TTC', 'آیلتس', 'مکالمه زبان'],
+  authors: [{ name: 'Vira Language Academy' }],
+  creator: 'Vira Academy',
   openGraph: {
     type: 'website',
     locale: 'fa_IR',
-    url: 'https://najvaaca.ir',
-    siteName: 'آموزشگاه نجوای قلم',
-    title: 'آموزشگاه نجوای قلم | مرکز تخصصی نخبه پروری',
-    description: 'مرکز تخصصی نخبه پروری در اصفهان - با لذت یاد بگیر، رشد کن و آینده‌ات رو رقم بزن',
+    url: 'https://viraacademyesf.ir',
+    siteName: 'آموزشگاه زبان ویرا',
+    title: 'آموزشگاه زبان ویرا | آموزش تخصصی زبان انگلیسی',
+    description: 'آموزش تخصصی زبان انگلیسی از پایه تا پیشرفته با بهترین اساتید در اصفهان',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'آموزشگاه نجوای قلم | مرکز تخصصی نخبه پروری',
-    description: 'مرکز تخصصی نخبه پروری در اصفهان - با لذت یاد بگیر، رشد کن و آینده‌ات رو رقم بزن',
+    title: 'آموزشگاه زبان ویرا | آموزش تخصصی زبان انگلیسی',
+    description: 'آموزش تخصصی زبان انگلیسی از پایه تا پیشرفته با بهترین اساتید در اصفهان',
   },
   robots: {
     index: true,
@@ -63,7 +63,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fa" dir="rtl" suppressHydrationWarning>
+    <html lang="fa" dir="rtl" className="dark" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

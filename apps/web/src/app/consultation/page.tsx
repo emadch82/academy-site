@@ -77,7 +77,7 @@ export default function ConsultationPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-16">
+      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 pt-24 pb-16">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

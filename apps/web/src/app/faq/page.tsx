@@ -117,7 +117,7 @@ export default function FAQPage() {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-3xl">
           {filteredCategories.map((category) => (
             <div key={category.name} className="mb-12">

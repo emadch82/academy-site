@@ -52,15 +52,15 @@ interface SettingsData {
 }
 
 const defaultSettings: SettingsData = {
-  academyName: 'آموزشگاه نجوای قلم',
+  academyName: 'آموزشگاه زبان ویرا',
   phone: '۰۳۱۳۶۵۱۲۸۱۴',
-  mobile: '۰۹۱۳۳۲۳۹۶۷۲',
-  email: 'info@najvaaca.ir',
-  website: 'najvaaca.ir',
-  address: 'اصفهان، سپاهان‌شهر، بلوار غدیر، خیابان ایثار',
+  mobile: '۰۹۱۳۲۰۱۹۱۳۹',
+  email: 'info@viraacademyesf.ir',
+  website: 'viraacademyesf.ir',
+  address: 'اصفهان، خیابان رودکی، کوچه شهید سلیمانی (۸۴)',
   hours: 'شنبه تا پنجشنبه ۸ صبح تا ۸ شب',
-  supportPhone: '۰۹۱۳۴۶۴۷۷۹۳',
-  description: 'مرکز تخصصی نخبه پروری',
+  supportPhone: '۰۹۱۳۲۰۱۹۱۳۹',
+  description: 'مرکز تخصصی آموزش زبان انگلیسی',
   notifications: {
     courses: true,
     events: true,
