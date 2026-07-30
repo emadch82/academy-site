@@ -1,7 +1,9 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { db, initializeDB, type Notification as StoreNotification } from '@/lib/store';
+
+const READ_KEY = 'vira_notifications_read';
 
 export interface Notification {
   id: string;
@@ -25,31 +27,35 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | null>(null);
 
+function getReadIds(): Set<string> {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const raw = localStorage.getItem(READ_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function saveReadIds(ids: Set<string>) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(READ_KEY, JSON.stringify([...ids]));
+}
+
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const loadFromDb = () => {
+  const loadFromDb = useCallback(() => {
     try {
       initializeDB();
       const allSent = db.getNotifications().filter((n: StoreNotification) => n.status === 'sent');
-      const UNWANTED = ['یادآوری پرداخت اقساط', 'یادآوری کلاس React فردا', 'اعلام نتایج آزمون HTML'];
-      const today = new Date().toLocaleDateString('fa-IR');
-      allSent.forEach((n) => {
-        if (UNWANTED.some((u) => n.title.includes(u) || n.message.includes(u))) {
-          db.deleteNotification(n.id);
-        } else {
-          const newTitle = n.title.replace('پاییز', 'تابستان');
-          const newMessage = n.message.replace('پاییز', 'تابستان');
-          db.updateNotification(n.id, { title: newTitle, message: newMessage, date: today } as any);
-        }
-      });
-      const filtered = db.getNotifications().filter((n: StoreNotification) => n.status === 'sent');
-      const mapped: Notification[] = filtered.map((n) => ({
+      const readIds = getReadIds();
+      const mapped: Notification[] = allSent.map((n) => ({
         id: n.id,
         title: n.title,
         message: n.message,
         type: n.type,
-        read: false,
+        read: readIds.has(n.id),
         date: n.date,
         link: n.target === 'course' ? '/courses' : undefined,
       }));
@@ -57,15 +63,15 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     } catch {
       setNotifications([]);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadFromDb();
-  }, []);
+  }, [loadFromDb]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const addNotification = (n: Omit<Notification, 'id' | 'read' | 'date'>) => {
+  const addNotification = useCallback((n: Omit<Notification, 'id' | 'read' | 'date'>) => {
     const newNotif: Notification = {
       ...n,
       id: `n_${Date.now()}`,
@@ -73,19 +79,25 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       date: new Date().toLocaleDateString('fa-IR'),
     };
     setNotifications((prev) => [newNotif, ...prev]);
-  };
+  }, []);
 
-  const markAsRead = (id: string) => {
+  const markAsRead = useCallback((id: string) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-  };
+    const readIds = getReadIds();
+    readIds.add(id);
+    saveReadIds(readIds);
+  }, []);
 
-  const markAllRead = () => {
+  const markAllRead = useCallback(() => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
+    const readIds = getReadIds();
+    notifications.forEach((n) => readIds.add(n.id));
+    saveReadIds(readIds);
+  }, [notifications]);
 
-  const clearAll = () => setNotifications([]);
+  const clearAll = useCallback(() => setNotifications([]), []);
 
-  const refreshFromDb = () => loadFromDb();
+  const refreshFromDb = useCallback(() => loadFromDb(), [loadFromDb]);
 
   return (
     <NotificationContext.Provider value={{ notifications, unreadCount, addNotification, markAsRead, markAllRead, clearAll, refreshFromDb }}>

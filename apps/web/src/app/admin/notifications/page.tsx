@@ -45,12 +45,12 @@ const EMPTY_FORM = {
 };
 
 const SEED_NOTIFICATIONS: Omit<Notification, 'id' | 'read'>[] = [
-  { title: 'شروع ثبت‌نام دوره‌های پاییز', message: 'ثبت‌نام دوره‌های پاییز آغاز شد. برای مشاهده دوره‌ها به پنل مراجعه کنید.', type: 'info', target: 'all', status: 'sent', date: '۱۴۰۳/۰۸/۱۵' },
-  { title: 'یادآوری کلاس React فردا', message: 'کلاس React فردا ساعت ۰۹:۰۰ برگزار می‌شود. لطفاً به موقع حضور داشته باشید.', type: 'warning', target: 'course', status: 'sent', date: '۱۴۰۳/۰۸/۱۴' },
-  { title: 'اعلام نتایج آزمون HTML', message: 'نتایج آزمون HTML و CSS اعلام شد. نمرات خود را در پنل بررسی کنید.', type: 'success', target: 'course', status: 'sent', date: '۱۴۰۳/۰۸/۱۲' },
-  { title: 'تخفیف ویژه دوره فتوشاپ', message: 'تخفیف ۲۰٪ ویژه دوره فتوشاپ تا پایان آبان ماه فعال است.', type: 'info', target: 'all', status: 'draft', date: '۱۴۰۳/۰۸/۱۰' },
-  { title: 'یادآوری پرداخت اقساط', message: 'قسط سوم شهریه شما تا ۵ روز آینده سررسید می‌شود.', type: 'error', target: 'individual', status: 'sent', date: '۱۴۰۳/۰۸/۰۸' },
-  { title: 'برگزاری وبینار رایگان', message: 'وبینار مبانی برنامه‌نویسی روز جمعه ساعت ۱۰:۰۰ برگزار می‌شود.', type: 'success', target: 'all', status: 'sent', date: '۱۴۰۳/۰۸/۰۵' },
+  { title: 'شروع ثبت‌نام دوره‌های تابستان', message: 'ثبت‌نام دوره‌های تابستان ویرا آغاز شد. برای مشاهده دوره‌ها به پنل مراجعه کنید.', type: 'info', target: 'all', status: 'sent', date: '۱۴۰۵/۰۴/۱۵' },
+  { title: 'یادآوری کلاس مکالمه فردا', message: 'کلاس مکالمه زبان انگلیسی فردا ساعت ۱۰:۰۰ برگزار می‌شود. لطفاً به موقع حضور داشته باشید.', type: 'warning', target: 'course', status: 'sent', date: '۱۴۰۵/۰۴/۱۴' },
+  { title: 'اعلام نتایج آزمون تعیین سطح', message: 'نتایج آزمون تعیی�� سطح اعلام شد. نمرات خود را در پنل بررسی کنید.', type: 'success', target: 'course', status: 'sent', date: '۱۴۰۵/۰۴/۱۲' },
+  { title: 'تخفیف ویژه دوره TTC', message: 'تخفیف ۱۵٪ ویژه دوره مدرسان زبان (TTC) تا پایان تیر فعال است.', type: 'info', target: 'all', status: 'draft', date: '۱۴۰۵/۰۴/۱۰' },
+  { title: 'یادآوری پرداخت شهریه', message: 'قسط دوم شهریه شما تا ۵ روز آینده سررسید می‌شود.', type: 'error', target: 'individual', status: 'sent', date: '۱۴۰۵/۰۴/۰۸' },
+  { title: 'برگزاری کارگاه رایگان تلفظ', message: 'کارگاه رایگان تلفظ صحیح کلمات انگلیسی روز جمعه ساعت ۱۰:۰۰ برگزار می‌شود.', type: 'success', target: 'all', status: 'sent', date: '۱۴۰۵/۰۴/۰۵' },
 ];
 
 export default function NotificationsPage() {
@@ -59,7 +59,7 @@ export default function NotificationsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
-  const { addNotification: pushToSite } = useNotifications();
+  const { refreshFromDb } = useNotifications();
   const hydrated = useHydrated();
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -144,10 +144,7 @@ export default function NotificationsPage() {
       n.id === id ? { ...n, status: 'sent' as const } : n
     );
     db.setCollection('notifications', items);
-    const sent = items.find((n: Notification) => n.id === id);
-    if (sent) {
-      pushToSite({ title: sent.title, message: sent.message, type: sent.type, link: sent.target === 'course' ? '/courses' : undefined });
-    }
+    refreshFromDb();
     toast.success('اعلان ارسال شد');
     loadNotifications();
   };
