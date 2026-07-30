@@ -20,9 +20,9 @@ const departments = [
 
 const teachers = [
   { name: 'نسیم خدابخش', role: 'مدیریت مجموعه', qual: 'PhD Candidate in TEFL', img: '/images/nasim.jpg' },
-  { name: 'غزال امیرسلیمانی', role: 'مدرس کودک و نوجوان', qual: 'TTC معتبر', img: '/images/female-avatar.png' },
+  { name: 'غزال امیرسلیمانی', role: 'مدرس کودک و نوجوان', qual: 'TTC معتبر', img: '/images/ghazal.jpg' },
   { name: 'زهرا مردانی', role: 'مدرس TTC و بزرگسال', qual: 'فوق لیسانس, TESOL', img: '/images/zahra.jpg' },
-  { name: 'سوگل سرشوقی', role: 'مدرس کودک و نوجوان', qual: 'BA in English Lit, TTC', img: '/images/female-avatar.png' },
+  { name: 'سوگل سرشوقی', role: 'مدرس کودک و نوجوان', qual: 'BA in English Lit, TTC', img: '/images/sogol.jpg' },
 ];
 
 const testimonials = [
@@ -256,9 +256,9 @@ export default function HomePage() {
                     initial={{ opacity: 0, y: 30 }}
                     animate={videoLoaded ? { opacity: 1, y: 0 } : {}}
                     transition={{ delay: 0.1 + i * 0.1 }}
-                    className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl overflow-hidden hover:bg-white/15 transition-all hover:scale-105"
+                    className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl overflow-hidden hover:bg-white/15 transition-all hover:scale-105 flex flex-col h-full"
                   >
-                    <div className="relative h-28 sm:h-40 overflow-hidden">
+                    <div className="relative flex-1 min-h-[180px] sm:min-h-[240px] overflow-hidden">
                       <img src={t.img} alt={t.name} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     </div>

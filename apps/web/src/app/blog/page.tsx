@@ -27,42 +27,46 @@ export default function BlogPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row items-center gap-8 mb-10">
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex-1 text-center md:text-right flex flex-col justify-center w-full md:mt-28"
-          >
-            <h1 className="text-3xl md:text-5xl font-bold">اخبار و مقالات</h1>
-            <p className="text-lg text-muted-foreground max-w-lg mt-3">
-              جدیدترین اخبار و مقالات آموزشی
-            </p>
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="rounded-2xl overflow-hidden border mb-8"
+        >
+          <AutoPlayVideo src="/videos/blog-motion.mp4" poster="/videos/blog-poster.jpg" className="w-full h-auto" />
+        </motion.div>
 
-            <div className="flex flex-nowrap gap-2 mt-6 justify-center md:justify-start overflow-x-auto pb-1 scrollbar-hide">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-5 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap shrink-0 ${
-                    selectedCategory === cat
-                      ? 'bg-primary text-primary-foreground shadow-md'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
+          <h1 className="text-3xl md:text-5xl font-bold">اخبار و مقالات</h1>
+          <p className="text-lg text-muted-foreground max-w-lg mx-auto mt-3">
+            جدیدترین اخبار و مقالات آموزشی
+          </p>
+        </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex-1 rounded-2xl overflow-hidden border w-full"
-          >
-            <AutoPlayVideo src="/videos/blog-motion.mp4" poster="/videos/blog-poster.jpg" className="w-full h-auto" />
-          </motion.div>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex flex-nowrap gap-2 mb-10 justify-center overflow-x-auto pb-2"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap shrink-0 ${
+                selectedCategory === cat
+                  ? 'bg-primary text-primary-foreground shadow-md'
+                  : 'bg-white/10 text-white/60 hover:bg-white/15'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filtered.map((post, index) => (

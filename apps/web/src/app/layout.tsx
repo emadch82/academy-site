@@ -71,6 +71,11 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap"
           rel="stylesheet"
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.addEventListener('unhandledrejection',function(e){if(e.reason&&String(e.reason).indexOf('save-page')>-1)e.stopImmediatePropagation()});window.addEventListener('error',function(e){if(e.message&&e.message.indexOf('save-page')>-1)e.stopImmediatePropagation()},true);`,
+          }}
+        />
       </head>
       <body className="min-h-screen bg-background font-sans antialiased" suppressHydrationWarning>
         <Providers>

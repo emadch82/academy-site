@@ -20,9 +20,9 @@ const stats = [
 
 const teachers = [
   { name: 'نسیم خدابخش', role: 'موسس و مدیریت', qualifications: 'PhD Candidate in TEFL, MA in TEFL', image: '/images/nasim.jpg' },
-  { name: 'غزال امیرسلیمانی', role: 'مدرس کودک و نوجوان', qualifications: 'TTC معتبر', image: '/images/female-avatar.png' },
+  { name: 'غزال امیرسلیمانی', role: 'مدرس کودک و نوجوان', qualifications: 'TTC معتبر', image: '/images/ghazal.jpg' },
   { name: 'زهرا مردانی', role: 'مدرس TTC و بزرگسال', qualifications: 'فوق لیسانس آموزش زبان, TESOL', image: '/images/zahra.jpg' },
-  { name: 'سوگل سرشوقی', role: 'مدرس کودک و نوجوان', qualifications: 'BA in English Literature, TTC', image: '/images/female-avatar.png' },
+  { name: 'سوگل سرشوقی', role: 'مدرس کودک و نوجوان', qualifications: 'BA in English Literature, TTC', image: '/images/sogol.jpg' },
 ];
 
 export default function AboutPage() {
@@ -133,9 +133,9 @@ export default function AboutPage() {
                 transition={{ delay: index * 0.1 }}
                 viewport={{ once: true }}
                 whileHover={{ y: -10 }}
-                className="bg-background rounded-2xl border overflow-hidden group"
+                className="h-full"
               >
-                <div className="relative h-48 overflow-hidden">
+                <div className="relative flex-1 min-h-[250px] sm:min-h-[300px] overflow-hidden">
                   <img
                     src={teacher.image}
                     alt={teacher.name}

@@ -23,7 +23,7 @@ const teachers = [
     bio: 'مدرس تخصصی کودک و نوجوان با تجربه آموزش در محیط‌های خلاقانه',
     qualifications: ['TTC معتبر'],
     experience: 'بیش از ۳ سال سابقه تدریس کودک و نوجوان',
-    avatar: '/images/female-avatar.png',
+    avatar: '/images/ghazal.jpg',
   },
   {
     id: '3',
@@ -41,7 +41,7 @@ const teachers = [
     bio: 'مدرس تخصصی کودک و نوجوان با مدرک بین‌المللی',
     qualifications: ['BA in English Literature', 'TTC'],
     experience: 'بیش از ۷ سال سابقه تدریس',
-    avatar: '/images/female-avatar.png',
+    avatar: '/images/sogol.jpg',
   },
 ];
 
@@ -100,17 +100,18 @@ export default function TeachersPage() {
 
       {/* Teachers Grid */}
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
           {filteredTeachers.map((teacher, index) => (
             <motion.div
               key={teacher.id}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="h-full"
             >
-              <div className="bg-background/80 backdrop-blur-sm rounded-2xl border overflow-hidden group hover:shadow-xl hover:border-primary/30 transition-all duration-300">
+              <div className="bg-background/80 backdrop-blur-sm rounded-2xl border overflow-hidden group hover:shadow-xl hover:border-primary/30 transition-all duration-300 flex flex-col h-full">
                 {/* Avatar */}
-                <div className="relative h-64 overflow-hidden">
+                <div className="relative flex-1 min-h-[250px] sm:min-h-[300px] overflow-hidden">
                   <img
                     src={teacher.avatar}
                     alt={teacher.name}
