@@ -25,7 +25,7 @@ export default function ContactPage() {
   return (
     <main className="min-h-screen">
       {/* Hero */}
-      <section className="relative py-32 overflow-hidden">
+      <section className="relative pt-32 pb-12 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" />
         <motion.div
           animate={{ rotate: [0, 360] }}
@@ -34,26 +34,37 @@ export default function ContactPage() {
         />
         
         <div className="container mx-auto px-4 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
-            <motion.span
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4"
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex-1 text-center md:pl-24 flex flex-col justify-center"
             >
-              تماس با ما
-            </motion.span>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              ارتباط <span className="text-primary">با ما</span>
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              برای مشاوره، ثبت‌نام یا هرگونه سوال با ما در تماس باشید
-            </p>
-          </motion.div>
+              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+                ارتباط <span className="text-primary">با ما</span>
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-2xl">
+                برای مشاوره، ثبت‌نام یا هرگونه سوال با ما در تماس باشید
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex-1 rounded-2xl overflow-hidden border w-full"
+            >
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                className="w-full h-auto object-contain"
+              >
+                <source src="/videos/contact-motion.mp4" type="video/mp4" />
+              </video>
+            </motion.div>
+          </div>
         </div>
       </section>
 
