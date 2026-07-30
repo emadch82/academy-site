@@ -152,14 +152,13 @@ export function Header() {
           {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center gap-2">
             <CartDrawer />
-            <motion.button
+            <button
               type="button"
-              whileTap={{ scale: 0.9 }}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`inline-flex items-center justify-center rounded-lg p-1.5 transition-colors ${isHome ? 'text-white hover:bg-white/10' : 'text-muted-foreground hover:bg-muted'}`}
+              className={`inline-flex items-center justify-center rounded-lg p-2.5 min-w-[44px] min-h-[44px] transition-colors active:scale-95 ${isHome ? 'text-white hover:bg-white/10' : 'text-muted-foreground hover:bg-muted'}`}
             >
-              {mobileMenuOpen ? <FiX className="h-5 w-5" /> : <FiMenu className="h-5 w-5" />}
-            </motion.button>
+              {mobileMenuOpen ? <FiX className="h-6 w-6" /> : <FiMenu className="h-6 w-6" />}
+            </button>
           </div>
         </div>
       </div>
