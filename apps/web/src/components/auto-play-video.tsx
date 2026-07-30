@@ -4,50 +4,46 @@ import { useRef, useEffect, useState } from 'react';
 
 export function AutoPlayVideo({ src, poster, className }: { src: string; poster?: string; className?: string }) {
   const ref = useRef<HTMLVideoElement>(null);
-  const [ready, setReady] = useState(false);
+  const [showPoster, setShowPoster] = useState(!!poster);
 
   useEffect(() => {
     const video = ref.current;
     if (!video) return;
 
-    const onCanPlay = () => setReady(true);
-    video.addEventListener('canplay', onCanPlay);
-    if (video.readyState >= 3) setReady(true);
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-        }
-      },
-      { threshold: 0.3 }
-    );
-
-    observer.observe(video);
-    return () => {
-      observer.disconnect();
-      video.removeEventListener('canplay', onCanPlay);
+    const tryPlay = () => {
+      const rect = video.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        video.play().catch(() => {});
+      }
     };
+
+    video.addEventListener('canplay', tryPlay);
+    if (video.readyState >= 3) tryPlay();
+    window.addEventListener('scroll', tryPlay, { passive: true });
+    return () => window.removeEventListener('scroll', tryPlay);
   }, []);
 
   return (
-    <div className={`relative ${className || ''}`}>
-      {poster && !ready && (
-        <img src={poster} alt="" className="w-full h-full object-cover" />
-      )}
+    <div className={className} style={{ width: '100%', overflow: 'hidden', borderRadius: '1rem', position: 'relative' }}>
       <video
         ref={ref}
         loop
         muted
         autoPlay
         playsInline
-        preload="metadata"
-        className={`w-full h-full object-cover ${ready ? '' : 'absolute inset-0 opacity-0'}`}
+        preload="auto"
+        onCanPlay={() => setShowPoster(false)}
+        style={{ width: '100%', display: 'block', aspectRatio: '16 / 9', objectFit: 'cover' }}
       >
         <source src={src} type="video/mp4" />
       </video>
+      {showPoster && poster && (
+        <img
+          src={poster}
+          alt=""
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+      )}
     </div>
   );
 }

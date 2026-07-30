@@ -80,14 +80,14 @@ export default function CoursesPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row items-center gap-8 mb-10">
+        <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 mb-10">
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex-1 text-center md:text-right flex flex-col justify-center w-full"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full md:w-1/2 text-center md:text-right order-2 md:order-1"
           >
-            <h1 className="text-2xl sm:text-4xl font-bold">دپارتمان‌های آموزشی آموزشگاه زبان ویرا</h1>
-            <p className="text-muted-foreground max-w-lg mt-3">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">دپارتمان‌های آموزشی آموزشگاه زبان ویرا</h1>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-lg mt-3 mx-auto md:mx-0">
               از بین دوره‌های متنوع، دوره مناسب خود را پیدا کنید
             </p>
 
@@ -122,11 +122,12 @@ export default function CoursesPage() {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex-1 rounded-2xl overflow-hidden border w-full"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="w-full md:w-1/2 order-1 md:order-2"
           >
-            <AutoPlayVideo src="/videos/courses-motion.mp4" poster="/videos/courses-poster.jpg" className="w-full h-auto max-h-44 sm:max-h-none" />
+            <AutoPlayVideo src="/videos/courses-motion.mp4" poster="/videos/courses-poster.jpg" className="rounded-2xl border" />
           </motion.div>
         </div>
 

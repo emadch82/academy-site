@@ -407,7 +407,7 @@ html {
   main {
     -webkit-overflow-scrolling: touch;
   }
-  video {
+  .scroll-video {
     object-fit: cover !important;
     width: 100vw !important;
     height: 100vh !important;

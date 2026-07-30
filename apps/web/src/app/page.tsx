@@ -82,26 +82,26 @@ export default function HomePage() {
   const testOpacity = useTransform(scrollYProgress, [0.67, 0.72, 0.82, 0.87], [0, 1, 1, 0]);
   const testY = useTransform(scrollYProgress, [0.67, 0.72, 0.82, 0.87], [40, 0, 0, -40]);
 
-  const contactOpacity = useTransform(scrollYProgress, [0.87, 0.92, 1, 1], [0, 1, 1, 1]);
-  const contactY = useTransform(scrollYProgress, [0.87, 0.92], [40, 0]);
+  const contactOpacity = useTransform(scrollYProgress, [0.87, 0.92, 0.96, 1], [0, 1, 1, 0]);
+  const contactY = useTransform(scrollYProgress, [0.87, 0.92, 0.96, 1], [40, 0, 0, -40]);
 
   const progressWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
-    <main ref={containerRef} style={{ height: "800vh" }} className="overflow-x-hidden">
+    <main ref={containerRef} style={{ height: "800vh" }}>
       {/* Video Background */}
-      <div className="fixed top-0 left-0 w-screen h-screen z-0 overflow-hidden">
-        <motion.div style={{ scale: videoScale }} className="w-full h-full">
-          <video ref={videoRef} muted playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover">
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <motion.div style={{ scale: videoScale }} className="absolute inset-0">
+          <video ref={videoRef} muted playsInline preload="metadata" className="scroll-video w-full h-full object-cover">
             <source src="/motion/VIRA_language_institute_animation_1080p_202607281703_gwr_video_mvp.mp4" type="video/mp4" />
           </video>
         </motion.div>
         <div className="absolute inset-0 bg-black/40" />
       </div>
 
-      {/* Sticky Content */}
-      <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center">
-        <div className="container mx-auto px-4 relative z-10 w-full">
+      {/* Fixed Content Overlay */}
+      <div className="fixed top-0 left-0 w-screen h-screen flex items-center justify-center z-10 pointer-events-none">
+        <div className="container mx-auto px-4 relative w-full pointer-events-auto">
 
           {/* HERO */}
           <motion.div

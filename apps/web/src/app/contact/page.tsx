@@ -35,26 +35,27 @@ export default function ContactPage() {
         />
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col md:flex-row items-center gap-8">
+          <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex-1 text-center md:pl-24 flex flex-col justify-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="w-full md:w-1/2 text-center md:text-right md:pr-12"
             >
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 md:mb-6">
                 ارتباط <span className="text-primary">با ما</span>
               </h1>
-              <p className="text-lg text-muted-foreground max-w-2xl">
+              <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-xl mx-auto md:mx-0">
                 برای مشاوره، ثبت‌نام یا هرگونه سوال با ما در تماس باشید
               </p>
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex-1 rounded-2xl overflow-hidden border w-full"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="w-full md:w-1/2"
             >
-              <AutoPlayVideo src="/videos/contact-motion.mp4" poster="/videos/contact-poster.jpg" className="w-full h-auto max-h-44 sm:max-h-none" />
+              <AutoPlayVideo src="/videos/contact-motion.mp4" poster="/videos/contact-poster.jpg" className="rounded-2xl border" />
             </motion.div>
           </div>
         </div>

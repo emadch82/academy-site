@@ -58,7 +58,7 @@ export default function AboutPage() {
             viewport={{ once: true }}
             className="rounded-2xl overflow-hidden border max-w-4xl mx-auto mt-10"
           >
-            <AutoPlayVideo src="/videos/about-motion.mp4" poster="/videos/about-poster.jpg" className="w-full h-auto max-h-44 sm:max-h-none" />
+            <AutoPlayVideo src="/videos/about-motion.mp4" poster="/videos/about-poster.jpg" className="rounded-2xl overflow-hidden border" />
           </motion.div>
         </div>
       </section>
