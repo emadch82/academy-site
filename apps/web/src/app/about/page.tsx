@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { FiTarget, FiEye, FiHeart, FiAward, FiCheckCircle } from 'react-icons/fi';
+import { AutoPlayVideo } from '@/components/auto-play-video';
 
 const values = [
   { icon: FiTarget, title: 'کیفیت', description: 'ارائه بهترین خدمات آموزشی با استانداردهای بین‌المللی' },
@@ -42,14 +43,6 @@ export default function AboutPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <motion.span
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4"
-            >
-              درباره ما
-            </motion.span>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               آشنایی با <span className="text-primary">آکادمی ویرا</span>
             </h1>
@@ -65,15 +58,7 @@ export default function AboutPage() {
             viewport={{ once: true }}
             className="rounded-2xl overflow-hidden border max-w-4xl mx-auto mt-10"
           >
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-auto object-contain"
-            >
-              <source src="/videos/about-motion.mp4" type="video/mp4" />
-            </video>
+            <AutoPlayVideo src="/videos/about-motion.mp4" className="w-full h-auto object-contain" />
           </motion.div>
         </div>
       </section>

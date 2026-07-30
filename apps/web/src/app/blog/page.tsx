@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiArrowRight, FiClock, FiUser } from 'react-icons/fi';
 import { blogPosts } from '@/lib/blog-data';
+import { AutoPlayVideo } from '@/components/auto-play-video';
 
 const categories = ['همه', 'یادگیری زبان', 'آموزش کودکان', 'مکالمه', 'آزمون آیلتس', 'TTC', 'فرهنگی'];
 
@@ -59,16 +60,7 @@ export default function BlogPage() {
             animate={{ opacity: 1, x: 0 }}
             className="flex-1 rounded-2xl overflow-hidden border w-full"
           >
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="metadata"
-              className="w-full h-auto object-contain"
-            >
-              <source src="/videos/blog-motion.mp4" type="video/mp4" />
-            </video>
+            <AutoPlayVideo src="/videos/blog-motion.mp4" className="w-full h-auto object-contain" />
           </motion.div>
         </div>
 

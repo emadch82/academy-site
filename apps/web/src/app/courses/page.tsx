@@ -9,6 +9,7 @@ import { courses, formatPrice } from '@/lib/courses-data';
 import { useCart } from '@/contexts/cart-context';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
+import { AutoPlayVideo } from '@/components/auto-play-video';
 
 const categories = ['همه', 'کودکان', 'نوجوانان', 'بزرگسالان', 'مکالمه', 'TTC', 'آزمون', 'فرهنگی', 'آنلاین'];
 
@@ -125,15 +126,7 @@ export default function CoursesPage() {
             animate={{ opacity: 1, x: 0 }}
             className="flex-1 rounded-2xl overflow-hidden border w-full"
           >
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-auto object-contain"
-            >
-              <source src="/videos/courses-motion.mp4" type="video/mp4" />
-            </video>
+            <AutoPlayVideo src="/videos/courses-motion.mp4" className="w-full h-auto object-contain" />
           </motion.div>
         </div>
 

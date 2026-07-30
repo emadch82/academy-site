@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { FiPhone, FiMail, FiMapPin, FiClock, FiSend, FiCheck } from 'react-icons/fi';
 import { FaWhatsapp, FaTelegram, FaInstagram } from 'react-icons/fa';
+import { AutoPlayVideo } from '@/components/auto-play-video';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -53,16 +54,7 @@ export default function ContactPage() {
               animate={{ opacity: 1, x: 0 }}
               className="flex-1 rounded-2xl overflow-hidden border w-full"
             >
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="metadata"
-                className="w-full h-auto object-contain"
-              >
-                <source src="/videos/contact-motion.mp4" type="video/mp4" />
-              </video>
+              <AutoPlayVideo src="/videos/contact-motion.mp4" className="w-full h-auto object-contain" />
             </motion.div>
           </div>
         </div>

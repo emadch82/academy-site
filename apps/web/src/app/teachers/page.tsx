@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiSearch, FiStar, FiBookOpen, FiAward } from 'react-icons/fi';
+import { AutoPlayVideo } from '@/components/auto-play-video';
 
 const teachers = [
   {
@@ -93,15 +94,7 @@ export default function TeachersPage() {
           viewport={{ once: true }}
           className="rounded-2xl overflow-hidden border max-w-4xl mx-auto"
         >
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-auto object-contain"
-          >
-            <source src="/videos/teachers-motion.mp4" type="video/mp4" />
-          </video>
+          <AutoPlayVideo src="/videos/teachers-motion.mp4" className="w-full h-auto object-contain" />
         </motion.div>
       </div>
 
