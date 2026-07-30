@@ -54,7 +54,7 @@ export default function ContactPage() {
               animate={{ opacity: 1, x: 0 }}
               className="flex-1 rounded-2xl overflow-hidden border w-full"
             >
-              <AutoPlayVideo src="/videos/contact-motion.mp4" poster="/videos/contact-poster.jpg" className="w-full h-44 sm:aspect-video" />
+              <AutoPlayVideo src="/videos/contact-motion.mp4" poster="/videos/contact-poster.jpg" className="w-full h-auto max-h-44 sm:max-h-none" />
             </motion.div>
           </div>
         </div>
