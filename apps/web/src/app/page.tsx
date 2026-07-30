@@ -1,9 +1,9 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
-import { motion, useScroll, useTransform, useMotionValueEvent, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
 import Link from 'next/link';
-import { FiArrowLeft, FiPlay, FiUsers, FiBookOpen, FiAward, FiCalendar, FiStar, FiPhone, FiMapPin, FiCheck, FiSend, FiInstagram } from 'react-icons/fi';
+import { FiArrowLeft, FiUsers, FiBookOpen, FiAward, FiCalendar, FiStar, FiPhone, FiMapPin, FiCheck, FiSend, FiInstagram } from 'react-icons/fi';
 import { FaWhatsapp, FaTelegram } from 'react-icons/fa';
 
 /* ─── Data ─── */
@@ -36,133 +36,90 @@ export default function HomePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoDuration, setVideoDuration] = useState(0);
-  const [videoLoaded, setVideoLoaded] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  // Load video and get duration
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-
     const onReady = () => {
       video.currentTime = 0;
       video.pause();
       setVideoDuration(video.duration);
-      setVideoLoaded(true);
     };
-
     video.addEventListener('loadedmetadata', onReady);
-    // Fallback if metadata already loaded
     if (video.readyState >= 1) onReady();
-
     return () => video.removeEventListener('loadedmetadata', onReady);
   }, []);
 
-  // Direct scroll-to-video sync — seek directly for frame-accurate playback
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
     const video = videoRef.current;
     if (!video || !videoDuration) return;
-    const targetTime = progress * videoDuration;
-    if (Math.abs(video.currentTime - targetTime) > 0.01) {
-      video.currentTime = targetTime;
-    }
+    video.currentTime = progress * videoDuration;
   });
 
-  /* ─── Section Animations (scroll ranges) ─── */
+  /* ─── Scroll Ranges ─── */
   const videoScale = useTransform(scrollYProgress, [0, 0.05, 0.95, 1], [1.1, 1, 1, 1.1]);
-  const videoBrightness = useTransform(scrollYProgress, [0, 0.1, 0.9, 1], [0.5, 0.8, 0.8, 0.5]);
 
-  // Section 0: Hero text
   const heroOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.08], [1, 0.9]);
-  const heroY = useTransform(scrollYProgress, [0, 0.08], [0, -80]);
+  const heroY = useTransform(scrollYProgress, [0, 0.08], [0, -60]);
 
-  // Section 1: Stats
-  const statsOpacity = useTransform(scrollYProgress, [0.06, 0.1, 0.18, 0.22], [0, 1, 1, 0]);
-  const statsY = useTransform(scrollYProgress, [0.06, 0.1, 0.18, 0.22], [60, 0, 0, -60]);
-  const statsScale = useTransform(scrollYProgress, [0.06, 0.1, 0.18, 0.22], [0.9, 1, 1, 0.9]);
+  const statsOpacity = useTransform(scrollYProgress, [0.07, 0.12, 0.19, 0.24], [0, 1, 1, 0]);
+  const statsY = useTransform(scrollYProgress, [0.07, 0.12, 0.19, 0.24], [40, 0, 0, -40]);
 
-  // Section 2: Departments
-  const deptOpacity = useTransform(scrollYProgress, [0.2, 0.24, 0.36, 0.4], [0, 1, 1, 0]);
-  const deptY = useTransform(scrollYProgress, [0.2, 0.24, 0.36, 0.4], [60, 0, 0, -60]);
+  const deptOpacity = useTransform(scrollYProgress, [0.22, 0.27, 0.34, 0.39], [0, 1, 1, 0]);
+  const deptY = useTransform(scrollYProgress, [0.22, 0.27, 0.34, 0.39], [40, 0, 0, -40]);
 
-  // Section 3: Teachers
-  const teacherOpacity = useTransform(scrollYProgress, [0.38, 0.42, 0.54, 0.58], [0, 1, 1, 0]);
-  const teacherY = useTransform(scrollYProgress, [0.38, 0.42, 0.54, 0.58], [60, 0, 0, -60]);
+  const teacherOpacity = useTransform(scrollYProgress, [0.37, 0.42, 0.49, 0.54], [0, 1, 1, 0]);
+  const teacherY = useTransform(scrollYProgress, [0.37, 0.42, 0.49, 0.54], [40, 0, 0, -40]);
 
-  // Section 4: About
-  const aboutOpacity = useTransform(scrollYProgress, [0.56, 0.6, 0.72, 0.76], [0, 1, 1, 0]);
-  const aboutY = useTransform(scrollYProgress, [0.56, 0.6, 0.72, 0.76], [60, 0, 0, -60]);
+  const aboutOpacity = useTransform(scrollYProgress, [0.52, 0.57, 0.64, 0.69], [0, 1, 1, 0]);
+  const aboutY = useTransform(scrollYProgress, [0.52, 0.57, 0.64, 0.69], [40, 0, 0, -40]);
 
-  // Section 5: Testimonials
-  const testOpacity = useTransform(scrollYProgress, [0.74, 0.78, 0.88, 0.92], [0, 1, 1, 0]);
-  const testY = useTransform(scrollYProgress, [0.74, 0.78, 0.88, 0.92], [60, 0, 0, -60]);
+  const testOpacity = useTransform(scrollYProgress, [0.67, 0.72, 0.82, 0.87], [0, 1, 1, 0]);
+  const testY = useTransform(scrollYProgress, [0.67, 0.72, 0.82, 0.87], [40, 0, 0, -40]);
 
-  // Section 6: Contact
-  const contactOpacity = useTransform(scrollYProgress, [0.9, 0.94, 1, 1], [0, 1, 1, 1]);
-  const contactY = useTransform(scrollYProgress, [0.9, 0.94], [60, 0]);
+  const contactOpacity = useTransform(scrollYProgress, [0.87, 0.92, 1, 1], [0, 1, 1, 1]);
+  const contactY = useTransform(scrollYProgress, [0.87, 0.92], [40, 0]);
 
-  // Progress
   const progressWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
-    <main ref={containerRef} style={{ height: "800vh", position: 'relative' }} className="overflow-x-hidden">
-      {/* Sticky Video Background */}
+    <main ref={containerRef} style={{ height: "800vh" }} className="overflow-x-hidden">
+      {/* Video Background */}
       <div className="fixed top-0 left-0 w-screen h-screen z-0 overflow-hidden">
-        <motion.div style={{ scale: videoScale }} className="w-full h-full will-change-transform">
+        <motion.div style={{ scale: videoScale }} className="w-full h-full">
           <video ref={videoRef} muted playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover">
             <source src="/motion/VIRA_language_institute_animation_1080p_202607281703_gwr_video_mvp.mp4" type="video/mp4" />
           </video>
         </motion.div>
-        {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/40" />
-        {/* Bottom gradient */}
-        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/90 to-transparent" />
       </div>
 
-      {/* Sticky Content Container */}
-      <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center" style={{ WebkitOverflowScrolling: 'touch' }}>
+      {/* Sticky Content */}
+      <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center">
         <div className="container mx-auto px-4 relative z-10 w-full">
 
-          {/* ═══════ HERO ═══════ */}
+          {/* HERO */}
           <motion.div
-            style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
+            style={{ opacity: heroOpacity, y: heroY }}
             className="absolute inset-0 flex items-center justify-center"
           >
             <div className="text-center max-w-3xl px-4">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm font-medium text-white mb-6 sm:mb-8"
-              >
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm font-medium text-white mb-6 sm:mb-8">
                 <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-green-400 animate-pulse" />
                 ثبت‌نام دوره‌های جدید آغاز شد
-              </motion.div>
-
-              <div className="h-56 sm:h-48 md:h-64" />
-
-              <motion.p
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
-                className="text-base sm:text-lg md:text-xl text-white/80 max-w-xl mx-auto mb-6 sm:mb-10 leading-relaxed"
-              >
+              </div>
+              <div className="h-48 sm:h-32 md:h-48" />
+              <p className="text-base sm:text-lg md:text-xl text-white/80 max-w-xl mx-auto mb-6 sm:mb-10 leading-relaxed">
                 آموزش تخصصی زبان انگلیسی از پایه تا پیشرفته
                 <br />
                 با بهترین اساتید در اصفهان
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9 }}
-                className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center"
-              >
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                 <Link href="/courses" className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white text-black px-6 py-3 sm:px-8 sm:py-4 text-sm font-bold hover:bg-white/90 transition-all hover:scale-105 shadow-xl">
                   ثبت‌نام دوره‌ها
                   <FiArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
@@ -171,13 +128,13 @@ export default function HomePage() {
                   <FiPhone className="h-4 w-4" />
                   ۰۳۱-۳۷۷۵۹۵۵۶
                 </Link>
-              </motion.div>
+              </div>
             </div>
           </motion.div>
 
-          {/* ═══════ STATS ═══════ */}
+          {/* STATS */}
           <motion.div
-            style={{ opacity: statsOpacity, y: statsY, scale: statsScale }}
+            style={{ opacity: statsOpacity, y: statsY }}
             className="absolute inset-0 flex items-center justify-center"
           >
             <div className="w-full max-w-4xl px-4">
@@ -190,26 +147,20 @@ export default function HomePage() {
                   { icon: FiUsers, value: '۵۰+', label: 'دانش‌آموز', color: 'from-violet-500 to-purple-500' },
                   { icon: FiBookOpen, value: '۸', label: 'دپارتمان', color: 'from-amber-500 to-orange-500' },
                   { icon: FiAward, value: '۴', label: 'استاد مجرب', color: 'from-emerald-500 to-green-500' },
-                ].map((s, i) => (
-                  <motion.div
-                    key={s.label}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 + i * 0.1 }}
-                    className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center hover:bg-white/15 transition-all"
-                  >
+                ].map((s) => (
+                  <div key={s.label} className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center hover:bg-white/15 transition-all">
                     <div className={`inline-flex h-10 w-10 sm:h-14 sm:w-14 rounded-lg sm:rounded-xl bg-gradient-to-br ${s.color} items-center justify-center mb-2 sm:mb-4 shadow-lg`}>
                       <s.icon className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
                     </div>
                     <div className="text-2xl sm:text-3xl font-black text-white mb-1">{s.value}</div>
                     <div className="text-xs sm:text-sm text-white/70">{s.label}</div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </div>
           </motion.div>
 
-          {/* ═══════ DEPARTMENTS ═══════ */}
+          {/* DEPARTMENTS */}
           <motion.div
             style={{ opacity: deptOpacity, y: deptY }}
             className="absolute inset-0 flex items-center justify-center"
@@ -220,29 +171,21 @@ export default function HomePage() {
               </h2>
               <p className="text-white/60 text-center mb-6 sm:mb-10 max-w-lg mx-auto text-sm sm:text-base">دوره‌های متنوع برای تمام سنین و سطوح</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
-                {departments.map((d, i) => (
-                  <motion.div
-                    key={d.id}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.05 + i * 0.03 }}
-                    className="group"
-                  >
-                    <Link href={`/courses/${d.id}`} className="block bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center hover:bg-white/20 transition-all hover:scale-105 hover:border-white/40">
-                      <div className={`inline-flex h-10 w-10 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl bg-gradient-to-br ${d.color} items-center justify-center mb-2 sm:mb-3 text-xl sm:text-2xl shadow-lg`}>
-                        {d.icon}
-                      </div>
-                      <h3 className="text-xs sm:text-sm font-bold text-white mb-1">{d.title}</h3>
-                      <p className="text-[10px] sm:text-xs text-white/60 line-clamp-2">{d.desc}</p>
-                      {d.age && <span className="inline-block mt-1 sm:mt-2 text-[9px] sm:text-[10px] bg-white/10 rounded-full px-1.5 sm:px-2 py-0.5 text-white/80">{d.age}</span>}
-                    </Link>
-                  </motion.div>
+                {departments.map((d) => (
+                  <Link key={d.id} href={`/courses/${d.id}`} className="block bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center hover:bg-white/20 transition-all hover:scale-105 hover:border-white/40">
+                    <div className={`inline-flex h-10 w-10 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl bg-gradient-to-br ${d.color} items-center justify-center mb-2 sm:mb-3 text-xl sm:text-2xl shadow-lg`}>
+                      {d.icon}
+                    </div>
+                    <h3 className="text-xs sm:text-sm font-bold text-white mb-1">{d.title}</h3>
+                    <p className="text-[10px] sm:text-xs text-white/60 line-clamp-2">{d.desc}</p>
+                    {d.age && <span className="inline-block mt-1 sm:mt-2 text-[9px] sm:text-[10px] bg-white/10 rounded-full px-1.5 sm:px-2 py-0.5 text-white/80">{d.age}</span>}
+                  </Link>
                 ))}
               </div>
             </div>
           </motion.div>
 
-          {/* ═══════ TEACHERS ═══════ */}
+          {/* TEACHERS */}
           <motion.div
             style={{ opacity: teacherOpacity, y: teacherY }}
             className="absolute inset-0 flex items-center justify-center"
@@ -253,14 +196,8 @@ export default function HomePage() {
               </h2>
               <p className="text-white/60 text-center mb-6 sm:mb-10 text-sm sm:text-base">اساتید مجرب با مدارک بین‌المللی</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
-                {teachers.map((t, i) => (
-                  <motion.div
-                    key={t.name}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.05 + i * 0.1 }}
-                    className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl overflow-hidden hover:bg-white/15 transition-all hover:scale-105 flex flex-col h-full"
-                  >
+                {teachers.map((t) => (
+                  <div key={t.name} className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl overflow-hidden hover:bg-white/15 transition-all hover:scale-105 flex flex-col h-full">
                     <div className="relative flex-1 min-h-[180px] sm:min-h-[240px] overflow-hidden">
                       <img src={t.img} alt={t.name} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -270,13 +207,13 @@ export default function HomePage() {
                       <p className="text-[10px] sm:text-xs text-primary">{t.role}</p>
                       <p className="text-[9px] sm:text-[10px] text-white/50 mt-0.5 sm:mt-1">{t.qual}</p>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </div>
           </motion.div>
 
-          {/* ═══════ ABOUT ═══════ */}
+          {/* ABOUT */}
           <motion.div
             style={{ opacity: aboutOpacity, y: aboutY }}
             className="absolute inset-0 flex items-center justify-center"
@@ -318,7 +255,7 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          {/* ═══════ TESTIMONIALS ═══════ */}
+          {/* TESTIMONIALS */}
           <motion.div
             style={{ opacity: testOpacity, y: testY }}
             className="absolute inset-0 flex items-center justify-center"
@@ -329,14 +266,8 @@ export default function HomePage() {
               </h2>
               <p className="text-white/60 text-center mb-6 sm:mb-10 text-sm sm:text-base">تجربه واقعی زبان‌آموزان ما</p>
               <div className="grid md:grid-cols-3 gap-3 sm:gap-5">
-                {testimonials.map((t, i) => (
-                  <motion.div
-                    key={t.name}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.05 + i * 0.1 }}
-                    className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6"
-                  >
+                {testimonials.map((t) => (
+                  <div key={t.name} className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
                     <div className="flex items-center gap-0.5 sm:gap-1 mb-2 sm:mb-3">
                       {[...Array(5)].map((_, j) => (
                         <FiStar key={j} className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-yellow-400 fill-yellow-400" />
@@ -347,13 +278,13 @@ export default function HomePage() {
                       <div className="text-xs sm:text-sm font-bold text-white">{t.name}</div>
                       <div className="text-[10px] sm:text-xs text-primary">{t.course}</div>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </div>
           </motion.div>
 
-          {/* ═══════ CONTACT ═══════ */}
+          {/* CONTACT */}
           <motion.div
             style={{ opacity: contactOpacity, y: contactY }}
             className="absolute inset-0 flex items-center justify-center"

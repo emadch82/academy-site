@@ -94,7 +94,7 @@ export default function TeachersPage() {
           viewport={{ once: true }}
           className="rounded-2xl overflow-hidden border max-w-4xl mx-auto"
         >
-          <AutoPlayVideo src="/videos/teachers-motion.mp4" poster="/videos/teachers-poster.jpg" className="w-full h-auto" />
+          <AutoPlayVideo src="/videos/teachers-motion.mp4" poster="/videos/teachers-poster.jpg" className="w-full h-44 sm:aspect-video" />
         </motion.div>
       </div>
 

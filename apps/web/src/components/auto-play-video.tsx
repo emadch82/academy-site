@@ -35,7 +35,7 @@ export function AutoPlayVideo({ src, poster, className }: { src: string; poster?
   return (
     <div className={`relative ${className || ''}`}>
       {poster && !ready && (
-        <img src={poster} alt="" className="w-full h-auto" />
+        <img src={poster} alt="" className="w-full h-full object-cover" />
       )}
       <video
         ref={ref}
@@ -43,7 +43,7 @@ export function AutoPlayVideo({ src, poster, className }: { src: string; poster?
         muted
         playsInline
         preload="metadata"
-        className={`w-full h-auto object-contain ${ready ? '' : 'absolute inset-0 opacity-0'}`}
+        className={`w-full h-full object-cover ${ready ? '' : 'absolute inset-0 opacity-0'}`}
       >
         <source src={src} type="video/mp4" />
       </video>
