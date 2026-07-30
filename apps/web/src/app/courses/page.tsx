@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { FiSearch, FiClock, FiStar, FiUsers, FiArrowLeft, FiArrowRight, FiShoppingCart, FiCheck, FiCheckCircle } from 'react-icons/fi';
+import { FiSearch, FiStar, FiUsers, FiArrowLeft, FiArrowRight, FiShoppingCart, FiCheck, FiCheckCircle } from 'react-icons/fi';
 import { courses, formatPrice } from '@/lib/courses-data';
 import { useCart } from '@/contexts/cart-context';
 import Cookies from 'js-cookie';
@@ -151,7 +151,7 @@ export default function CoursesPage() {
                       {course.category}
                     </div>
                     <div className="absolute top-3 left-3 bg-background/80 backdrop-blur text-xs px-2 py-1 rounded-full">
-                      {course.sessions} جلسه
+                      {course.level}
                     </div>
                     {isPurchased(course.id) && (
                       <div className="absolute bottom-3 left-3 bg-green-500 text-white text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1">
@@ -174,10 +174,6 @@ export default function CoursesPage() {
                     </p>
 
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <FiClock className="h-3 w-3" />
-                        {course.sessions} جلسه
-                      </div>
                       <div className="flex items-center gap-1">
                         <FiStar className="h-3 w-3 text-yellow-500" />
                         {course.rating}
