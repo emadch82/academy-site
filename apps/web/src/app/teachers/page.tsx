@@ -85,6 +85,26 @@ export default function TeachersPage() {
         </div>
       </div>
 
+      {/* Motion Video */}
+      <div className="container mx-auto px-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="rounded-2xl overflow-hidden border max-w-4xl mx-auto"
+        >
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-auto max-h-[400px] object-cover"
+          >
+            <source src="/videos/teachers-motion.mp4" type="video/mp4" />
+          </video>
+        </motion.div>
+      </div>
+
       {/* Teachers Grid */}
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

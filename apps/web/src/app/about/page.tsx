@@ -70,6 +70,28 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Motion Video */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="rounded-2xl overflow-hidden border max-w-4xl mx-auto"
+          >
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-auto max-h-[400px] object-cover"
+            >
+              <source src="/videos/about-motion.mp4" type="video/mp4" />
+            </video>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Stats */}
       <section className="py-16 border-y bg-muted/30">
         <div className="container mx-auto px-4">

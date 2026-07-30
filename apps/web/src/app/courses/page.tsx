@@ -96,6 +96,23 @@ export default function CoursesPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-10 rounded-2xl overflow-hidden border"
+        >
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-auto max-h-[400px] object-cover"
+          >
+            <source src="/videos/courses-motion.mp4" type="video/mp4" />
+          </video>
+        </motion.div>
+
         <div className="flex flex-wrap gap-2 mb-8 justify-center">
           {categories.map((cat) => (
             <button
