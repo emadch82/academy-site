@@ -167,29 +167,23 @@ export function Header() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className={`lg:hidden fixed inset-0 top-14 z-40 overflow-y-auto ${isHome ? 'bg-black/95 backdrop-blur-xl' : 'bg-background'}`}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.15 }}
+            className={`lg:hidden fixed inset-0 top-14 z-40 overflow-y-auto ${isHome ? 'bg-black/95' : 'bg-background'}`}
           >
             <div className="px-6 py-8">
-              <nav className="flex flex-col gap-2">
-                {navigation.map((item, index) => (
-                  <motion.div
+              <nav className="flex flex-col gap-1">
+                {navigation.map((item) => (
+                  <Link
                     key={item.name}
-                    initial={{ opacity: 0, x: -30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.06 }}
+                    href={item.href}
+                    className={`block px-4 py-4 text-lg font-bold rounded-xl transition-colors ${isHome ? 'text-white active:bg-white/10' : 'active:bg-primary/5 active:text-primary'}`}
+                    onClick={() => setMobileMenuOpen(false)}
                   >
-                    <Link
-                      href={item.href}
-                      className={`block px-4 py-4 text-lg font-bold rounded-xl transition-colors ${isHome ? 'text-white hover:bg-white/10' : 'hover:bg-primary/5 hover:text-primary'}`}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {item.name}
-                    </Link>
-                  </motion.div>
+                    {item.name}
+                  </Link>
                 ))}
                 <div className="border-t border-white/10 mt-4 pt-4">
                   <p className={`px-4 py-2 text-xs font-medium ${isHome ? 'text-white/40' : 'text-muted-foreground'}`}>امکانات</p>
@@ -199,42 +193,36 @@ export function Header() {
                     { name: 'چت پشتیبانی', href: '/chat', icon: FiMessageCircle },
                     { name: 'گواهینامه‌ها', href: '/certificates', icon: FiFileText },
                     { name: 'پیشنهادات', href: '/suggestions', icon: FiZap },
-                  ].map((item, index) => (
-                    <motion.div
+                  ].map((item) => (
+                    <Link
                       key={item.href}
-                      initial={{ opacity: 0, x: -30 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.25 + index * 0.06 }}
+                      href={item.href}
+                      className={`flex items-center gap-3 px-4 py-3.5 text-base font-medium rounded-xl transition-colors ${isHome ? 'text-white/80 active:bg-white/10 active:text-white' : 'active:bg-primary/5 active:text-primary'}`}
+                      onClick={() => setMobileMenuOpen(false)}
                     >
-                      <Link
-                        href={item.href}
-                        className={`flex items-center gap-3 px-4 py-3.5 text-base font-medium rounded-xl transition-colors ${isHome ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'hover:bg-primary/5 hover:text-primary'}`}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <item.icon className="h-5 w-5" />
-                        {item.name}
-                      </Link>
-                    </motion.div>
+                      <item.icon className="h-5 w-5" />
+                      {item.name}
+                    </Link>
                   ))}
                 </div>
                 <div className="flex gap-3 mt-6">
                   {user ? (
                     <>
                       {user.role === 'admin' && (
-                        <Link href="/admin" className={`flex-1 text-center py-3 text-sm font-medium border rounded-xl transition-colors ${isHome ? 'border-white/20 text-white hover:bg-white/10' : 'hover:bg-muted'}`} onClick={() => setMobileMenuOpen(false)}>
+                        <Link href="/admin" className={`flex-1 text-center py-3 text-sm font-medium border rounded-xl transition-colors ${isHome ? 'border-white/20 text-white active:bg-white/10' : 'active:bg-muted'}`} onClick={() => setMobileMenuOpen(false)}>
                           پنل مدیریت
                         </Link>
                       )}
-                      <button onClick={() => { logout(); setMobileMenuOpen(false); }} className="flex-1 text-center py-3 text-sm font-medium bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors">
+                      <button onClick={() => { logout(); setMobileMenuOpen(false); }} className="flex-1 text-center py-3 text-sm font-medium bg-red-500 text-white rounded-xl active:bg-red-600 transition-colors">
                         خروج
                       </button>
                     </>
                   ) : (
                     <>
-                      <Link href="/auth/login" className={`flex-1 text-center py-3 text-sm font-medium border rounded-xl transition-colors ${isHome ? 'border-white/20 text-white hover:bg-white/10' : 'hover:bg-muted'}`} onClick={() => setMobileMenuOpen(false)}>
+                      <Link href="/auth/login" className={`flex-1 text-center py-3 text-sm font-medium border rounded-xl transition-colors ${isHome ? 'border-white/20 text-white active:bg-white/10' : 'active:bg-muted'}`} onClick={() => setMobileMenuOpen(false)}>
                         ورود
                       </Link>
-                      <Link href="/auth/register" className="flex-1 text-center py-3 text-sm font-medium bg-gradient-to-l from-primary to-primary/80 text-primary-foreground rounded-xl hover:shadow-lg transition-all" onClick={() => setMobileMenuOpen(false)}>
+                      <Link href="/auth/register" className="flex-1 text-center py-3 text-sm font-medium bg-gradient-to-l from-primary to-primary/80 text-primary-foreground rounded-xl active:shadow-lg transition-all" onClick={() => setMobileMenuOpen(false)}>
                         ثبت‌نام
                       </Link>
                     </>
