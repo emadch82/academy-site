@@ -14,7 +14,7 @@ import '@/styles/globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'آموزشگاه زبان ویرا | آموزش تخصصی زبان انگلیسی',
+    default: 'آموزشگاه زبان ویرا',
     template: '%s | آموزشگاه زبان ویرا',
   },
   description: 'آموزشگاه زبان ویرا، مرکز تخصصی آموزش زبان انگلیسی در اصفهان - دوره‌های کودکان، نوجوانان، بزرگسالان، مکالمه و TTC',
