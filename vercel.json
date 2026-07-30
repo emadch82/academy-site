@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm install -g pnpm@9.12.0 && pnpm install --no-frozen-lockfile",
-  "buildCommand": "cd apps/web && npx next build",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "buildCommand": "cd apps/web && npx next build"
 }
