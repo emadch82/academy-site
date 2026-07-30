@@ -1,6 +1,5 @@
 {
-  "rootDirectory": "apps/web",
   "installCommand": "npm install -g pnpm@9.12.0 && pnpm install --no-frozen-lockfile",
-  "buildCommand": "npx next build",
+  "buildCommand": "cd apps/web && npx next build",
   "framework": "nextjs"
 }
