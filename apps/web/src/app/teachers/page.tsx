@@ -98,7 +98,7 @@ export default function TeachersPage() {
             loop
             muted
             playsInline
-            className="w-full h-auto max-h-[400px] object-cover"
+            className="w-full h-auto object-contain"
           >
             <source src="/videos/teachers-motion.mp4" type="video/mp4" />
           </video>

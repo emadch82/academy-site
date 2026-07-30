@@ -58,7 +58,7 @@ export default function CoursesPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 pt-24 pb-16">
+      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 pt-24 pb-8">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -72,66 +72,70 @@ export default function CoursesPage() {
                 <FiArrowRight className="h-4 w-4" />
                 بازگشت
               </Link>
-              <h1 className="text-2xl sm:text-4xl font-bold text-center flex-1">دپارتمان‌های آموزشی آموزشگاه زبان ویرا</h1>
               <div className="w-16 shrink-0 hidden sm:block" />
             </div>
-            <p className="text-muted-foreground max-w-2xl mx-auto mt-3 text-center">
-              از بین دوره‌های متنوع، دوره مناسب خود را پیدا کنید
-            </p>
           </motion.div>
-
-          <div className="max-w-2xl mx-auto mt-8">
-            <div className="relative">
-              <FiSearch className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pr-12 pl-4 py-4 rounded-xl border bg-background shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 text-lg"
-                placeholder="جستجو در دوره‌ها..."
-              />
-            </div>
-          </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-10 rounded-2xl overflow-hidden border"
-        >
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-auto max-h-[400px] object-cover"
+        <div className="flex flex-col md:flex-row items-start gap-8 mb-10">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex-1 text-center md:text-right flex flex-col justify-center w-full"
           >
-            <source src="/videos/courses-motion.mp4" type="video/mp4" />
-          </video>
-        </motion.div>
+            <h1 className="text-2xl sm:text-4xl font-bold">دپارتمان‌های آموزشی آموزشگاه زبان ویرا</h1>
+            <p className="text-muted-foreground max-w-lg mt-3">
+              از بین دوره‌های متنوع، دوره مناسب خود را پیدا کنید
+            </p>
 
-        <div className="flex flex-wrap gap-2 mb-8 justify-center">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
-                selectedCategory === cat
-                  ? 'bg-primary text-primary-foreground shadow-md'
-                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
-              }`}
+            <div className="mt-6 w-full">
+              <div className="relative">
+                <FiSearch className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pr-12 pl-4 py-4 rounded-xl border bg-background shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 text-lg"
+                  placeholder="جستجو در دوره‌ها..."
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-nowrap gap-2 mt-4 justify-start overflow-x-auto pb-1 scrollbar-hide">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                    selectedCategory === cat
+                      ? 'bg-primary text-primary-foreground shadow-md'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex-1 rounded-2xl overflow-hidden border w-full"
+          >
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-auto object-contain"
             >
-              {cat}
-            </button>
-          ))}
+              <source src="/videos/courses-motion.mp4" type="video/mp4" />
+            </video>
+          </motion.div>
         </div>
-
-        <p className="text-muted-foreground mb-6">
-          <span className="font-medium text-foreground">{filteredCourses.length}</span> دوره یافت شد
-        </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCourses.map((course, index) => (

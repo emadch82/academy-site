@@ -415,7 +415,7 @@ export default function HomePage() {
       {/* Scroll Hint */}
       <motion.div
         style={{ opacity: useTransform(scrollYProgress, [0, 0.02], [1, 0]) }}
-        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50"
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 hidden sm:flex"
       >
         <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 1.5, repeat: Infinity }} className="flex flex-col items-center gap-2">
           <span className="text-xs text-white/60">اسکرول کنید</span>
