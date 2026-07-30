@@ -21,17 +21,22 @@ export const metadata: Metadata = {
   keywords: ['آموزشگاه زبان', 'زبان ویرا', 'آموزش زبان انگلیسی', 'اصفهان', 'دوره زبان', 'TTC', 'آیلتس', 'مکالمه زبان'],
   authors: [{ name: 'Vira Language Academy' }],
   creator: 'Vira Academy',
+  icons: {
+    icon: '/images/vira-logo.jpg',
+    apple: '/images/vira-logo.jpg',
+  },
   openGraph: {
     type: 'website',
     locale: 'fa_IR',
     url: 'https://viraacademyesf.ir',
     siteName: 'آموزشگاه زبان ویرا',
-    title: 'آموزشگاه زبان ویرا | آموزش تخصصی زبان انگلیسی',
+    title: 'آموزشگاه زبان ویرا',
     description: 'آموزش تخصصی زبان انگلیسی از پایه تا پیشرفته با بهترین اساتید در اصفهان',
+    images: ['/images/vira-logo.jpg'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'آموزشگاه زبان ویرا | آموزش تخصصی زبان انگلیسی',
+    title: 'آموزشگاه زبان ویرا',
     description: 'آموزش تخصصی زبان انگلیسی از پایه تا پیشرفته با بهترین اساتید در اصفهان',
   },
   robots: {
