@@ -36,6 +36,8 @@ export default function HomePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoDuration, setVideoDuration] = useState(0);
+  const rafRef = useRef<number>(0);
+  const targetTimeRef = useRef(0);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -52,13 +54,22 @@ export default function HomePage() {
     };
     video.addEventListener('loadedmetadata', onReady);
     if (video.readyState >= 1) onReady();
-    return () => video.removeEventListener('loadedmetadata', onReady);
+    return () => {
+      video.removeEventListener('loadedmetadata', onReady);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
 
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
     const video = videoRef.current;
     if (!video || !videoDuration) return;
-    video.currentTime = progress * videoDuration;
+    targetTimeRef.current = progress * videoDuration;
+    if (!rafRef.current) {
+      rafRef.current = requestAnimationFrame(() => {
+        video.currentTime = targetTimeRef.current;
+        rafRef.current = 0;
+      });
+    }
   });
 
   /* ─── Scroll Ranges ─── */
@@ -92,7 +103,7 @@ export default function HomePage() {
       {/* Video Background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <motion.div style={{ scale: videoScale }} className="absolute inset-0">
-          <video ref={videoRef} muted playsInline preload="metadata" className="scroll-video w-full h-full object-cover">
+          <video ref={videoRef} muted playsInline preload="auto" className="scroll-video w-full h-full object-cover">
             <source src="/motion/VIRA_language_institute_animation_1080p_202607281703_gwr_video_mvp.mp4" type="video/mp4" />
           </video>
         </motion.div>
