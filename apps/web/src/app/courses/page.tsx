@@ -79,7 +79,7 @@ export default function CoursesPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row items-start gap-8 mb-10">
+        <div className="flex flex-col md:flex-row items-center gap-8 mb-10">
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
