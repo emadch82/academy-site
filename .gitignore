@@ -6,7 +6,7 @@ dist/
 *.log
 .turbo/
 *.tsbuildinfo
-motion/
+# motion/
 web-hosting/
 web-hosting.zip
 index.html
