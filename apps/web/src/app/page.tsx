@@ -67,7 +67,7 @@ export default function HomePage() {
     const video = videoRef.current;
     if (!video || !videoDuration) return;
     const targetTime = progress * videoDuration;
-    if (Math.abs(video.currentTime - targetTime) > 0.05) {
+    if (Math.abs(video.currentTime - targetTime) > 0.01) {
       video.currentTime = targetTime;
     }
   });
@@ -194,8 +194,9 @@ export default function HomePage() {
                   <motion.div
                     key={s.label}
                     initial={{ opacity: 0, y: 30 }}
-                    animate={videoLoaded ? { opacity: 1, y: 0 } : {}}
-                    transition={{ delay: 0.2 + i * 0.1 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={{ delay: 0.1 + i * 0.1 }}
                     className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center hover:bg-white/15 transition-all"
                   >
                     <div className={`inline-flex h-10 w-10 sm:h-14 sm:w-14 rounded-lg sm:rounded-xl bg-gradient-to-br ${s.color} items-center justify-center mb-2 sm:mb-4 shadow-lg`}>
@@ -224,8 +225,9 @@ export default function HomePage() {
                   <motion.div
                     key={d.id}
                     initial={{ opacity: 0, scale: 0.8 }}
-                    animate={videoLoaded ? { opacity: 1, scale: 1 } : {}}
-                    transition={{ delay: 0.1 + i * 0.05 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={{ delay: 0.05 + i * 0.03 }}
                     className="group"
                   >
                     <Link href={`/courses/${d.id}`} className="block bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center hover:bg-white/20 transition-all hover:scale-105 hover:border-white/40">
@@ -257,8 +259,9 @@ export default function HomePage() {
                   <motion.div
                     key={t.name}
                     initial={{ opacity: 0, y: 30 }}
-                    animate={videoLoaded ? { opacity: 1, y: 0 } : {}}
-                    transition={{ delay: 0.1 + i * 0.1 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={{ delay: 0.05 + i * 0.1 }}
                     className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl overflow-hidden hover:bg-white/15 transition-all hover:scale-105 flex flex-col h-full"
                   >
                     <div className="relative flex-1 min-h-[180px] sm:min-h-[240px] overflow-hidden">
@@ -333,8 +336,9 @@ export default function HomePage() {
                   <motion.div
                     key={t.name}
                     initial={{ opacity: 0, y: 30 }}
-                    animate={videoLoaded ? { opacity: 1, y: 0 } : {}}
-                    transition={{ delay: 0.1 + i * 0.1 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={{ delay: 0.05 + i * 0.1 }}
                     className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6"
                   >
                     <div className="flex items-center gap-0.5 sm:gap-1 mb-2 sm:mb-3">
