@@ -37,14 +37,6 @@ export default function HomePage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoDuration, setVideoDuration] = useState(0);
   const [videoLoaded, setVideoLoaded] = useState(false);
-  const [scrollHeight, setScrollHeight] = useState('800vh');
-
-  useEffect(() => {
-    const check = () => setScrollHeight(window.innerWidth < 768 ? '500vh' : '800vh');
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -70,13 +62,14 @@ export default function HomePage() {
     return () => video.removeEventListener('loadedmetadata', onReady);
   }, []);
 
-  // Direct scroll-to-video sync with RAF for smooth mobile performance
+  // Direct scroll-to-video sync — seek directly for frame-accurate playback
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
     const video = videoRef.current;
     if (!video || !videoDuration) return;
-    requestAnimationFrame(() => {
-      video.currentTime = progress * videoDuration;
-    });
+    const targetTime = progress * videoDuration;
+    if (Math.abs(video.currentTime - targetTime) > 0.05) {
+      video.currentTime = targetTime;
+    }
   });
 
   /* ─── Section Animations (scroll ranges) ─── */
@@ -117,7 +110,7 @@ export default function HomePage() {
   const progressWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
-    <main ref={containerRef} style={{ height: scrollHeight }} className="overflow-x-hidden">
+    <main ref={containerRef} style={{ height: "800vh" }} className="overflow-x-hidden">
       {/* Sticky Video Background */}
       <div className="fixed top-0 left-0 w-screen h-screen z-0 overflow-hidden">
         <motion.div style={{ scale: videoScale }} className="w-full h-full will-change-transform">
