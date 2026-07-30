@@ -39,10 +39,13 @@ export default function HomePage() {
   const rafRef = useRef<number>(0);
   const targetTimeRef = useRef(0);
   const [scrollHeight, setScrollHeight] = useState("800vh");
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const check = () => {
-      setScrollHeight(window.innerWidth < 768 ? "1200vh" : "800vh");
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      setScrollHeight(mobile ? "1200vh" : "800vh");
     };
     check();
     window.addEventListener('resize', check);
@@ -116,8 +119,8 @@ export default function HomePage() {
       {/* Video Background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <motion.div style={{ scale: videoScale }} className="absolute inset-0">
-          <video ref={videoRef} muted playsInline preload="auto" style={{ willChange: 'transform' }} className="scroll-video w-full h-full object-cover">
-            <source src="/motion/VIRA_language_institute_animation_1080p_202607281703_gwr_video_mvp.mp4" type="video/mp4" />
+          <video key={isMobile ? 'm' : 'd'} ref={videoRef} muted playsInline preload="auto" style={{ willChange: 'transform' }} className="scroll-video w-full h-full object-cover">
+            <source src={isMobile ? "/motion/VIRA_scroll_mobile.mp4" : "/motion/VIRA_language_institute_animation_1080p_202607281703_gwr_video_mvp.mp4"} type="video/mp4" />
           </video>
         </motion.div>
         <div className="absolute inset-0 bg-black/40" />
