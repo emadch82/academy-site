@@ -38,6 +38,16 @@ export default function HomePage() {
   const [videoDuration, setVideoDuration] = useState(0);
   const rafRef = useRef<number>(0);
   const targetTimeRef = useRef(0);
+  const [scrollHeight, setScrollHeight] = useState("800vh");
+
+  useEffect(() => {
+    const check = () => {
+      setScrollHeight(window.innerWidth < 768 ? "1200vh" : "800vh");
+    };
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -62,11 +72,14 @@ export default function HomePage() {
 
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
     const video = videoRef.current;
-    if (!video || !videoDuration) return;
+    if (!video || !videoDuration || video.seeking) return;
     targetTimeRef.current = progress * videoDuration;
     if (!rafRef.current) {
       rafRef.current = requestAnimationFrame(() => {
-        video.currentTime = targetTimeRef.current;
+        const v = videoRef.current;
+        if (v && !v.seeking) {
+          v.currentTime = targetTimeRef.current;
+        }
         rafRef.current = 0;
       });
     }
@@ -99,11 +112,11 @@ export default function HomePage() {
   const progressWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
-    <main ref={containerRef} style={{ height: "800vh" }}>
+    <main ref={containerRef} style={{ height: scrollHeight }}>
       {/* Video Background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <motion.div style={{ scale: videoScale }} className="absolute inset-0">
-          <video ref={videoRef} muted playsInline preload="auto" className="scroll-video w-full h-full object-cover">
+          <video ref={videoRef} muted playsInline preload="auto" style={{ willChange: 'transform' }} className="scroll-video w-full h-full object-cover">
             <source src="/motion/VIRA_language_institute_animation_1080p_202607281703_gwr_video_mvp.mp4" type="video/mp4" />
           </video>
         </motion.div>
