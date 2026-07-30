@@ -22,8 +22,8 @@ export const metadata: Metadata = {
   authors: [{ name: 'Vira Language Academy' }],
   creator: 'Vira Academy',
   icons: {
-    icon: '/images/vira-logo.jpg',
-    apple: '/images/vira-logo.jpg',
+    icon: '/images/v-icon.svg',
+    apple: '/images/v-icon.svg',
   },
   openGraph: {
     type: 'website',
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     siteName: 'آموزشگاه زبان ویرا',
     title: 'آموزشگاه زبان ویرا',
     description: 'آموزش تخصصی زبان انگلیسی از پایه تا پیشرفته با بهترین اساتید در اصفهان',
-    images: ['/images/vira-logo.jpg'],
+    images: ['/images/v-icon.svg'],
   },
   twitter: {
     card: 'summary_large_image',
