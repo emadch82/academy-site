@@ -11,3 +11,5 @@ web-hosting/
 web-hosting.zip
 index.html
 helpcode.txt
+pnpm-lock.yaml
+package-lock.json
