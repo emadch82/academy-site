@@ -35,7 +35,9 @@ const testimonials = [
 export default function HomePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const mobileVideoRef = useRef<HTMLVideoElement>(null);
   const [videoDuration, setVideoDuration] = useState(0);
+  const [mobileVideoDuration, setMobileVideoDuration] = useState(0);
   const rafRef = useRef<number>(0);
   const targetTimeRef = useRef(0);
   const [scrollHeight, setScrollHeight] = useState("800vh");
@@ -73,15 +75,29 @@ export default function HomePage() {
     };
   }, []);
 
+  useEffect(() => {
+    const video = mobileVideoRef.current;
+    if (!video) return;
+    const onReady = () => {
+      video.currentTime = 0;
+      video.pause();
+      setMobileVideoDuration(video.duration);
+    };
+    video.addEventListener('loadedmetadata', onReady);
+    if (video.readyState >= 1) onReady();
+    return () => video.removeEventListener('loadedmetadata', onReady);
+  }, []);
+
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
-    const video = videoRef.current;
-    if (!video || !videoDuration || video.seeking) return;
-    targetTimeRef.current = progress * videoDuration;
     if (!rafRef.current) {
       rafRef.current = requestAnimationFrame(() => {
-        const v = videoRef.current;
-        if (v && !v.seeking) {
-          v.currentTime = targetTimeRef.current;
+        const desktopVideo = videoRef.current;
+        const mobile = mobileVideoRef.current;
+        if (desktopVideo && videoDuration && !desktopVideo.seeking) {
+          desktopVideo.currentTime = progress * videoDuration;
+        }
+        if (mobile && mobileVideoDuration && !mobile.seeking) {
+          mobile.currentTime = progress * mobileVideoDuration;
         }
         rafRef.current = 0;
       });
@@ -119,8 +135,11 @@ export default function HomePage() {
       {/* Video Background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <motion.div style={{ scale: videoScale }} className="absolute inset-0">
-          <video key={isMobile ? 'm' : 'd'} ref={videoRef} muted playsInline preload="auto" style={{ willChange: 'transform' }} className="scroll-video w-full h-full object-cover">
-            <source src={isMobile ? "/motion/VIRA_scroll_mobile_combined.mp4" : "/motion/VIRA_language_institute_animation_1080p_202607281703_gwr_video_mvp.mp4"} type="video/mp4" />
+          <video ref={videoRef} muted playsInline preload="auto" style={{ willChange: 'transform' }} className={`scroll-video w-full h-full object-cover ${isMobile ? 'hidden' : ''}`}>
+            <source src="/motion/VIRA_language_institute_animation_1080p_202607281703_gwr_video_mvp.mp4" type="video/mp4" />
+          </video>
+          <video ref={mobileVideoRef} muted playsInline preload="auto" style={{ willChange: 'transform' }} className={`scroll-video w-full h-full object-cover ${isMobile ? '' : 'hidden'}`}>
+            <source src="/motion/VIRA_scroll_mobile_combined.mp4" type="video/mp4" />
           </video>
         </motion.div>
         <div className="absolute inset-0 bg-black/40" />
