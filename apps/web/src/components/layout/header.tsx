@@ -57,7 +57,7 @@ export function Header() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+      className={`fixed top-0 z-50 w-full pointer-events-auto transition-all duration-300 ${
         isHome
           ? scrolled
             ? 'bg-black/60 backdrop-blur-xl border-b border-white/10'
@@ -150,14 +150,13 @@ export function Header() {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="lg:hidden flex items-center gap-3" style={{ touchAction: 'manipulation' }}>
+          <div className="lg:hidden flex items-center gap-3">
             <CartDrawer />
             <button
               type="button"
-              onPointerDown={(e) => { e.stopPropagation(); setMobileMenuOpen(prev => !prev); }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={() => setMobileMenuOpen(prev => !prev)}
               className={`inline-flex items-center justify-center rounded-lg p-2.5 min-w-[44px] min-h-[44px] transition-colors active:scale-95 ${isHome ? 'text-white hover:bg-white/10' : 'text-muted-foreground hover:bg-muted'}`}
-              style={{ touchAction: 'manipulation' }}
+              style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
             >
               {mobileMenuOpen ? <FiX className="h-6 w-6" /> : <FiMenu className="h-6 w-6" />}
             </button>
