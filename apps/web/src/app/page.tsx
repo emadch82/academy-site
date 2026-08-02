@@ -40,21 +40,48 @@ function MobileSection({ children, className = '' }: { children: React.ReactNode
 }
 
 function MobileHome() {
-  const [videoSrc, setVideoSrc] = useState('');
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoDuration, setVideoDuration] = useState(0);
+  const rafRef = useRef<number>(0);
+  const TOTAL_SECTIONS = 7;
 
   useEffect(() => {
-    setVideoSrc('/motion/VIRA_scroll_mobile_combined.mp4');
+    const video = videoRef.current;
+    if (!video) return;
+    const onReady = () => {
+      video.currentTime = 0;
+      video.pause();
+      setVideoDuration(video.duration);
+    };
+    video.addEventListener('loadedmetadata', onReady);
+    if (video.readyState >= 1) onReady();
+    return () => video.removeEventListener('loadedmetadata', onReady);
   }, []);
 
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    const video = videoRef.current;
+    if (!el || !video || !videoDuration) return;
+
+    if (!rafRef.current) {
+      rafRef.current = requestAnimationFrame(() => {
+        const scrollTop = el.scrollTop;
+        const maxScroll = el.scrollHeight - el.clientHeight;
+        const progress = maxScroll > 0 ? scrollTop / maxScroll : 0;
+        video.currentTime = progress * videoDuration;
+        rafRef.current = 0;
+      });
+    }
+  };
+
   return (
-    <div className="h-screen overflow-y-auto snap-y snap-mandatory">
+    <div ref={scrollRef} onScroll={handleScroll} className="h-screen overflow-y-auto snap-y snap-mandatory">
       {/* Fixed Video Background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
-        {videoSrc && (
-          <video autoPlay loop muted playsInline preload="auto" className="scroll-video w-full h-full object-cover">
-            <source src={videoSrc} type="video/mp4" />
-          </video>
-        )}
+        <video ref={videoRef} muted playsInline preload="auto" style={{ willChange: 'transform' }} className="scroll-video w-full h-full object-cover">
+          <source src="/motion/VIRA_scroll_mobile_combined.mp4" type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-black/40" />
       </div>
 
