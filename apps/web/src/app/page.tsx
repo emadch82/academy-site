@@ -178,8 +178,8 @@ function MobileHome() {
       <div className="relative z-10">
         {/* HERO */}
         <div ref={(el) => { sectionRefs.current[0] = el; }} className="min-h-screen w-full relative px-4" style={{ scrollSnapAlign: 'start' }}>
-          {/* Top: above VIRA → moves to center after VIRA fades */}
-          <div className={`absolute left-0 right-0 text-center px-4 transition-all duration-1000 ease-in-out ${showButtons ? 'top-[35%]' : 'top-[18%]'}`}>
+          {/* Top: badge + text → moves to center */}
+          <div className={`absolute left-0 right-0 text-center px-4 transition-all duration-1000 ease-in-out ${showButtons ? 'top-[30%]' : 'top-[18%]'}`}>
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 text-xs font-medium text-white mb-4">
               <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
               ثبت‌نام دوره‌های جدید آغاز شد
@@ -189,7 +189,10 @@ function MobileHome() {
               <br />
               با بهترین اساتید در اصفهان
             </p>
-            <div className={`inline-flex flex-col gap-2.5 w-64 transition-all duration-700 ease-out ${showButtons ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          </div>
+          {/* Buttons: start below VIRA, move up when VIRA fades */}
+          <div className={`absolute left-0 right-0 text-center px-4 transition-all duration-1000 ease-in-out ${showButtons ? 'top-[52%]' : 'top-[55%]'}`}>
+            <div className="inline-flex flex-col gap-2.5 w-64">
               <Link href="/courses" className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white text-black px-5 py-2.5 text-sm font-bold hover:bg-white/90 transition-all hover:scale-105 shadow-xl">
                 ثبت‌نام دوره‌ها
                 <FiArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
