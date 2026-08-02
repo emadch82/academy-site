@@ -37,7 +37,16 @@ function MobileHome() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoDuration, setVideoDuration] = useState(0);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const TOTAL_SECTIONS = 7;
+
+  const SECTION_TIMES = [
+    { start: 0, end: 3 },
+    { start: 3, end: 6 },
+    { start: 6, end: 9 },
+    { start: 9, end: 12 },
+    { start: 12, end: 15 },
+    { start: 15, end: 18 },
+    { start: 18, end: 20 },
+  ];
 
   useEffect(() => {
     const video = videoRef.current;
@@ -57,29 +66,48 @@ function MobileHome() {
     const video = videoRef.current;
     if (!video) return;
 
+    const onTimeUpdate = () => {
+      const idx = sectionRefs.current.findIndex((el) => {
+        if (!el) return false;
+        const rect = el.getBoundingClientRect();
+        return rect.top >= -10 && rect.top < window.innerHeight * 0.5;
+      });
+      if (idx !== -1) {
+        const seg = SECTION_TIMES[idx];
+        if (video.currentTime >= seg.end) {
+          video.pause();
+          video.currentTime = seg.end - 0.01;
+        }
+      }
+    };
+    video.addEventListener('timeupdate', onTimeUpdate);
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           const idx = sectionRefs.current.indexOf(entry.target as HTMLDivElement);
           if (idx === -1) return;
+          const seg = SECTION_TIMES[idx];
 
           if (entry.isIntersecting) {
-            const segmentDuration = videoDuration / TOTAL_SECTIONS;
-            video.currentTime = idx * segmentDuration;
+            video.currentTime = seg.start;
             video.play().catch(() => {});
           } else {
             video.pause();
           }
         });
       },
-      { threshold: 0.6 }
+      { threshold: 0.5 }
     );
 
     sectionRefs.current.forEach((el) => {
       if (el) observer.observe(el);
     });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      video.removeEventListener('timeupdate', onTimeUpdate);
+    };
   }, [videoDuration]);
 
   return (
