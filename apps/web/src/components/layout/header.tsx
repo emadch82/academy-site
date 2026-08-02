@@ -72,13 +72,15 @@ export function Header() {
       animate={{ y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
       className={`fixed top-0 z-50 w-full pointer-events-auto transition-all duration-300 ${
-        isHome
-          ? scrolled
-            ? 'bg-black/80 border-b border-white/10'
-            : 'bg-transparent'
-          : scrolled
-            ? 'bg-background/95 border-b shadow-lg shadow-primary/5'
-            : 'bg-transparent'
+        mobileMenuOpen
+          ? 'bg-black/60 backdrop-blur-xl border-b border-white/10'
+          : isHome
+            ? scrolled
+              ? 'bg-black/80 border-b border-white/10'
+              : 'bg-transparent'
+            : scrolled
+              ? 'bg-background/95 border-b shadow-lg shadow-primary/5'
+              : 'bg-transparent'
       }`}
     >
       <div className="container mx-auto px-4">
