@@ -31,19 +31,12 @@ const testimonials = [
 ];
 
 /* ─── Mobile: Scroll-Snap Sections ─── */
-function MobileSection({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={`snap-start min-h-screen w-full flex items-center justify-center px-4 ${className}`}>
-      {children}
-    </div>
-  );
-}
 
 function MobileHome() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoDuration, setVideoDuration] = useState(0);
-  const rafRef = useRef<number>(0);
+  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const TOTAL_SECTIONS = 7;
 
   useEffect(() => {
@@ -59,24 +52,38 @@ function MobileHome() {
     return () => video.removeEventListener('loadedmetadata', onReady);
   }, []);
 
-  const handleScroll = () => {
-    const el = scrollRef.current;
+  useEffect(() => {
+    if (!videoDuration) return;
     const video = videoRef.current;
-    if (!el || !video || !videoDuration) return;
+    if (!video) return;
 
-    if (!rafRef.current) {
-      rafRef.current = requestAnimationFrame(() => {
-        const scrollTop = el.scrollTop;
-        const maxScroll = el.scrollHeight - el.clientHeight;
-        const progress = maxScroll > 0 ? scrollTop / maxScroll : 0;
-        video.currentTime = progress * videoDuration;
-        rafRef.current = 0;
-      });
-    }
-  };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const idx = sectionRefs.current.indexOf(entry.target as HTMLDivElement);
+          if (idx === -1) return;
+
+          if (entry.isIntersecting) {
+            const segmentDuration = videoDuration / TOTAL_SECTIONS;
+            video.currentTime = idx * segmentDuration;
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+        });
+      },
+      { threshold: 0.6 }
+    );
+
+    sectionRefs.current.forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [videoDuration]);
 
   return (
-    <div ref={scrollRef} onScroll={handleScroll} className="h-screen overflow-y-auto snap-y snap-mandatory">
+    <div ref={scrollRef} className="h-screen overflow-y-auto snap-y snap-mandatory">
       {/* Fixed Video Background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <video ref={videoRef} muted playsInline preload="auto" style={{ willChange: 'transform' }} className="scroll-video w-full h-full object-cover">
@@ -88,7 +95,7 @@ function MobileHome() {
       {/* Snap Sections */}
       <div className="relative z-10">
         {/* HERO */}
-        <MobileSection>
+        <div ref={(el) => { sectionRefs.current[0] = el; }} className="snap-start min-h-screen w-full flex items-center justify-center px-4">
           <div className="text-center max-w-xl">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 text-xs font-medium text-white mb-6">
               <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
@@ -110,10 +117,10 @@ function MobileHome() {
               </Link>
             </div>
           </div>
-        </MobileSection>
+        </div>
 
         {/* STATS */}
-        <MobileSection>
+        <div ref={(el) => { sectionRefs.current[1] = el; }} className="snap-start min-h-screen w-full flex items-center justify-center px-4">
           <div className="w-full">
             <h2 className="text-xl font-black text-white text-center mb-6">
               آموزشگاه زبان ویرا در <span className="text-primary">یک نگاه</span>
@@ -135,10 +142,10 @@ function MobileHome() {
               ))}
             </div>
           </div>
-        </MobileSection>
+        </div>
 
         {/* DEPARTMENTS */}
-        <MobileSection>
+        <div ref={(el) => { sectionRefs.current[2] = el; }} className="snap-start min-h-screen w-full flex items-center justify-center px-4">
           <div className="w-full">
             <h2 className="text-xl font-black text-white text-center mb-2">
               دپارتمان‌های <span className="text-primary">آموزشی</span>
@@ -156,10 +163,10 @@ function MobileHome() {
               ))}
             </div>
           </div>
-        </MobileSection>
+        </div>
 
         {/* TEACHERS */}
-        <MobileSection>
+        <div ref={(el) => { sectionRefs.current[3] = el; }} className="snap-start min-h-screen w-full flex items-center justify-center px-4">
           <div className="w-full">
             <h2 className="text-xl font-black text-white text-center mb-2">
               تیم <span className="text-primary">حرفه‌ای</span> ما
@@ -180,10 +187,10 @@ function MobileHome() {
               ))}
             </div>
           </div>
-        </MobileSection>
+        </div>
 
         {/* ABOUT */}
-        <MobileSection>
+        <div ref={(el) => { sectionRefs.current[4] = el; }} className="snap-start min-h-screen w-full flex items-center justify-center px-4">
           <div className="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-5">
             <h2 className="text-lg font-black text-white mb-3">
               درباره <span className="text-primary">آکادمی ویرا</span>
@@ -204,10 +211,10 @@ function MobileHome() {
               <div className="text-xs text-white/80">سال تجربه درخشان</div>
             </div>
           </div>
-        </MobileSection>
+        </div>
 
         {/* TESTIMONIALS */}
-        <MobileSection>
+        <div ref={(el) => { sectionRefs.current[5] = el; }} className="snap-start min-h-screen w-full flex items-center justify-center px-4">
           <div className="w-full">
             <h2 className="text-xl font-black text-white text-center mb-2">
               نظرات <span className="text-primary">دانش‌آموزان</span>
@@ -230,10 +237,10 @@ function MobileHome() {
               ))}
             </div>
           </div>
-        </MobileSection>
+        </div>
 
         {/* CONTACT */}
-        <MobileSection className="!items-start pt-20">
+        <div ref={(el) => { sectionRefs.current[6] = el; }} className="snap-start min-h-screen w-full flex items-center justify-start px-4 pt-20">
           <div className="w-full space-y-3">
             <h2 className="text-xl font-black text-white">
               تماس <span className="text-primary">با ما</span>
@@ -265,7 +272,7 @@ function MobileHome() {
               ))}
             </div>
           </div>
-        </MobileSection>
+        </div>
       </div>
 
       {/* Scroll Hint */}
