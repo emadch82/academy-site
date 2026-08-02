@@ -132,20 +132,25 @@ export default function AboutPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 viewport={{ once: true }}
-                whileHover={{ y: -10 }}
-                className="h-full"
+                whileHover={{ y: -8 }}
+                className="group relative bg-background rounded-2xl border overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500"
               >
-                <div className="relative flex-1 min-h-[250px] sm:min-h-[300px] overflow-hidden">
+                <div className="relative aspect-[3/4] overflow-hidden">
                   <img
                     src={teacher.image}
                     alt={teacher.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-                </div>
-                <div className="p-4 -mt-10 relative z-10">
-                  <h3 className="font-bold">{teacher.name}</h3>
-                  <p className="text-sm text-primary">{teacher.role}</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                    <h3 className="text-lg font-bold text-white mb-1">{teacher.name}</h3>
+                    <p className="text-sm text-primary font-medium">{teacher.role}</p>
+                  </div>
+                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="bg-white/20 backdrop-blur-md rounded-full px-3 py-1 text-xs text-white border border-white/20">
+                      {teacher.qualifications.split(',')[0]}
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             ))}
