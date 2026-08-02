@@ -128,20 +128,26 @@ function MobileHome() {
 
       stopLoop();
 
-      const scrollHeight = scrollEl.scrollHeight - scrollEl.clientHeight;
-      const progress = scrollHeight > 0 ? scrollEl.scrollTop / scrollHeight : 0;
-      const time = Math.min(progress * videoDuration, videoDuration - 0.1);
-      video.currentTime = time;
-      video.play().catch(() => {});
+      const idx = findSection();
+      if (idx !== -1) {
+        const el = sectionRefs.current[idx];
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const sectionProgress = Math.max(0, Math.min(1, -rect.top / window.innerHeight));
+          const seg = SECTION_TIMES[idx];
+          const segDuration = seg.end - seg.start;
+          const time = seg.start + sectionProgress * segDuration;
+          video.currentTime = time;
+          video.play().catch(() => {});
+        }
+      }
 
-      const currentSection = findSection();
-      if (currentSection !== -1 && currentSection !== lastSection) {
+      if (idx !== -1 && idx !== lastSection) {
         triggerTransition();
-        lastSection = currentSection;
+        lastSection = idx;
       }
 
       scrollTimer = setTimeout(() => {
-        const idx = findSection();
         if (idx !== -1) startLoop(idx);
       }, 300);
     };
