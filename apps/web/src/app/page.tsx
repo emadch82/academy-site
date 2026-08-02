@@ -64,12 +64,30 @@ function MobileHome() {
   useEffect(() => {
     if (!videoDuration) return;
     const video = videoRef.current;
-    if (!video) return;
-    const activeSection = { current: -1 };
+    const scrollEl = scrollRef.current;
+    if (!video || !scrollEl) return;
+
+    let looping = false;
+    let loopSection = -1;
+    let scrollTimer: NodeJS.Timeout | null = null;
+
+    const startLoop = (idx: number) => {
+      if (looping && loopSection === idx) return;
+      looping = true;
+      loopSection = idx;
+      const seg = SECTION_TIMES[idx];
+      video.currentTime = seg.start;
+      video.play().catch(() => {});
+    };
+
+    const stopLoop = () => {
+      looping = false;
+      loopSection = -1;
+    };
 
     const onTimeUpdate = () => {
-      if (activeSection.current === -1) return;
-      const seg = SECTION_TIMES[activeSection.current];
+      if (!looping || loopSection === -1) return;
+      const seg = SECTION_TIMES[loopSection];
       if (!seg) return;
       if (video.currentTime >= seg.end - 0.05) {
         video.currentTime = seg.start;
@@ -77,35 +95,41 @@ function MobileHome() {
     };
     video.addEventListener('timeupdate', onTimeUpdate);
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const idx = sectionRefs.current.indexOf(entry.target as HTMLDivElement);
-          if (idx === -1) return;
-          const seg = SECTION_TIMES[idx];
+    const findSection = () => {
+      for (let i = 0; i < sectionRefs.current.length; i++) {
+        const el = sectionRefs.current[i];
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        if (rect.top >= -window.innerHeight * 0.3 && rect.top < window.innerHeight * 0.5) {
+          return i;
+        }
+      }
+      return -1;
+    };
 
-          if (entry.isIntersecting) {
-            activeSection.current = idx;
-            video.currentTime = seg.start;
-            video.play().catch(() => {});
-          } else {
-            if (activeSection.current === idx) {
-              activeSection.current = -1;
-              video.pause();
-            }
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
+    const onScroll = () => {
+      if (scrollTimer) clearTimeout(scrollTimer);
 
-    sectionRefs.current.forEach((el) => {
-      if (el) observer.observe(el);
-    });
+      stopLoop();
+
+      const scrollHeight = scrollEl.scrollHeight - scrollEl.clientHeight;
+      const progress = scrollHeight > 0 ? scrollEl.scrollTop / scrollHeight : 0;
+      const time = Math.min(progress * videoDuration, videoDuration - 0.1);
+      video.currentTime = time;
+      video.play().catch(() => {});
+
+      scrollTimer = setTimeout(() => {
+        const idx = findSection();
+        if (idx !== -1) startLoop(idx);
+      }, 300);
+    };
+
+    scrollEl.addEventListener('scroll', onScroll, { passive: true });
 
     return () => {
-      observer.disconnect();
+      scrollEl.removeEventListener('scroll', onScroll);
       video.removeEventListener('timeupdate', onTimeUpdate);
+      if (scrollTimer) clearTimeout(scrollTimer);
     };
   }, [videoDuration]);
 
