@@ -34,39 +34,40 @@ const testimonials = [
 
 function MobileHome() {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [activeSection, setActiveSection] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [transitionOpacity, setTransitionOpacity] = useState(0);
   const [transitionBlur, setTransitionBlur] = useState(0);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
-  const VIDEO_SOURCES = [
-    '/motion/sec_0.mp4',
-    '/motion/sec_1.mp4',
-    '/motion/sec_2.mp4',
-    '/motion/sec_3.mp4',
-    '/motion/sec_4.mp4',
-    '/motion/sec_5.mp4',
-    '/motion/sec_6.mp4',
+  const SECTIONS = [
+    { start: 0, end: 4 },
+    { start: 4, end: 6.5 },
+    { start: 6.5, end: 9 },
+    { start: 9, end: 12 },
+    { start: 12, end: 15 },
+    { start: 15, end: 18.5 },
+    { start: 18.5, end: 22 },
   ];
 
   useEffect(() => {
-    videoRefs.current.forEach((v) => {
-      if (v) v.playbackRate = 0.5;
-    });
-  }, [activeSection]);
+    const video = videoRef.current;
+    if (!video) return;
+    video.playbackRate = 0.7;
+  }, []);
 
   useEffect(() => {
+    const video = videoRef.current;
     const scrollEl = scrollRef.current;
-    if (!scrollEl) return;
+    if (!video || !scrollEl) return;
 
     let scrollTimer: NodeJS.Timeout | null = null;
     let lastSection = -1;
+    let activeIdx = 0;
 
     const triggerTransition = () => {
-      setTransitionOpacity(0.8);
-      setTransitionBlur(8);
-      setTimeout(() => { setTransitionOpacity(0); setTransitionBlur(0); }, 200);
+      setTransitionOpacity(0.7);
+      setTransitionBlur(6);
+      setTimeout(() => { setTransitionOpacity(0); setTransitionBlur(0); }, 250);
     };
 
     const findSection = () => {
@@ -74,12 +75,21 @@ function MobileHome() {
         const el = sectionRefs.current[i];
         if (!el) continue;
         const rect = el.getBoundingClientRect();
-        if (rect.top >= -window.innerHeight * 0.1 && rect.top < window.innerHeight * 0.6) {
+        if (rect.top >= -window.innerHeight * 0.5 && rect.top < window.innerHeight * 0.5) {
           return i;
         }
       }
-      return -1;
+      return 0;
     };
+
+    const onTimeUpdate = () => {
+      if (activeIdx === 0) return;
+      const seg = SECTIONS[activeIdx];
+      if (seg && video.currentTime >= seg.end - 0.05) {
+        video.currentTime = seg.start;
+      }
+    };
+    video.addEventListener('timeupdate', onTimeUpdate);
 
     const onScroll = () => {
       if (scrollTimer) clearTimeout(scrollTimer);
@@ -90,96 +100,74 @@ function MobileHome() {
         const el = sectionRefs.current[0];
         if (el) {
           const rect = el.getBoundingClientRect();
-          const sectionProgress = Math.max(0, Math.min(1, -rect.top / window.innerHeight));
-          const v = videoRefs.current[0];
-          if (v) {
-            v.currentTime = sectionProgress * (v.duration || 4.3);
-            if (v.paused) v.play().catch(() => {});
-          }
+          const progress = Math.max(0, Math.min(1, -rect.top / window.innerHeight));
+          video.currentTime = progress * SECTIONS[0].end;
+          if (video.paused) video.play().catch(() => {});
         }
       }
 
-      if (idx !== -1 && idx !== lastSection) {
-        triggerTransition();
+      if (idx !== lastSection) {
+        if (lastSection !== -1) triggerTransition();
         lastSection = idx;
-        setActiveSection(idx);
+        activeIdx = idx;
+
+        if (idx !== 0) {
+          video.currentTime = SECTIONS[idx].start;
+          video.play().catch(() => {});
+        }
       }
 
       scrollTimer = setTimeout(() => {
         const current = findSection();
-        if (current !== -1) {
-          videoRefs.current.forEach((v, i) => {
-            if (!v) return;
-            if (i === current && i !== 0) {
-              v.currentTime = 0;
-              v.play().catch(() => {});
-            } else if (i !== 0) {
-              v.pause();
-            }
-          });
+        if (current === 0) {
+          video.pause();
         }
-      }, 350);
+      }, 400);
     };
 
     scrollEl.addEventListener('scroll', onScroll, { passive: true });
 
-    // Initial play for section 0
-    const v0 = videoRefs.current[0];
-    if (v0) { v0.currentTime = 0; v0.play().catch(() => {}); }
+    video.currentTime = 0;
+    video.play().catch(() => {});
 
     return () => {
       scrollEl.removeEventListener('scroll', onScroll);
+      video.removeEventListener('timeupdate', onTimeUpdate);
       if (scrollTimer) clearTimeout(scrollTimer);
     };
   }, []);
 
   return (
-    <div ref={scrollRef} className="h-screen overflow-y-auto snap-y snap-mandatory">
-      {/* Fixed Video Background — all 7 stacked, only active one visible */}
+    <div ref={scrollRef} className="h-screen overflow-y-auto">
+      {/* Fixed Video Background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
-        {VIDEO_SOURCES.map((src, i) => (
-          <video
-            key={i}
-            ref={(el) => { videoRefs.current[i] = el; }}
-            muted
-            loop={i !== 0}
-            playsInline
-            preload="auto"
-            style={{
-              willChange: 'transform',
-              filter: `blur(${transitionBlur}px)`,
-              transition: 'filter 0.3s ease, opacity 0.4s ease',
-              opacity: activeSection === i ? 1 : 0,
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
-          >
-            <source src={src} type="video/mp4" />
-          </video>
-        ))}
+        <video
+          ref={videoRef}
+          muted
+          playsInline
+          preload="auto"
+          style={{
+            willChange: 'transform',
+            filter: `blur(${transitionBlur}px)`,
+            transition: 'filter 0.3s ease',
+          }}
+          className="scroll-video w-full h-full object-cover"
+        >
+          <source src="/motion/vira_combined_new.mp4" type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-black/40" />
         <div
-          className="absolute inset-0 pointer-events-none transition-opacity duration-300 ease-in-out"
+          className="absolute inset-0 pointer-events-none transition-opacity duration-300"
           style={{ opacity: transitionOpacity }}
         >
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
         </div>
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            opacity: transitionOpacity * 0.5,
-            background: 'radial-gradient(ellipse at center, transparent 20%, rgba(0,0,0,0.9) 80%)',
-          }}
-        />
       </div>
 
       {/* Snap Sections */}
       <div className="relative z-10">
         {/* HERO */}
-        <div ref={(el) => { sectionRefs.current[0] = el; }} className="snap-start min-h-screen w-full relative px-4">
+        <div ref={(el) => { sectionRefs.current[0] = el; }} className="min-h-screen w-full relative px-4">
           {/* Top: above VIRA */}
           <div className="absolute top-[18%] left-0 right-0 text-center px-4">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 text-xs font-medium text-white mb-4">
@@ -208,7 +196,7 @@ function MobileHome() {
         </div>
 
         {/* STATS */}
-        <div ref={(el) => { sectionRefs.current[1] = el; }} className="snap-start min-h-screen w-full flex items-center justify-center px-4">
+        <div ref={(el) => { sectionRefs.current[1] = el; }} className="min-h-screen w-full flex items-center justify-center px-4">
           <div className="w-full">
             <h2 className="text-xl font-black text-white text-center mb-6">
               آموزشگاه زبان ویرا در <span className="text-primary">یک نگاه</span>
@@ -233,7 +221,7 @@ function MobileHome() {
         </div>
 
         {/* DEPARTMENTS */}
-        <div ref={(el) => { sectionRefs.current[2] = el; }} className="snap-start min-h-screen w-full flex items-center justify-center px-4">
+        <div ref={(el) => { sectionRefs.current[2] = el; }} className="min-h-screen w-full flex items-center justify-center px-4">
           <div className="w-full">
             <h2 className="text-xl font-black text-white text-center mb-2">
               دپارتمان‌های <span className="text-primary">آموزشی</span>
@@ -254,7 +242,7 @@ function MobileHome() {
         </div>
 
         {/* TEACHERS */}
-        <div ref={(el) => { sectionRefs.current[3] = el; }} className="snap-start min-h-screen w-full flex items-center justify-center px-4">
+        <div ref={(el) => { sectionRefs.current[3] = el; }} className="min-h-screen w-full flex items-center justify-center px-4">
           <div className="w-full">
             <h2 className="text-xl font-black text-white text-center mb-2">
               تیم <span className="text-primary">حرفه‌ای</span> ما
@@ -278,7 +266,7 @@ function MobileHome() {
         </div>
 
         {/* ABOUT */}
-        <div ref={(el) => { sectionRefs.current[4] = el; }} className="snap-start min-h-screen w-full flex items-center justify-center px-4">
+        <div ref={(el) => { sectionRefs.current[4] = el; }} className="min-h-screen w-full flex items-center justify-center px-4">
           <div className="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-5">
             <h2 className="text-lg font-black text-white mb-3">
               درباره <span className="text-primary">آکادمی ویرا</span>
@@ -302,7 +290,7 @@ function MobileHome() {
         </div>
 
         {/* TESTIMONIALS */}
-        <div ref={(el) => { sectionRefs.current[5] = el; }} className="snap-start min-h-screen w-full flex items-center justify-center px-4">
+        <div ref={(el) => { sectionRefs.current[5] = el; }} className="min-h-screen w-full flex items-center justify-center px-4">
           <div className="w-full">
             <h2 className="text-xl font-black text-white text-center mb-2">
               نظرات <span className="text-primary">دانش‌آموزان</span>
@@ -328,7 +316,7 @@ function MobileHome() {
         </div>
 
         {/* CONTACT */}
-        <div ref={(el) => { sectionRefs.current[6] = el; }} className="snap-start min-h-screen w-full flex items-center justify-start px-4 pt-20">
+        <div ref={(el) => { sectionRefs.current[6] = el; }} className="min-h-screen w-full flex items-center justify-start px-4 pt-20">
           <div className="w-full space-y-3">
             <h2 className="text-xl font-black text-white">
               تماس <span className="text-primary">با ما</span>
