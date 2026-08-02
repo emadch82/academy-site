@@ -37,6 +37,7 @@ function MobileHome() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoDuration, setVideoDuration] = useState(0);
   const [transitionOpacity, setTransitionOpacity] = useState(0);
+  const [transitionBlur, setTransitionBlur] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -77,9 +78,13 @@ function MobileHome() {
 
     const triggerTransition = () => {
       setIsTransitioning(true);
-      setTransitionOpacity(1);
-      setTimeout(() => setTransitionOpacity(0), 100);
-      setTimeout(() => setIsTransitioning(false), 400);
+      setTransitionOpacity(0.8);
+      setTransitionBlur(8);
+      setTimeout(() => {
+        setTransitionOpacity(0);
+        setTransitionBlur(0);
+      }, 200);
+      setTimeout(() => setIsTransitioning(false), 500);
     };
 
     const startLoop = (idx: number) => {
@@ -155,19 +160,21 @@ function MobileHome() {
     <div ref={scrollRef} className="h-screen overflow-y-auto snap-y snap-mandatory">
       {/* Fixed Video Background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
-        <video ref={videoRef} muted playsInline preload="auto" style={{ willChange: 'transform' }} className="scroll-video w-full h-full object-cover">
+        <video ref={videoRef} muted playsInline preload="auto" style={{ willChange: 'transform', filter: `blur(${transitionBlur}px)`, transition: 'filter 0.3s ease' }} className="scroll-video w-full h-full object-cover">
           <source src="/motion/VIRA_scroll_mobile_combined.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-black/40" />
         <div
-          className="absolute inset-0 bg-black pointer-events-none transition-opacity duration-300 ease-in-out"
+          className="absolute inset-0 pointer-events-none transition-opacity duration-300 ease-in-out"
           style={{ opacity: transitionOpacity }}
-        />
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
+        </div>
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            opacity: transitionOpacity * 0.6,
-            background: 'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.8) 70%)',
+            opacity: transitionOpacity * 0.5,
+            background: 'radial-gradient(ellipse at center, transparent 20%, rgba(0,0,0,0.9) 80%)',
           }}
         />
       </div>
@@ -175,17 +182,21 @@ function MobileHome() {
       {/* Snap Sections */}
       <div className="relative z-10">
         {/* HERO */}
-        <div ref={(el) => { sectionRefs.current[0] = el; }} className="snap-start min-h-screen w-full flex items-end justify-center px-4 pb-16">
-          <div className="text-center max-w-xl">
+        <div ref={(el) => { sectionRefs.current[0] = el; }} className="snap-start min-h-screen w-full relative px-4">
+          {/* Top: above VIRA */}
+          <div className="absolute top-20 left-0 right-0 text-center px-4">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 text-xs font-medium text-white mb-4">
               <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
               ثبت‌نام دوره‌های جدید آغاز شد
             </div>
-            <p className="text-base text-white/80 leading-relaxed mb-5">
+            <p className="text-base text-white/80 leading-relaxed">
               آموزش تخصصی زبان انگلیسی از پایه تا پیشرفته
               <br />
               با بهترین اساتید در اصفهان
             </p>
+          </div>
+          {/* Bottom: below VIRA */}
+          <div className="absolute bottom-16 left-0 right-0 text-center px-4">
             <div className="flex flex-col gap-3 justify-center">
               <Link href="/courses" className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white text-black px-6 py-3 text-sm font-bold hover:bg-white/90 transition-all hover:scale-105 shadow-xl">
                 ثبت‌نام دوره‌ها
