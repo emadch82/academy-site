@@ -51,11 +51,10 @@ export function Header() {
     const btn = menuBtnRef.current;
     if (!btn) return;
     const handler = (e: Event) => {
-      e.preventDefault();
       e.stopPropagation();
       setMobileMenuOpen(prev => !prev);
     };
-    btn.addEventListener('pointerdown', handler, { capture: true, passive: false } as AddEventListenerOptions);
+    btn.addEventListener('pointerdown', handler, { capture: true, passive: true } as AddEventListenerOptions);
     return () => btn.removeEventListener('pointerdown', handler, { capture: true } as EventListenerOptions);
   }, []);
 

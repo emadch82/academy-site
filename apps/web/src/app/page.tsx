@@ -260,15 +260,14 @@ function MobileHome() {
             <p className="text-white/60 text-center mb-4 text-xs">اساتید مجرب با مدارک بین‌المللی</p>
             <div className="grid grid-cols-2 gap-3">
               {teachers.map((t) => (
-                <div key={t.name} className="bg-white/10 backdrop-blur-md border border-white/2xl rounded-xl overflow-hidden flex flex-col h-full">
-                  <div className="relative min-h-[160px] overflow-hidden">
-                    <img src={t.img} alt={t.name} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div key={t.name} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 text-center hover:bg-white/15 transition-all duration-300">
+                  <div className="relative w-20 h-20 mx-auto mb-3">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary to-purple-500 rounded-full animate-pulse opacity-50 blur-md" />
+                    <img src={t.img} alt={t.name} className="relative w-20 h-20 object-cover rounded-full border-2 border-white/30" />
                   </div>
-                  <div className="p-3 -mt-5 relative">
-                    <h3 className="text-xs font-bold text-white">{t.name}</h3>
-                    <p className="text-[10px] text-primary">{t.role}</p>
-                  </div>
+                  <h3 className="text-sm font-bold text-white mb-0.5">{t.name}</h3>
+                  <p className="text-[10px] text-primary font-medium mb-1">{t.role}</p>
+                  <p className="text-[9px] text-white/50">{t.qual}</p>
                 </div>
               ))}
             </div>
