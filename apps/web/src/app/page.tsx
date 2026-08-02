@@ -189,7 +189,7 @@ function MobileHome() {
               <br />
               با بهترین اساتید در اصفهان
             </p>
-            <div className={`inline-flex flex-col gap-2.5 w-52 transition-all duration-700 ease-out ${showButtons ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            <div className={`inline-flex flex-col gap-2.5 w-64 transition-all duration-700 ease-out ${showButtons ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               <Link href="/courses" className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white text-black px-5 py-2.5 text-sm font-bold hover:bg-white/90 transition-all hover:scale-105 shadow-xl">
                 ثبت‌نام دوره‌ها
                 <FiArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
