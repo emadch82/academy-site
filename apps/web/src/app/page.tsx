@@ -34,83 +34,40 @@ const testimonials = [
 
 function MobileHome() {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoDuration, setVideoDuration] = useState(0);
+  const [activeSection, setActiveSection] = useState(0);
   const [transitionOpacity, setTransitionOpacity] = useState(0);
   const [transitionBlur, setTransitionBlur] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
-  const SECTION_TIMES = [
-    { start: 0, end: 3 },
-    { start: 3, end: 6 },
-    { start: 6, end: 9 },
-    { start: 9, end: 12 },
-    { start: 12, end: 15 },
-    { start: 15, end: 18 },
-    { start: 18, end: 20 },
+  const VIDEO_SOURCES = [
+    '/motion/sec_0.mp4',
+    '/motion/sec_1.mp4',
+    '/motion/sec_2.mp4',
+    '/motion/sec_3.mp4',
+    '/motion/sec_4.mp4',
+    '/motion/sec_5.mp4',
+    '/motion/sec_6.mp4',
   ];
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.playbackRate = 0.5;
-    const onReady = () => {
-      video.currentTime = 0;
-      video.pause();
-      setVideoDuration(video.duration);
-    };
-    video.addEventListener('loadedmetadata', onReady);
-    if (video.readyState >= 1) onReady();
-    return () => video.removeEventListener('loadedmetadata', onReady);
-  }, []);
+    videoRefs.current.forEach((v) => {
+      if (v) v.playbackRate = 0.5;
+    });
+  }, [activeSection]);
 
   useEffect(() => {
-    if (!videoDuration) return;
-    const video = videoRef.current;
     const scrollEl = scrollRef.current;
-    if (!video || !scrollEl) return;
+    if (!scrollEl) return;
 
-    let looping = false;
-    let loopSection = -1;
     let scrollTimer: NodeJS.Timeout | null = null;
     let lastSection = -1;
-    let transitionTimer: NodeJS.Timeout | null = null;
 
     const triggerTransition = () => {
-      setIsTransitioning(true);
       setTransitionOpacity(0.8);
       setTransitionBlur(8);
-      setTimeout(() => {
-        setTransitionOpacity(0);
-        setTransitionBlur(0);
-      }, 200);
-      setTimeout(() => setIsTransitioning(false), 500);
+      setTimeout(() => { setTransitionOpacity(0); setTransitionBlur(0); }, 200);
     };
-
-    const startLoop = (idx: number) => {
-      if (looping && loopSection === idx) return;
-      looping = true;
-      loopSection = idx;
-      const seg = SECTION_TIMES[idx];
-      video.currentTime = seg.start;
-      safePlay();
-    };
-
-    const stopLoop = () => {
-      looping = false;
-      loopSection = -1;
-    };
-
-    const onTimeUpdate = () => {
-      if (!looping || loopSection === -1) return;
-      const seg = SECTION_TIMES[loopSection];
-      if (!seg) return;
-      if (video.currentTime >= seg.end - 0.05) {
-        video.currentTime = seg.start;
-      }
-    };
-    video.addEventListener('timeupdate', onTimeUpdate);
 
     const findSection = () => {
       for (let i = 0; i < sectionRefs.current.length; i++) {
@@ -124,65 +81,85 @@ function MobileHome() {
       return -1;
     };
 
-    const safePlay = () => {
-      if (video.paused) {
-        video.play().catch(() => {});
-      }
-    };
-
-    const safePause = () => {
-      if (!video.paused) {
-        video.pause();
-      }
-    };
-
     const onScroll = () => {
       if (scrollTimer) clearTimeout(scrollTimer);
 
-      stopLoop();
-
       const idx = findSection();
-      if (idx !== -1) {
-        const el = sectionRefs.current[idx];
+
+      if (idx === 0) {
+        const el = sectionRefs.current[0];
         if (el) {
           const rect = el.getBoundingClientRect();
           const sectionProgress = Math.max(0, Math.min(1, -rect.top / window.innerHeight));
-          const seg = SECTION_TIMES[idx];
-          const segDuration = seg.end - seg.start;
-          const time = seg.start + sectionProgress * segDuration;
-          video.currentTime = time;
-          safePlay();
+          const v = videoRefs.current[0];
+          if (v) {
+            v.currentTime = sectionProgress * (v.duration || 4.3);
+            if (v.paused) v.play().catch(() => {});
+          }
         }
       }
 
       if (idx !== -1 && idx !== lastSection) {
         triggerTransition();
         lastSection = idx;
+        setActiveSection(idx);
       }
 
       scrollTimer = setTimeout(() => {
-        safePause();
-        if (idx !== -1 && idx !== 0) startLoop(idx);
-      }, 300);
+        const current = findSection();
+        if (current !== -1) {
+          videoRefs.current.forEach((v, i) => {
+            if (!v) return;
+            if (i === current && i !== 0) {
+              v.currentTime = 0;
+              v.play().catch(() => {});
+            } else if (i !== 0) {
+              v.pause();
+            }
+          });
+        }
+      }, 350);
     };
 
     scrollEl.addEventListener('scroll', onScroll, { passive: true });
 
+    // Initial play for section 0
+    const v0 = videoRefs.current[0];
+    if (v0) { v0.currentTime = 0; v0.play().catch(() => {}); }
+
     return () => {
       scrollEl.removeEventListener('scroll', onScroll);
-      video.removeEventListener('timeupdate', onTimeUpdate);
       if (scrollTimer) clearTimeout(scrollTimer);
-      if (transitionTimer) clearTimeout(transitionTimer);
     };
-  }, [videoDuration]);
+  }, []);
 
   return (
     <div ref={scrollRef} className="h-screen overflow-y-auto snap-y snap-mandatory">
-      {/* Fixed Video Background */}
+      {/* Fixed Video Background — all 7 stacked, only active one visible */}
       <div className="fixed inset-0 z-0 overflow-hidden">
-        <video ref={videoRef} muted playsInline preload="auto" style={{ willChange: 'transform', filter: `blur(${transitionBlur}px)`, transition: 'filter 0.3s ease' }} className="scroll-video w-full h-full object-cover">
-          <source src="/motion/VIRA_scroll_mobile_combined.mp4" type="video/mp4" />
-        </video>
+        {VIDEO_SOURCES.map((src, i) => (
+          <video
+            key={i}
+            ref={(el) => { videoRefs.current[i] = el; }}
+            muted
+            loop={i !== 0}
+            playsInline
+            preload="auto"
+            style={{
+              willChange: 'transform',
+              filter: `blur(${transitionBlur}px)`,
+              transition: 'filter 0.3s ease, opacity 0.4s ease',
+              opacity: activeSection === i ? 1 : 0,
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          >
+            <source src={src} type="video/mp4" />
+          </video>
+        ))}
         <div className="absolute inset-0 bg-black/40" />
         <div
           className="absolute inset-0 pointer-events-none transition-opacity duration-300 ease-in-out"
