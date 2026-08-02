@@ -65,19 +65,14 @@ function MobileHome() {
     if (!videoDuration) return;
     const video = videoRef.current;
     if (!video) return;
+    const activeSection = { current: -1 };
 
     const onTimeUpdate = () => {
-      const idx = sectionRefs.current.findIndex((el) => {
-        if (!el) return false;
-        const rect = el.getBoundingClientRect();
-        return rect.top >= -10 && rect.top < window.innerHeight * 0.5;
-      });
-      if (idx !== -1) {
-        const seg = SECTION_TIMES[idx];
-        if (video.currentTime >= seg.end) {
-          video.pause();
-          video.currentTime = seg.end - 0.01;
-        }
+      if (activeSection.current === -1) return;
+      const seg = SECTION_TIMES[activeSection.current];
+      if (!seg) return;
+      if (video.currentTime >= seg.end - 0.05) {
+        video.currentTime = seg.start;
       }
     };
     video.addEventListener('timeupdate', onTimeUpdate);
@@ -90,10 +85,14 @@ function MobileHome() {
           const seg = SECTION_TIMES[idx];
 
           if (entry.isIntersecting) {
+            activeSection.current = idx;
             video.currentTime = seg.start;
             video.play().catch(() => {});
           } else {
-            video.pause();
+            if (activeSection.current === idx) {
+              activeSection.current = -1;
+              video.pause();
+            }
           }
         });
       },
