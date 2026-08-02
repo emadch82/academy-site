@@ -45,7 +45,7 @@ export default function HomePage() {
     const check = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      setScrollHeight(mobile ? "1200vh" : "800vh");
+      setScrollHeight(mobile ? "1600vh" : "800vh");
     };
     check();
     window.addEventListener('resize', check);
@@ -120,7 +120,7 @@ export default function HomePage() {
       <div className="fixed inset-0 z-0 overflow-hidden">
         <motion.div style={{ scale: videoScale }} className="absolute inset-0">
           <video key={isMobile ? 'm' : 'd'} ref={videoRef} muted playsInline preload="auto" style={{ willChange: 'transform' }} className="scroll-video w-full h-full object-cover">
-            <source src={isMobile ? "/motion/VIRA_scroll_mobile.mp4" : "/motion/VIRA_language_institute_animation_1080p_202607281703_gwr_video_mvp.mp4"} type="video/mp4" />
+            <source src={isMobile ? "/motion/VIRA_scroll_mobile_combined.mp4" : "/motion/VIRA_language_institute_animation_1080p_202607281703_gwr_video_mvp.mp4"} type="video/mp4" />
           </video>
         </motion.div>
         <div className="absolute inset-0 bg-black/40" />
