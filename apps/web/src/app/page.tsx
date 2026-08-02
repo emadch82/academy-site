@@ -138,7 +138,7 @@ function MobileHome() {
   }, []);
 
   return (
-    <div ref={scrollRef} className="h-screen overflow-y-auto">
+    <div ref={scrollRef} className="h-screen overflow-y-auto" style={{ scrollSnapType: 'y proximity' }}>
       {/* Fixed Video Background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <video
@@ -167,7 +167,7 @@ function MobileHome() {
       {/* Snap Sections */}
       <div className="relative z-10">
         {/* HERO */}
-        <div ref={(el) => { sectionRefs.current[0] = el; }} className="min-h-screen w-full relative px-4">
+        <div ref={(el) => { sectionRefs.current[0] = el; }} className="min-h-screen w-full relative px-4" style={{ scrollSnapAlign: 'start' }}>
           {/* Top: above VIRA */}
           <div className="absolute top-[18%] left-0 right-0 text-center px-4">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 text-xs font-medium text-white mb-4">
@@ -196,7 +196,7 @@ function MobileHome() {
         </div>
 
         {/* STATS */}
-        <div ref={(el) => { sectionRefs.current[1] = el; }} className="min-h-screen w-full flex items-center justify-center px-4">
+        <div ref={(el) => { sectionRefs.current[1] = el; }} className="min-h-screen w-full flex items-center justify-center px-4" style={{ scrollSnapAlign: 'start' }}>
           <div className="w-full">
             <h2 className="text-xl font-black text-white text-center mb-6">
               آموزشگاه زبان ویرا در <span className="text-primary">یک نگاه</span>
@@ -221,7 +221,7 @@ function MobileHome() {
         </div>
 
         {/* DEPARTMENTS */}
-        <div ref={(el) => { sectionRefs.current[2] = el; }} className="min-h-screen w-full flex items-center justify-center px-4">
+        <div ref={(el) => { sectionRefs.current[2] = el; }} className="min-h-screen w-full flex items-center justify-center px-4" style={{ scrollSnapAlign: 'start' }}>
           <div className="w-full">
             <h2 className="text-xl font-black text-white text-center mb-2">
               دپارتمان‌های <span className="text-primary">آموزشی</span>
@@ -242,7 +242,7 @@ function MobileHome() {
         </div>
 
         {/* TEACHERS */}
-        <div ref={(el) => { sectionRefs.current[3] = el; }} className="min-h-screen w-full flex items-center justify-center px-4">
+        <div ref={(el) => { sectionRefs.current[3] = el; }} className="min-h-screen w-full flex items-center justify-center px-4" style={{ scrollSnapAlign: 'start' }}>
           <div className="w-full">
             <h2 className="text-xl font-black text-white text-center mb-2">
               تیم <span className="text-primary">حرفه‌ای</span> ما
@@ -266,7 +266,7 @@ function MobileHome() {
         </div>
 
         {/* ABOUT */}
-        <div ref={(el) => { sectionRefs.current[4] = el; }} className="min-h-screen w-full flex items-center justify-center px-4">
+        <div ref={(el) => { sectionRefs.current[4] = el; }} className="min-h-screen w-full flex items-center justify-center px-4" style={{ scrollSnapAlign: 'start' }}>
           <div className="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-5">
             <h2 className="text-lg font-black text-white mb-3">
               درباره <span className="text-primary">آکادمی ویرا</span>
@@ -290,7 +290,7 @@ function MobileHome() {
         </div>
 
         {/* TESTIMONIALS */}
-        <div ref={(el) => { sectionRefs.current[5] = el; }} className="min-h-screen w-full flex items-center justify-center px-4">
+        <div ref={(el) => { sectionRefs.current[5] = el; }} className="min-h-screen w-full flex items-center justify-center px-4" style={{ scrollSnapAlign: 'start' }}>
           <div className="w-full">
             <h2 className="text-xl font-black text-white text-center mb-2">
               نظرات <span className="text-primary">دانش‌آموزان</span>
@@ -316,7 +316,7 @@ function MobileHome() {
         </div>
 
         {/* CONTACT */}
-        <div ref={(el) => { sectionRefs.current[6] = el; }} className="min-h-screen w-full flex items-center justify-start px-4 pt-20">
+        <div ref={(el) => { sectionRefs.current[6] = el; }} className="min-h-screen w-full flex items-center justify-start px-4 pt-20" style={{ scrollSnapAlign: 'start' }}>
           <div className="w-full space-y-3">
             <h2 className="text-xl font-black text-white">
               تماس <span className="text-primary">با ما</span>

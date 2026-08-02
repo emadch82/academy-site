@@ -426,7 +426,7 @@ html {
 }
 
 /* Prevent horizontal overflow globally */
-html, body {
+body {
   overflow-x: hidden;
   max-width: 100vw;
 }
