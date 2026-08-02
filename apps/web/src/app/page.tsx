@@ -361,7 +361,7 @@ function MobileHome() {
       </div>
 
       {/* Scroll Hint */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 scroll-hint">
         <div className="animate-bounce flex flex-col items-center gap-1">
           <span className="text-[10px] text-white/50">اسکرول کنید</span>
           <div className="w-5 h-7 rounded-full border border-white/30 flex justify-center pt-1">

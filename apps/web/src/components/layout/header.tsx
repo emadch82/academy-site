@@ -48,6 +48,15 @@ export function Header() {
   }, []);
 
   useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.classList.add('menu-open');
+    } else {
+      document.body.classList.remove('menu-open');
+    }
+    return () => document.body.classList.remove('menu-open');
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
     const btn = menuBtnRef.current;
     if (!btn) return;
     const handler = (e: Event) => {
