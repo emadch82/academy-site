@@ -116,7 +116,7 @@ function MobileHome() {
         const el = sectionRefs.current[i];
         if (!el) continue;
         const rect = el.getBoundingClientRect();
-        if (rect.top >= -window.innerHeight * 0.3 && rect.top < window.innerHeight * 0.5) {
+        if (rect.top >= -window.innerHeight * 0.1 && rect.top < window.innerHeight * 0.6) {
           return i;
         }
       }
@@ -184,7 +184,7 @@ function MobileHome() {
         {/* HERO */}
         <div ref={(el) => { sectionRefs.current[0] = el; }} className="snap-start min-h-screen w-full relative px-4">
           {/* Top: above VIRA */}
-          <div className="absolute top-20 left-0 right-0 text-center px-4">
+          <div className="absolute top-[18%] left-0 right-0 text-center px-4">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 text-xs font-medium text-white mb-4">
               <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
               ثبت‌نام دوره‌های جدید آغاز شد
@@ -196,13 +196,13 @@ function MobileHome() {
             </p>
           </div>
           {/* Bottom: below VIRA */}
-          <div className="absolute bottom-16 left-0 right-0 text-center px-4">
-            <div className="flex flex-col gap-3 justify-center">
-              <Link href="/courses" className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white text-black px-6 py-3 text-sm font-bold hover:bg-white/90 transition-all hover:scale-105 shadow-xl">
+          <div className="absolute top-[55%] left-0 right-0 text-center px-4">
+            <div className="inline-flex flex-col gap-2.5 w-52">
+              <Link href="/courses" className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white text-black px-5 py-2.5 text-sm font-bold hover:bg-white/90 transition-all hover:scale-105 shadow-xl">
                 ثبت‌نام دوره‌ها
                 <FiArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
               </Link>
-              <Link href="/contact" className="group inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-white px-6 py-3 text-sm font-medium hover:bg-primary/90 transition-all hover:scale-105">
+              <Link href="/contact" className="group inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-white px-5 py-2.5 text-sm font-medium hover:bg-primary/90 transition-all hover:scale-105">
                 <FiPhone className="h-4 w-4" />
                 ۰۳۱-۳۷۷۵۹۵۵۶
               </Link>
