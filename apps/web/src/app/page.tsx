@@ -100,9 +100,10 @@ function MobileHome() {
         const el = sectionRefs.current[0];
         if (el) {
           const rect = el.getBoundingClientRect();
-          const progress = Math.max(0, Math.min(1, -rect.top / window.innerHeight));
-          video.currentTime = progress * SECTIONS[0].end;
-          if (video.paused) video.play().catch(() => {});
+          const progress = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / (window.innerHeight + rect.height)));
+          const time = progress * SECTIONS[0].end;
+          video.currentTime = Math.min(time, SECTIONS[0].end - 0.1);
+          video.play().catch(() => {});
         }
       }
 
@@ -120,9 +121,15 @@ function MobileHome() {
       scrollTimer = setTimeout(() => {
         const current = findSection();
         if (current === 0) {
-          video.pause();
+          const el = sectionRefs.current[0];
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            if (Math.abs(rect.top) < 10) {
+              video.pause();
+            }
+          }
         }
-      }, 400);
+      }, 500);
     };
 
     scrollEl.addEventListener('scroll', onScroll, { passive: true });
