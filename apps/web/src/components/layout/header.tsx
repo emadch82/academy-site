@@ -186,7 +186,8 @@ export function Header() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.15 }}
-            className={`lg:hidden fixed inset-0 top-14 z-40 overflow-y-auto backdrop-blur-xl ${isHome ? 'bg-black/70' : 'bg-background/70'}`}
+            className={`lg:hidden fixed inset-x-2 top-16 bottom-2 z-40 overflow-y-auto backdrop-blur-2xl border border-white/10 shadow-2xl ${isHome ? 'bg-black/40' : 'bg-background/40'}`}
+            style={{ borderRadius: '1.5rem' }}
           >
             <div className="px-6 py-8">
               <nav className="flex flex-col gap-1">
