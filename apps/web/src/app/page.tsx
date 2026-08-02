@@ -93,7 +93,7 @@ function MobileHome() {
       loopSection = idx;
       const seg = SECTION_TIMES[idx];
       video.currentTime = seg.start;
-      video.play().catch(() => {});
+      safePlay();
     };
 
     const stopLoop = () => {
@@ -123,6 +123,18 @@ function MobileHome() {
       return -1;
     };
 
+    const safePlay = () => {
+      if (video.paused) {
+        video.play().catch(() => {});
+      }
+    };
+
+    const safePause = () => {
+      if (!video.paused) {
+        video.pause();
+      }
+    };
+
     const onScroll = () => {
       if (scrollTimer) clearTimeout(scrollTimer);
 
@@ -138,7 +150,7 @@ function MobileHome() {
           const segDuration = seg.end - seg.start;
           const time = seg.start + sectionProgress * segDuration;
           video.currentTime = time;
-          video.play().catch(() => {});
+          safePlay();
         }
       }
 
@@ -148,6 +160,7 @@ function MobileHome() {
       }
 
       scrollTimer = setTimeout(() => {
+        safePause();
         if (idx !== -1 && idx !== 0) startLoop(idx);
       }, 300);
     };
