@@ -136,7 +136,7 @@ export default function HomePage() {
       <div className="fixed inset-0 z-0 overflow-hidden">
         <motion.div style={{ scale: videoScale }} className="absolute inset-0">
           <video ref={videoRef} muted playsInline preload="auto" style={{ willChange: 'transform' }} className={`scroll-video w-full h-full object-cover ${isMobile ? 'hidden' : ''}`}>
-            <source src="/motion/VIRA_scroll_desktop_combined.mp4" type="video/mp4" />
+            <source src="/motion/VIRA_language_institute_animation_1080p_202607281703_gwr_video_mvp.mp4" type="video/mp4" />
           </video>
           <video ref={mobileVideoRef} muted playsInline preload="auto" style={{ willChange: 'transform' }} className={`scroll-video w-full h-full object-cover ${isMobile ? '' : 'hidden'}`}>
             <source src="/motion/VIRA_scroll_mobile_combined.mp4" type="video/mp4" />
