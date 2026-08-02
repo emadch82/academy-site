@@ -150,12 +150,14 @@ export function Header() {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="lg:hidden flex items-center gap-2">
+          <div className="lg:hidden flex items-center gap-3" style={{ touchAction: 'manipulation' }}>
             <CartDrawer />
             <button
               type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onPointerDown={(e) => { e.stopPropagation(); setMobileMenuOpen(prev => !prev); }}
+              onClick={(e) => e.stopPropagation()}
               className={`inline-flex items-center justify-center rounded-lg p-2.5 min-w-[44px] min-h-[44px] transition-colors active:scale-95 ${isHome ? 'text-white hover:bg-white/10' : 'text-muted-foreground hover:bg-muted'}`}
+              style={{ touchAction: 'manipulation' }}
             >
               {mobileMenuOpen ? <FiX className="h-6 w-6" /> : <FiMenu className="h-6 w-6" />}
             </button>
