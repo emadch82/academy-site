@@ -47,7 +47,7 @@ export default function HomePage() {
     const check = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      setScrollHeight(mobile ? "1600vh" : "800vh");
+      setScrollHeight(mobile ? "2400vh" : "800vh");
     };
     check();
     window.addEventListener('resize', check);
