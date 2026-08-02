@@ -24,27 +24,27 @@ export default function ContactPage() {
   };
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen overflow-x-hidden">
       {/* Hero */}
       <section className="relative pt-32 pb-12 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" />
         <motion.div
           animate={{ rotate: [0, 360] }}
           transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-40 -right-40 w-96 h-96 border border-primary/10 rounded-full"
+          className="absolute -top-40 right-0 w-64 h-64 border border-primary/10 rounded-full opacity-50"
         />
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
+          <div className="flex flex-col items-center gap-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="w-full md:w-1/2 text-center md:text-right md:pr-12"
+              className="w-full text-center"
             >
-              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 md:mb-6">
+              <h1 className="text-3xl sm:text-4xl font-bold mb-4">
                 ارتباط <span className="text-primary">با ما</span>
               </h1>
-              <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-xl mx-auto md:mx-0">
+              <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
                 برای مشاوره، ثبت‌نام یا هرگونه سوال با ما در تماس باشید
               </p>
             </motion.div>
@@ -53,15 +53,15 @@ export default function ContactPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="w-full md:w-1/2"
+              className="w-full max-w-md"
             >
-              <AutoPlayVideo src="/videos/contact-motion.mp4" poster="/videos/contact-poster.jpg" className="rounded-2xl border" />
+              <AutoPlayVideo src="/videos/contact-motion.mp4" poster="/videos/contact-poster.jpg" className="rounded-2xl border w-full" />
             </motion.div>
           </div>
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-16 overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
             {/* Contact Info */}
@@ -110,7 +110,7 @@ export default function ContactPage() {
                     initial={{ opacity: 0, x: 30 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    whileHover={{ scale: 1.02, x: 5 }}
+                    whileHover={{ scale: 1.02 }}
                     className="flex items-start gap-4 bg-background/80 backdrop-blur-sm rounded-xl border p-5 hover:shadow-lg transition-all duration-300"
                   >
                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shrink-0 shadow-lg`}>
