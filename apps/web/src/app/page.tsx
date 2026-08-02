@@ -36,6 +36,8 @@ function MobileHome() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoDuration, setVideoDuration] = useState(0);
+  const [transitionOpacity, setTransitionOpacity] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const SECTION_TIMES = [
@@ -70,6 +72,15 @@ function MobileHome() {
     let looping = false;
     let loopSection = -1;
     let scrollTimer: NodeJS.Timeout | null = null;
+    let lastSection = -1;
+    let transitionTimer: NodeJS.Timeout | null = null;
+
+    const triggerTransition = () => {
+      setIsTransitioning(true);
+      setTransitionOpacity(1);
+      setTimeout(() => setTransitionOpacity(0), 100);
+      setTimeout(() => setIsTransitioning(false), 400);
+    };
 
     const startLoop = (idx: number) => {
       if (looping && loopSection === idx) return;
@@ -118,6 +129,12 @@ function MobileHome() {
       video.currentTime = time;
       video.play().catch(() => {});
 
+      const currentSection = findSection();
+      if (currentSection !== -1 && currentSection !== lastSection) {
+        triggerTransition();
+        lastSection = currentSection;
+      }
+
       scrollTimer = setTimeout(() => {
         const idx = findSection();
         if (idx !== -1) startLoop(idx);
@@ -130,6 +147,7 @@ function MobileHome() {
       scrollEl.removeEventListener('scroll', onScroll);
       video.removeEventListener('timeupdate', onTimeUpdate);
       if (scrollTimer) clearTimeout(scrollTimer);
+      if (transitionTimer) clearTimeout(transitionTimer);
     };
   }, [videoDuration]);
 
@@ -141,6 +159,17 @@ function MobileHome() {
           <source src="/motion/VIRA_scroll_mobile_combined.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-black/40" />
+        <div
+          className="absolute inset-0 bg-black pointer-events-none transition-opacity duration-300 ease-in-out"
+          style={{ opacity: transitionOpacity }}
+        />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            opacity: transitionOpacity * 0.6,
+            background: 'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.8) 70%)',
+          }}
+        />
       </div>
 
       {/* Snap Sections */}
