@@ -175,13 +175,13 @@ function MobileHome() {
       {/* Snap Sections */}
       <div className="relative z-10">
         {/* HERO */}
-        <div ref={(el) => { sectionRefs.current[0] = el; }} className="snap-start min-h-screen w-full flex items-center justify-center px-4">
+        <div ref={(el) => { sectionRefs.current[0] = el; }} className="snap-start min-h-screen w-full flex items-end justify-center px-4 pb-16">
           <div className="text-center max-w-xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 text-xs font-medium text-white mb-6">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 text-xs font-medium text-white mb-4">
               <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
               ثبت‌نام دوره‌های جدید آغاز شد
             </div>
-            <p className="text-base text-white/80 leading-relaxed mb-6">
+            <p className="text-base text-white/80 leading-relaxed mb-5">
               آموزش تخصصی زبان انگلیسی از پایه تا پیشرفته
               <br />
               با بهترین اساتید در اصفهان
