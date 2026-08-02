@@ -178,8 +178,8 @@ function MobileHome() {
       <div className="relative z-10">
         {/* HERO */}
         <div ref={(el) => { sectionRefs.current[0] = el; }} className="min-h-screen w-full relative px-4" style={{ scrollSnapAlign: 'start' }}>
-          {/* Top: above VIRA */}
-          <div className="absolute top-[18%] left-0 right-0 text-center px-4">
+          {/* Top: above VIRA → moves to center after VIRA fades */}
+          <div className={`absolute left-0 right-0 text-center px-4 transition-all duration-1000 ease-in-out ${showButtons ? 'top-[35%]' : 'top-[18%]'}`}>
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 text-xs font-medium text-white mb-4">
               <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
               ثبت‌نام دوره‌های جدید آغاز شد
