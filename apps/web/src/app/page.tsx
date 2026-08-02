@@ -54,6 +54,7 @@ function MobileHome() {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+    video.playbackRate = 0.5;
     const onReady = () => {
       video.currentTime = 0;
       video.pause();
