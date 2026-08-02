@@ -74,10 +74,10 @@ export function Header() {
       className={`fixed top-0 z-50 w-full pointer-events-auto transition-all duration-300 ${
         isHome
           ? scrolled
-            ? 'bg-black/80 border-b border-white/10'
+            ? 'bg-black/60 backdrop-blur-xl border-b border-white/10'
             : 'bg-transparent'
           : scrolled
-            ? 'bg-background/95 border-b shadow-lg shadow-primary/5'
+            ? 'bg-background/60 backdrop-blur-xl border-b border-border/50 shadow-lg shadow-primary/5'
             : 'bg-transparent'
       }`}
     >
@@ -186,7 +186,7 @@ export function Header() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.15 }}
-            className={`lg:hidden fixed inset-0 top-14 z-40 overflow-y-auto ${isHome ? 'bg-black/95' : 'bg-background'}`}
+            className={`lg:hidden fixed inset-0 top-14 z-40 overflow-y-auto backdrop-blur-xl ${isHome ? 'bg-black/70' : 'bg-background/70'}`}
           >
             <div className="px-6 py-8">
               <nav className="flex flex-col gap-1">
