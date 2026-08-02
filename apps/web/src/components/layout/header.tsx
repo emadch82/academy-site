@@ -74,10 +74,10 @@ export function Header() {
       className={`fixed top-0 z-50 w-full pointer-events-auto transition-all duration-300 ${
         isHome
           ? scrolled
-            ? 'bg-black/60 backdrop-blur-xl border-b border-white/10'
+            ? 'bg-black/80 border-b border-white/10'
             : 'bg-transparent'
           : scrolled
-            ? 'bg-background/80 backdrop-blur-xl border-b shadow-lg shadow-primary/5'
+            ? 'bg-background/95 border-b shadow-lg shadow-primary/5'
             : 'bg-transparent'
       }`}
     >
