@@ -41,12 +41,12 @@ function MobileHome() {
 
   const SECTIONS = [
     { start: 0, end: 4 },
-    { start: 4, end: 6.5 },
-    { start: 6.5, end: 9 },
-    { start: 9, end: 12 },
-    { start: 12, end: 15 },
-    { start: 15, end: 18.5 },
-    { start: 18.5, end: 22 },
+    { start: 4, end: 7.5 },
+    { start: 7.5, end: 11 },
+    { start: 11, end: 14.5 },
+    { start: 14.5, end: 18 },
+    { start: 18, end: 21.5 },
+    { start: 21.5, end: 25 },
   ];
 
   useEffect(() => {
@@ -153,7 +153,7 @@ function MobileHome() {
           }}
           className="scroll-video w-full h-full object-cover"
         >
-          <source src="/motion/vira_combined_new.mp4" type="video/mp4" />
+          <source src="/motion/vira_final.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-black/40" />
         <div
