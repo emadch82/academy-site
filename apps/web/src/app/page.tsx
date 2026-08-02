@@ -148,7 +148,7 @@ function MobileHome() {
       }
 
       scrollTimer = setTimeout(() => {
-        if (idx !== -1) startLoop(idx);
+        if (idx !== -1 && idx !== 0) startLoop(idx);
       }, 300);
     };
 
