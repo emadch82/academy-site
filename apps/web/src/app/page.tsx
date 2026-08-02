@@ -47,7 +47,7 @@ export default function HomePage() {
     const check = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      setScrollHeight(mobile ? "2400vh" : "800vh");
+      setScrollHeight(mobile ? "1000vh" : "800vh");
     };
     check();
     window.addEventListener('resize', check);
@@ -93,10 +93,10 @@ export default function HomePage() {
       rafRef.current = requestAnimationFrame(() => {
         const desktopVideo = videoRef.current;
         const mobile = mobileVideoRef.current;
-        if (desktopVideo && videoDuration && !desktopVideo.seeking) {
+        if (desktopVideo && videoDuration) {
           desktopVideo.currentTime = progress * videoDuration;
         }
-        if (mobile && mobileVideoDuration && !mobile.seeking) {
+        if (mobile && mobileVideoDuration) {
           mobile.currentTime = progress * mobileVideoDuration;
         }
         rafRef.current = 0;
