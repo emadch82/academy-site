@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMenu, FiX, FiUser, FiBookOpen, FiGrid, FiFileText, FiBell, FiMessageCircle, FiUsers, FiZap, FiLogOut, FiShield } from 'react-icons/fi';
@@ -31,6 +31,8 @@ export function Header() {
   const { items } = useCart();
   const { unreadCount } = useNotifications();
 
+  const menuBtnRef = useRef<HTMLButtonElement>(null);
+
   useEffect(() => {
     const raw = Cookies.get('amz_user');
     if (raw) {
@@ -43,6 +45,17 @@ export function Header() {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const btn = menuBtnRef.current;
+    if (!btn) return;
+    const handler = (e: TouchEvent) => {
+      e.stopPropagation();
+      setMobileMenuOpen(prev => !prev);
+    };
+    btn.addEventListener('touchend', handler, { capture: true, passive: false });
+    return () => btn.removeEventListener('touchend', handler, { capture: true } as EventListenerOptions);
   }, []);
 
   const logout = () => {
@@ -153,6 +166,7 @@ export function Header() {
           <div className="lg:hidden flex items-center gap-3">
             <CartDrawer />
             <button
+              ref={menuBtnRef}
               type="button"
               onClick={() => setMobileMenuOpen(prev => !prev)}
               className={`inline-flex items-center justify-center rounded-lg p-2.5 min-w-[44px] min-h-[44px] transition-colors active:scale-95 ${isHome ? 'text-white hover:bg-white/10' : 'text-muted-foreground hover:bg-muted'}`}
