@@ -71,11 +71,11 @@ function MobileHome() {
     };
 
     const findSection = () => {
-      for (let i = 0; i < sectionRefs.current.length; i++) {
+      for (let i = sectionRefs.current.length - 1; i >= 0; i--) {
         const el = sectionRefs.current[i];
         if (!el) continue;
         const rect = el.getBoundingClientRect();
-        if (rect.top >= -window.innerHeight * 0.5 && rect.top < window.innerHeight * 0.5) {
+        if (rect.top < window.innerHeight * 0.6) {
           return i;
         }
       }
