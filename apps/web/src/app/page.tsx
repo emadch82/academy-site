@@ -219,7 +219,7 @@ function MobileHome() {
             objectFit: 'cover',
           }}
         >
-          <source src="/motion/s0_hero_hd.mp4" type="video/mp4" />
+          <source src="/motion/s0_hero_hd_web.mp4" type="video/mp4" />
         </video>
         {/* Main combined video (sections 1-6) */}
         <video
