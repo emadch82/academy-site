@@ -54,7 +54,7 @@ function MobileHome() {
     const video = videoRef.current;
     if (!video) return;
     video.playbackRate = 0.7;
-    const timer = setTimeout(() => setShowButtons(true), 1500);
+    const timer = setTimeout(() => setShowButtons(true), 2500);
     return () => clearTimeout(timer);
   }, []);
 
