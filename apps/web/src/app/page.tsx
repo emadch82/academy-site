@@ -98,11 +98,21 @@ function MobileHome() {
     const onTimeUpdate = () => {
       if (activeIdx === 0) return;
       const seg = SECTIONS[activeIdx];
-      if (seg && video.currentTime >= seg.end - 0.05) {
+      if (!seg) return;
+      if (video.currentTime >= seg.end - 0.1 || video.currentTime < seg.start - 0.2) {
         video.currentTime = seg.start;
       }
     };
+    const onEnded = () => {
+      if (activeIdx === 0) return;
+      const seg = SECTIONS[activeIdx];
+      if (!seg) return;
+      video.currentTime = seg.start;
+      const p = video.play();
+      if (p) p.catch(() => {});
+    };
     video.addEventListener('timeupdate', onTimeUpdate);
+    video.addEventListener('ended', onEnded);
 
     const onStall = () => {
       const v = videoRef.current;
@@ -189,6 +199,7 @@ function MobileHome() {
     return () => {
       scrollEl.removeEventListener('scroll', onScroll);
       video.removeEventListener('timeupdate', onTimeUpdate);
+      video.removeEventListener('ended', onEnded);
       video.removeEventListener('waiting', onStall);
       video.removeEventListener('canplay', onStall);
       if (scrollTimer) clearTimeout(scrollTimer);
@@ -207,6 +218,7 @@ function MobileHome() {
           loop
           autoPlay
           preload="auto"
+          poster="/motion/poster_sec0.jpg"
           style={{
             willChange: 'transform',
             filter: `blur(${transitionBlur}px)`,
@@ -227,6 +239,7 @@ function MobileHome() {
           muted
           playsInline
           preload="metadata"
+          poster="/motion/poster_sec1.jpg"
           style={{
             willChange: 'transform',
             filter: `blur(${transitionBlur}px)`,
