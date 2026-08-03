@@ -154,17 +154,10 @@ function MobileHome() {
 
         if (idx === 0) {
           if (!heroVisible) switchToHero();
-          const el = sectionRefs.current[0];
-          if (el && hero) {
-            const rect = el.getBoundingClientRect();
-            const rawProgress = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / (window.innerHeight + rect.height)));
-            const p = Math.max(0, Math.min(1, (rawProgress - 0.5) * 2));
-            hero.currentTime = Math.min(p * (hero.duration || 4), 3.9);
-            if (hero.paused) hero.play().catch(() => {});
-          }
+          if (hero && hero.paused) hero.play().catch(() => {});
         } else if (heroVisible) {
-        switchToMain(idx);
-      }
+          switchToMain(idx);
+        }
 
       if (idx !== lastSection) {
         if (lastSection !== -1) triggerTransition();
@@ -178,14 +171,8 @@ function MobileHome() {
 
       scrollTimer = setTimeout(() => {
         const current = findSection();
-        if (current === 0 && hero) {
-          const el = sectionRefs.current[0];
-          if (el) {
-            const rect = el.getBoundingClientRect();
-            if (Math.abs(rect.top) < 10 && hero.paused && hero.readyState >= 2) {
-              hero.play().catch(() => {});
-            }
-          }
+        if (current === 0 && hero && hero.paused && hero.readyState >= 2) {
+          hero.play().catch(() => {});
         }
       }, 500);
     };
