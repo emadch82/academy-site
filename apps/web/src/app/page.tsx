@@ -522,7 +522,7 @@ function DesktopHome() {
     <main ref={containerRef} style={{ height: "800vh" }}>
       <div className="fixed inset-0 z-0 overflow-hidden">
         <motion.div style={{ scale: videoScale }} className="absolute inset-0">
-          <video ref={videoRef} muted playsInline preload="auto" style={{ willChange: 'transform' }} className="scroll-video w-full h-full object-cover">
+          <video ref={videoRef} muted playsInline preload="auto" poster="/motion/poster_hero_hd.jpg" style={{ willChange: 'transform' }} className="scroll-video w-full h-full object-cover">
             <source src="/motion/VIRA_language_institute_animation_1080p_202607281703_gwr_video_mvp.mp4" type="video/mp4" />
           </video>
         </motion.div>

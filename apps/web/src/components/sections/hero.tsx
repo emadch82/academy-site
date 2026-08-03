@@ -164,7 +164,7 @@ export function HeroSection() {
                 loop
                 playsInline
                 className="w-full h-full object-cover"
-                poster="/images/hero-poster.jpg"
+                poster="/motion/poster_hero_hd.jpg"
               >
                 <source src="/motion/VIRA_language_institute_animation_1080p_202607281703_gwr_video_mvp.mp4" type="video/mp4" />
               </video>

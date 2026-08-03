@@ -42,7 +42,7 @@ export function AboutSection() {
                   loop
                   playsInline
                   className="w-full h-full object-cover"
-                  poster="/images/about-poster.jpg"
+                  poster="/motion/poster_about_motion.jpg"
                 >
                   <source src="/motion/Motion_graphics_for_language_school_202607281714_gwr_video_mvp.mp4" type="video/mp4" />
                 </video>
