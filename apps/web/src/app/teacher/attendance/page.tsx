@@ -10,6 +10,7 @@ import {
   FiBookOpen,
   FiUserCheck,
   FiRefreshCw,
+  FiMessageCircle,
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { db, initializeDB, todayFa, addDaysFa, faWeekdayIndex } from '@/lib/store';
@@ -273,14 +274,21 @@ export default function AttendancePage() {
                 </thead>
                 <tbody>
                   {weeklyTable.map(({ student, cells }) => (
-                    <tr key={student.id} className="border-t">
-                      <td className="py-2 font-medium">{student.fullName}</td>
+                    <tr key={student.id} className="border-t align-top">
+                      <td className="py-2 font-medium whitespace-nowrap">{student.fullName}</td>
                       {cells.map((cell, i) => (
                         <td key={i} className="py-2 text-center">
                           {cell ? (
-                            <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] ${STATUS_COLORS[cell.status]}`}>
-                              {STATUS_LABELS[cell.status]}
-                            </span>
+                            <div className="flex flex-col items-center gap-1">
+                              <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] ${STATUS_COLORS[cell.status]}`}>
+                                {STATUS_LABELS[cell.status]}
+                              </span>
+                              {cell.status === 'absent' && cell.absenceReason && (
+                                <span className="inline-block max-w-[110px] text-[10px] leading-tight text-orange-600 bg-orange-50 rounded-lg px-1.5 py-0.5 text-center">
+                                  {cell.absenceReason}
+                                </span>
+                              )}
+                            </div>
                           ) : (
                             <span className="text-muted-foreground/40">—</span>
                           )}
@@ -320,6 +328,14 @@ export default function AttendancePage() {
                       <p className="text-xs text-muted-foreground" dir="ltr">
                         {student.mobile}
                       </p>
+                      {current === 'absent' && (() => {
+                        const rec = db.getAttendanceByCourse(courseId).find((a) => a.studentId === student.id && a.date === date);
+                        return rec?.absenceReason ? (
+                          <p className="text-[11px] text-orange-600 mt-1 flex items-center gap-1">
+                            <FiMessageCircle className="h-3 w-3 shrink-0" /> دلیل: {rec.absenceReason}
+                          </p>
+                        ) : null;
+                      })()}
                     </div>
                   </div>
 

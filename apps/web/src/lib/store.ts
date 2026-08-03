@@ -107,6 +107,12 @@ export function todayFa(): string {
   return faDateFromJdn(div(Date.now() / 86400000, 1) + 2440588);
 }
 
+export function faFromGregorian(isoDate: string): string {
+  const parts = isoDate.split('-').map((p) => parseInt(p, 10));
+  if (parts.length !== 3 || parts.some((p) => !p)) return isoDate;
+  return faDateFromJdn(g2d(parts[0], parts[1], parts[2]));
+}
+
 export function addDaysFa(faDate: string, days: number): string {
   const parts = toEnDigits(faDate).split('/');
   if (parts.length !== 3) return faDate;
@@ -188,6 +194,7 @@ export interface Attendance {
   studentName: string;
   date: string;
   status: 'present' | 'absent' | 'late';
+  absenceReason?: string;
 }
 
 export interface Homework {
@@ -285,6 +292,8 @@ export interface Appointment {
   time: string;
   reason: string;
   status: 'pending' | 'approved' | 'rejected' | 'completed';
+  sessions: number;
+  attendedCount: number;
   createdAt: string;
 }
 
@@ -298,6 +307,7 @@ export interface LeaveRequest {
   date: string;
   reason: string;
   status: 'pending' | 'approved' | 'rejected';
+  isToday?: boolean;
   createdAt: string;
 }
 
@@ -373,7 +383,7 @@ export interface Certificate {
 
 const STORAGE_KEY = 'amz_db';
 const DB_VERSION_KEY = 'amz_db_version';
-const CURRENT_DB_VERSION = 3;
+const CURRENT_DB_VERSION = 4;
 
 function getDB(): Record<string, any[]> {
   if (typeof window === 'undefined') return {};
@@ -816,6 +826,23 @@ export function initializeDB() {
     if (!db.quizAttempts) {
       setCollection('quizAttempts', []);
     }
+    let needsSave = false;
+    const appts = db.appointments as any[];
+    if (appts && appts.length > 0 && appts.some((a) => typeof a.sessions !== 'number')) {
+      appts.forEach((a) => {
+        if (typeof a.sessions !== 'number') a.sessions = 1;
+        if (typeof a.attendedCount !== 'number') a.attendedCount = 0;
+      });
+      needsSave = true;
+    }
+    const atts = db.attendance as any[];
+    if (atts && atts.some((a) => typeof a.absenceReason === 'undefined')) {
+      atts.forEach((a) => {
+        if (typeof a.absenceReason === 'undefined') a.absenceReason = '';
+      });
+      needsSave = true;
+    }
+    if (needsSave) saveDB(db);
     if (!db.groupMessages) {
       setCollection('groupMessages', []);
     }
@@ -864,6 +891,7 @@ export const db = {
   getAttendanceByStudent: (studentId: string) => getCollection<Attendance>('attendance').filter((a) => a.studentId === studentId),
   getAttendanceByCourse: (courseId: string) => getCollection<Attendance>('attendance').filter((a) => a.courseId === courseId),
   addAttendance: (a: Omit<Attendance, 'id'>) => addItem<Attendance>('attendance', { ...a, id: generateId('a') }),
+  updateAttendance: (id: string, updates: Partial<Attendance>) => updateItem<Attendance>('attendance', id, updates),
 
   // Schedule
   getSchedule: () => getCollection<Schedule>('schedule'),

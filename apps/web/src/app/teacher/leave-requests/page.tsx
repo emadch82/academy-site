@@ -124,6 +124,11 @@ export default function LeaveRequestsPage() {
                       <span className="flex items-center gap-1"><FiClock className="h-3 w-3" /> {req.date}</span>
                       <span className="flex items-center gap-1"><FiBookOpen className="h-3 w-3" /> {req.courseName}</span>
                       <span className="flex items-center gap-1"><FiAlertCircle className="h-3 w-3" /> ثبت: {req.createdAt}</span>
+                      {(req as any).isToday && (
+                        <span className="inline-flex items-center gap-1 text-[11px] bg-red-50 text-red-600 rounded-full px-2 py-0.5">
+                          <FiAlertCircle className="h-3 w-3" /> امروز نمی‌تواند بیاید
+                        </span>
+                      )}
                     </p>
                   </div>
                 </div>

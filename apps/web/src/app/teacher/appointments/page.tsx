@@ -10,6 +10,7 @@ import {
   FiX,
   FiCheckCircle,
   FiMessageCircle,
+  FiPlus,
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { db, initializeDB, Appointment } from '@/lib/store';
@@ -73,6 +74,28 @@ export default function AppointmentsPage() {
     setRefreshKey((k) => k + 1);
   };
 
+  const markSessionAttended = (ap: Appointment) => {
+    const sessions = ap.sessions || 1;
+    const attendedCount = ap.attendedCount || 0;
+    if (attendedCount >= sessions) return;
+    const newCount = attendedCount + 1;
+    const finished = newCount >= sessions;
+    db.updateAppointment(ap.id, { attendedCount: newCount, ...(finished ? { status: 'completed' } : {}) });
+    db.addNotification({
+      title: finished ? 'تعداد جلسات کلاس به پایان رسید' : 'جلسه کلاس برگزار شد',
+      message: finished
+        ? `کلاس «${ap.courseName}» با ${ap.studentName} به پایان رسید. هر ${sessions} جلسه برگزار شد.`
+        : `جلسه ${newCount} از ${sessions} جلسه کلاس «${ap.courseName}» با ${ap.studentName} برگزار شد.`,
+      type: finished ? 'success' : 'info',
+      target: 'individual',
+      recipientId: ap.studentId,
+      status: 'sent',
+      date: new Date().toLocaleDateString('fa-IR'),
+    });
+    toast.success(finished ? 'تعداد جلسات به پایان رسید' : `جلسه ${newCount} ثبت شد`);
+    setRefreshKey((k) => k + 1);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -129,36 +152,68 @@ export default function AppointmentsPage() {
                       <span className="flex items-center gap-1"><FiCalendar className="h-3 w-3" /> {ap.date}</span>
                       <span className="flex items-center gap-1"><FiClock className="h-3 w-3" /> {ap.time}</span>
                       <span className="flex items-center gap-1"><FiBookOpen className="h-3 w-3" /> {ap.courseName}</span>
+                      <span className="flex items-center gap-1"><FiCheckCircle className="h-3 w-3" /> {(ap as any).sessions || 1} جلسه</span>
                     </p>
                   </div>
                 </div>
 
-                {ap.status === 'pending' && (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleStatus(ap, 'approved')}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-green-500 text-white text-sm font-medium hover:bg-green-600 transition-colors"
-                    >
-                      <FiCheck className="h-4 w-4" /> تایید
-                    </button>
-                    <button
-                      onClick={() => handleStatus(ap, 'rejected')}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition-colors"
-                    >
-                      <FiX className="h-4 w-4" /> رد
-                    </button>
-                  </div>
-                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  {(ap.status === 'approved' || ap.status === 'completed') && (
+                    <div className="text-center">
+                      <p className="text-xs text-muted-foreground mb-1">
+                        جلسات: {(ap as any).attendedCount || 0} از {(ap as any).sessions || 1}
+                      </p>
+                      <div className="w-28 h-1.5 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-primary transition-all"
+                          style={{ width: `${Math.min(100, Math.round((((ap as any).attendedCount || 0) / ((ap as any).sessions || 1)) * 100))}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {ap.status === 'pending' && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleStatus(ap, 'approved')}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-green-500 text-white text-sm font-medium hover:bg-green-600 transition-colors"
+                      >
+                        <FiCheck className="h-4 w-4" /> تایید
+                      </button>
+                      <button
+                        onClick={() => handleStatus(ap, 'rejected')}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition-colors"
+                      >
+                        <FiX className="h-4 w-4" /> رد
+                      </button>
+                    </div>
+                  )}
 
-                {ap.status === 'approved' && (
-                  <button
-                    onClick={() => handleStatus(ap, 'completed')}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-                  >
-                    <FiCheckCircle className="h-4 w-4" /> علامت انجام
-                  </button>
-                )}
+                  {ap.status === 'approved' && ((ap as any).attendedCount || 0) < ((ap as any).sessions || 1) && (
+                    <button
+                      onClick={() => markSessionAttended(ap)}
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                    >
+                      <FiPlus className="h-4 w-4" /> ثبت حضور جلسه
+                    </button>
+                  )}
+
+                  {ap.status === 'approved' && ((ap as any).attendedCount || 0) >= ((ap as any).sessions || 1) && (
+                    <button
+                      onClick={() => handleStatus(ap, 'completed')}
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                    >
+                      <FiCheckCircle className="h-4 w-4" /> علامت انجام
+                    </button>
+                  )}
+                </div>
               </div>
+
+              {((ap as any).attendedCount || 0) >= ((ap as any).sessions || 1) && ap.status === 'completed' && (
+                <div className="mt-3 p-3 rounded-xl bg-green-50 border border-green-200 text-sm text-green-700 flex items-start gap-2">
+                  <FiCheckCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span>تعداد جلسات این کلاس به پایان رسید — به دانش‌آموز اطلاع داده شد.</span>
+                </div>
+              )}
 
               {ap.reason && (
                 <div className="mt-3 p-3 rounded-xl bg-muted/40 text-sm flex items-start gap-2">

@@ -33,9 +33,10 @@ import {
   FiX,
   FiUpload,
   FiPlus,
+  FiAlertCircle,
 } from 'react-icons/fi';
 import Cookies from 'js-cookie';
-import { db, initializeDB } from '@/lib/store';
+import { db, initializeDB, todayFa } from '@/lib/store';
 import { useHydrated } from '@/hooks/use-hydrated';
 import { useInvoices } from '@/contexts/invoice-context';
 import { formatPrice } from '@/lib/courses-data';
@@ -77,6 +78,9 @@ export default function ProfilePage() {
   const [apptDate, setApptDate] = useState('');
   const [apptTime, setApptTime] = useState('');
   const [apptReason, setApptReason] = useState('');
+  const [apptSessions, setApptSessions] = useState(1);
+  const [absentNoteId, setAbsentNoteId] = useState<string | null>(null);
+  const [absentNoteText, setAbsentNoteText] = useState('');
   const [activeQuiz, setActiveQuiz] = useState<any>(null);
   const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
   const [showMaterialModal, setShowMaterialModal] = useState(false);
@@ -224,6 +228,7 @@ export default function ProfilePage() {
       toast.error('دوره، تاریخ و دلیل را وارد کنید');
       return;
     }
+    const isToday = leaveDate === todayFa();
     db.addLeaveRequest({
       studentId: user.id,
       studentName: data.userInfo?.fullName || user.name,
@@ -233,11 +238,12 @@ export default function ProfilePage() {
       date: leaveDate,
       reason: leaveReason.trim(),
       status: 'pending',
+      isToday,
       createdAt: new Date().toLocaleDateString('fa-IR'),
     });
     db.addNotification({
-      title: 'درخواست غیبت موجه جدید',
-      message: `${user.name} درخواست غیبت موجه برای ${leaveDate} در دوره «${course.title}» ثبت کرد.`,
+      title: isToday ? 'غیبت امروز اعلام شد' : 'درخواست غیبت موجه جدید',
+      message: `${user.name} ${isToday ? 'اعلام کرد امروز نمی‌تواند در کلاس «' + course.title + '» حاضر شود.' : 'درخواست غیبت موجه برای ' + leaveDate + ' در دوره «' + course.title + '» ثبت کرد.'}`,
       type: 'info',
       target: 'individual',
       recipientId: course.teacherId,
@@ -248,6 +254,15 @@ export default function ProfilePage() {
     setLeaveCourseId('');
     setLeaveDate('');
     setLeaveReason('');
+    setRefreshKey((k) => k + 1);
+  };
+
+  const saveAbsenceNote = () => {
+    if (!absentNoteId) return;
+    db.updateAttendance(absentNoteId, { absenceReason: absentNoteText.trim() });
+    toast.success('دلیل غیبت برای استاد ارسال شد');
+    setAbsentNoteId(null);
+    setAbsentNoteText('');
     setRefreshKey((k) => k + 1);
   };
 
@@ -270,6 +285,8 @@ export default function ProfilePage() {
       time: apptTime,
       reason: apptReason.trim(),
       status: 'pending',
+      sessions: Math.max(1, apptSessions),
+      attendedCount: 0,
       createdAt: new Date().toLocaleDateString('fa-IR'),
     });
     db.addNotification({
@@ -568,23 +585,42 @@ export default function ProfilePage() {
                       </thead>
                       <tbody>
                         {data.attendance.map((a) => (
-                          <tr key={a.id} className="border-t">
-                            <td className="px-5 py-3">{a.date}</td>
+                          <tr key={a.id} className="border-t align-top">
+                            <td className="px-5 py-3 whitespace-nowrap">{a.date}</td>
                             <td className="px-5 py-3">{db.getCourseById(a.courseId)?.title || '—'}</td>
                             <td className="px-5 py-3">
-                              <span
-                                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs ${
-                                  a.status === 'present'
-                                    ? 'bg-green-100 text-green-700'
-                                    : a.status === 'late'
-                                    ? 'bg-yellow-100 text-yellow-700'
-                                    : 'bg-red-100 text-red-700'
-                                }`}
-                              >
-                                {a.status === 'present' && <><FiCheckCircle className="h-3 w-3" /> حاضر</>}
-                                {a.status === 'late' && <><FiClock className="h-3 w-3" /> تأخیر</>}
-                                {a.status === 'absent' && <><FiXCircle className="h-3 w-3" /> غایب</>}
-                              </span>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span
+                                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs ${
+                                    a.status === 'present'
+                                      ? 'bg-green-100 text-green-700'
+                                      : a.status === 'late'
+                                      ? 'bg-yellow-100 text-yellow-700'
+                                      : 'bg-red-100 text-red-700'
+                                  }`}
+                                >
+                                  {a.status === 'present' && <><FiCheckCircle className="h-3 w-3" /> حاضر</>}
+                                  {a.status === 'late' && <><FiClock className="h-3 w-3" /> تأخیر</>}
+                                  {a.status === 'absent' && <><FiXCircle className="h-3 w-3" /> غایب</>}
+                                </span>
+                                {a.status === 'absent' && (
+                                  a.absenceReason ? (
+                                    <span className="inline-flex items-center gap-1 text-[11px] text-orange-600 bg-orange-50 rounded-full px-2.5 py-1">
+                                      <FiMessageCircle className="h-3 w-3" /> دلیل: {a.absenceReason}
+                                    </span>
+                                  ) : (
+                                    <button
+                                      onClick={() => {
+                                        setAbsentNoteId(a.id);
+                                        setAbsentNoteText('');
+                                      }}
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
+                                    >
+                                      <FiEdit3 className="h-3 w-3" /> نوشتن دلیل غیبت
+                                    </button>
+                                  )
+                                )}
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -790,6 +826,18 @@ export default function ProfilePage() {
                       className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
                     />
                   </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">تعداد جلسات</label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={apptSessions}
+                      onChange={(e) => setApptSessions(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                    <p className="text-[11px] text-muted-foreground mt-1">این کلاس چند جلسه برگزار می‌شود؟</p>
+                  </div>
                   <div className="sm:col-span-2">
                     <label className="text-sm font-medium mb-1 block">موضوع کلاس</label>
                     <textarea
@@ -813,28 +861,50 @@ export default function ProfilePage() {
                 <div className="space-y-2">
                   <h3 className="font-bold">رزروهای من</h3>
                   {data.appointments.map((ap) => (
-                    <div key={ap.id} className="bg-background border rounded-xl p-4 flex flex-wrap items-center justify-between gap-2">
-                      <div>
-                        <p className="text-sm font-medium">{ap.teacherName} <span className="text-muted-foreground">— {ap.courseName}</span></p>
-                        <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
-                          <span className="flex items-center gap-1"><FiCalendar className="h-3 w-3" /> {ap.date}</span>
-                          <span className="flex items-center gap-1"><FiClock className="h-3 w-3" /> {ap.time}</span>
-                        </p>
-                        {ap.reason && <p className="text-xs text-muted-foreground mt-1">{ap.reason}</p>}
+                    <div key={ap.id} className="bg-background border rounded-xl p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-medium">{ap.teacherName} <span className="text-muted-foreground">— {ap.courseName}</span></p>
+                          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
+                            <span className="flex items-center gap-1"><FiCalendar className="h-3 w-3" /> {ap.date}</span>
+                            <span className="flex items-center gap-1"><FiClock className="h-3 w-3" /> {ap.time}</span>
+                            <span className="flex items-center gap-1"><FiCalendar className="h-3 w-3" /> {(ap as any).sessions || 1} جلسه</span>
+                          </p>
+                          {ap.reason && <p className="text-xs text-muted-foreground mt-1">{ap.reason}</p>}
+                        </div>
+                        <span
+                          className={`text-xs px-2.5 py-1 rounded-full ${
+                            ap.status === 'pending'
+                              ? 'bg-yellow-50 text-yellow-700'
+                              : ap.status === 'approved'
+                              ? 'bg-blue-50 text-blue-700'
+                              : ap.status === 'rejected'
+                              ? 'bg-red-50 text-red-600'
+                              : 'bg-green-50 text-green-700'
+                          }`}
+                        >
+                          {ap.status === 'pending' ? 'در انتظار تایید' : ap.status === 'approved' ? 'تایید شده' : ap.status === 'rejected' ? 'رد شده' : 'انجام شده'}
+                        </span>
                       </div>
-                      <span
-                        className={`text-xs px-2.5 py-1 rounded-full ${
-                          ap.status === 'pending'
-                            ? 'bg-yellow-50 text-yellow-700'
-                            : ap.status === 'approved'
-                            ? 'bg-blue-50 text-blue-700'
-                            : ap.status === 'rejected'
-                            ? 'bg-red-50 text-red-600'
-                            : 'bg-green-50 text-green-700'
-                        }`}
-                      >
-                        {ap.status === 'pending' ? 'در انتظار تایید' : ap.status === 'approved' ? 'تایید شده' : ap.status === 'rejected' ? 'رد شده' : 'انجام شده'}
-                      </span>
+                      {ap.status === 'approved' && (
+                        <div className="mt-3">
+                          <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+                            <span>جلسات برگزارشده</span>
+                            <span>{(ap as any).attendedCount || 0} از {(ap as any).sessions || 1}</span>
+                          </div>
+                          <div className="h-2 rounded-full bg-muted overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-primary transition-all"
+                              style={{ width: `${Math.min(100, Math.round((((ap as any).attendedCount || 0) / ((ap as any).sessions || 1)) * 100))}%` }}
+                            />
+                          </div>
+                          {((ap as any).attendedCount || 0) >= ((ap as any).sessions || 1) && (
+                            <p className="mt-3 text-sm font-medium text-green-600 bg-green-50 border border-green-200 rounded-xl px-4 py-2.5">
+                              تعداد جلسات این کلاس به پایان رسید — دوره شما تمام شده است.
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -865,12 +935,25 @@ export default function ProfilePage() {
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-1 block">تاریخ غیبت</label>
-                    <input
-                      type="date"
-                      value={leaveDate}
-                      onChange={(e) => setLeaveDate(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={leaveDate}
+                        onChange={(e) => setLeaveDate(e.target.value)}
+                        placeholder="مثلاً ۱۴۰۵/۰۵/۱۵"
+                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      />
+                      <button
+                        onClick={() => setLeaveDate(todayFa())}
+                        className="px-3 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors shrink-0"
+                        type="button"
+                      >
+                        امروز
+                      </button>
+                    </div>
+                    {leaveDate === todayFa() && (
+                      <p className="text-[11px] text-primary mt-1.5">امروز نمی‌توانید سر کلاس حاضر شوید؟ استاد در جریان قرار می‌گیرد.</p>
+                    )}
                   </div>
                   <div className="sm:col-span-2">
                     <label className="text-sm font-medium mb-1 block">دلیل غیبت</label>
@@ -899,6 +982,11 @@ export default function ProfilePage() {
                       <div>
                         <p className="text-sm font-medium">{l.courseName} <span className="text-muted-foreground">— {l.date}</span></p>
                         <p className="text-xs text-muted-foreground mt-1">{l.reason}</p>
+                        {(l as any).isToday && (
+                          <p className="text-[11px] text-red-600 mt-1 flex items-center gap-1">
+                            <FiAlertCircle className="h-3 w-3" /> غیبت امروز — به استاد اطلاع داده شد
+                          </p>
+                        )}
                       </div>
                       <span
                         className={`text-xs px-2.5 py-1 rounded-full ${
@@ -1280,6 +1368,36 @@ export default function ProfilePage() {
                 ارسال جزوه
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {absentNoteId && (
+        <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4" onClick={() => setAbsentNoteId(null)}>
+          <div className="bg-background border rounded-2xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-bold flex items-center gap-2">
+                <FiEdit3 className="h-5 w-5 text-primary" /> دلیل غیبت
+              </h3>
+              <button onClick={() => setAbsentNoteId(null)} className="p-2 rounded-lg hover:bg-muted/60 transition-colors">
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">چرا سر کلاس حاضر نبودید؟ دلیل برای استاد نمایش داده می‌شود.</p>
+            <textarea
+              value={absentNoteText}
+              onChange={(e) => setAbsentNoteText(e.target.value)}
+              rows={4}
+              placeholder="مثلاً: به دلیل بیماری نتوانستم در کلاس حاضر شوم..."
+              className="w-full px-3 py-2.5 border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+            />
+            <button
+              onClick={saveAbsenceNote}
+              disabled={!absentNoteText.trim()}
+              className="mt-4 w-full px-4 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ارسال دلیل به استاد
+            </button>
           </div>
         </div>
       )}
