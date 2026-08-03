@@ -704,6 +704,9 @@ export function initializeDB() {
   
   if (storedVersion < CURRENT_DB_VERSION) {
     localStorage.setItem(DB_VERSION_KEY, CURRENT_DB_VERSION.toString());
+  }
+
+  if (storedVersion === 0) {
     setCollection('users', SEED_USERS);
     setCollection('courses', SEED_COURSES);
     setCollection('enrollments', SEED_ENROLLMENTS);
@@ -735,7 +738,10 @@ export function initializeDB() {
     setCollection('leaveRequests', []);
     setCollection('quizAttempts', []);
     setCollection('groupMessages', []);
-  } else {
+    return;
+  }
+
+  {
     const users = db.users as User[];
     const hasAdmin = users.some((u) => u.role === 'admin');
     if (!hasAdmin) {
