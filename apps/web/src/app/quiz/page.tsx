@@ -1,61 +1,168 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FiArrowRight, FiCheckCircle, FiXCircle, FiClock, FiAward } from 'react-icons/fi';
-
-interface Question {
-  id: number;
-  question: string;
-  options: string[];
-  correct: number;
-}
-
-const MOCK_QUESTIONS: Question[] = [
-  { id: 1, question: 'پایتخت ایران کدام شهر است؟', options: ['اصفهان', 'تهران', 'شیراز', 'تبریز'], correct: 1 },
-  { id: 2, question: 'کدام زبان برنامه‌نویسی بیشترین استفاده را در هوش مصنوعی دارد؟', options: ['Java', 'C++', 'Python', 'JavaScript'], correct: 2 },
-  { id: 3, question: 'فرمول آب چیست؟', options: ['CO2', 'H2O', 'NaCl', 'O2'], correct: 1 },
-  { id: 4, question: 'بزرگترین اقیانوس جهان کدام است؟', options: ['اطلس', 'هند', 'آرام', 'جنوبگان'], correct: 2 },
-  { id: 5, question: 'React توسط کدام شرکت توسعه یافته است؟', options: ['Google', 'Microsoft', 'Meta', 'Apple'], correct: 2 },
-];
+import { FiAward, FiClock, FiCheckCircle, FiXCircle, FiChevronRight, FiRotateCcw } from 'react-icons/fi';
+import Cookies from 'js-cookie';
+import { db, initializeDB, Quiz } from '@/lib/store';
+import { useHydrated } from '@/hooks/use-hydrated';
 
 export default function QuizPage() {
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
   const [currentQ, setCurrentQ] = useState(0);
-  const [answers, setAnswers] = useState<(number | null)[]>(new Array(MOCK_QUESTIONS.length).fill(null));
+  const [answers, setAnswers] = useState<number[]>([]);
   const [showResult, setShowResult] = useState(false);
-  const [quizStarted, setQuizStarted] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const question = MOCK_QUESTIONS[currentQ];
-  const score = answers.reduce<number>((acc, ans, i) => acc + (ans === MOCK_QUESTIONS[i].correct ? 1 : 0), 0);
-  const percentage = Math.round((score / MOCK_QUESTIONS.length) * 100);
+  const hydrated = useHydrated();
 
-  const handleAnswer = (optionIndex: number) => {
-    const newAnswers = [...answers];
-    newAnswers[currentQ] = optionIndex;
-    setAnswers(newAnswers);
+  const user = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    const raw = Cookies.get('amz_user');
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as { id: string; name: string; identifier: string; role: string };
+    } catch {
+      return null;
+    }
+  }, []);
+
+  useMemo(() => {
+    if (!hydrated) return;
+    initializeDB();
+    let items = db.getQuizzes();
+    if (user?.id) {
+      const courseIds = db
+        .getEnrollmentsByStudent(user.id)
+        .filter((e) => e.status !== 'cancelled')
+        .map((e) => e.courseId);
+      if (courseIds.length > 0) {
+        items = items.filter((q) => courseIds.includes(q.courseId));
+      }
+    }
+    setQuizzes(items);
+  }, [hydrated, user?.id, refreshKey]);
+
+  if (!hydrated) return <main className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground">در حال بارگذاری...</p></main>;
+
+  const startQuiz = (quiz: Quiz) => {
+    setSelectedQuiz(quiz);
+    setCurrentQ(0);
+    setAnswers(new Array(quiz.questions.length).fill(-1));
+    setShowResult(false);
   };
 
-  const handleSubmit = () => {
+  const answer = (qIdx: number, oIdx: number) => {
+    setAnswers((prev) => prev.map((a, i) => (i === qIdx ? oIdx : a)));
+  };
+
+  const submit = () => {
+    if (!selectedQuiz) return;
+    const unanswered = answers.filter((a) => a === -1).length;
+    if (unanswered > 0) {
+      const r = confirm(`هنوز ${unanswered} سوال بدون پاسخ دارید. آیا مطمئن هستید؟`);
+      if (!r) return;
+    }
+    const score = selectedQuiz.questions.reduce(
+      (s, q, i) => s + (answers[i] === q.correctIndex ? 1 : 0),
+      0
+    );
+    if (user?.id) {
+      db.addQuizAttempt({
+        quizId: selectedQuiz.id,
+        quizTitle: selectedQuiz.title,
+        courseId: selectedQuiz.courseId,
+        studentId: user.id,
+        studentName: user.name,
+        score,
+        maxScore: selectedQuiz.questions.length,
+        date: new Date().toLocaleDateString('fa-IR'),
+      });
+    }
     setShowResult(true);
+    setRefreshKey((k) => k + 1);
   };
 
-  if (!quizStarted) {
+  const score = selectedQuiz
+    ? selectedQuiz.questions.reduce((s, q, i) => s + (answers[i] === q.correctIndex ? 1 : 0), 0)
+    : 0;
+  const pct = selectedQuiz ? Math.round((score / selectedQuiz.questions.length) * 100) : 0;
+
+  if (selectedQuiz && !showResult) {
+    const q = selectedQuiz.questions[currentQ];
     return (
       <main className="min-h-screen bg-background">
         <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 pt-24 pb-12">
           <div className="container mx-auto px-4">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-lg mx-auto text-center">
-              <div className="h-24 w-24 rounded-3xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto mb-6">
-                <FiAward className="h-12 w-12 text-primary/40" />
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h1 className="text-2xl font-bold">{selectedQuiz.title}</h1>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {selectedQuiz.courseName} — سوال {currentQ + 1} از {selectedQuiz.questions.length}
+                  </p>
+                </div>
+                <button onClick={() => setSelectedQuiz(null)} className="text-sm text-muted-foreground hover:text-foreground">
+                  خروج از آزمون
+                </button>
               </div>
-              <h1 className="text-3xl font-bold mb-4">آزمون آنلاین</h1>
-              <p className="text-muted-foreground mb-8">
-                {MOCK_QUESTIONS.length} سوال | زمان: {MOCK_QUESTIONS.length * 2} دقیقه
-              </p>
-              <button type="button" onClick={() => setQuizStarted(true)} className="bg-primary text-primary-foreground px-8 py-3 rounded-xl font-bold hover:bg-primary/90 transition-all">
-                شروع آزمون
-              </button>
+
+              <div className="flex gap-1.5 mb-6">
+                {selectedQuiz.questions.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 flex-1 rounded-full transition-colors ${
+                      answers[i] !== -1 ? 'bg-primary' : i === currentQ ? 'bg-primary/30' : 'bg-muted'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <div className="bg-background border rounded-2xl p-6 mb-6">
+                <p className="font-bold text-lg mb-4">{currentQ + 1}. {q.question}</p>
+                <div className="grid gap-3">
+                  {q.options.map((opt, oIdx) => (
+                    <button
+                      key={oIdx}
+                      onClick={() => answer(currentQ, oIdx)}
+                      className={`text-right px-4 py-3 rounded-xl border transition-colors ${
+                        answers[currentQ] === oIdx
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'hover:bg-muted/50'
+                      }`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => setCurrentQ((c) => Math.max(0, c - 1))}
+                  disabled={currentQ === 0}
+                  className="flex items-center gap-1 px-4 py-2.5 rounded-xl border font-medium disabled:opacity-40 hover:bg-muted/50 transition-colors"
+                >
+                  <FiChevronRight className="h-4 w-4" /> قبلی
+                </button>
+                {currentQ < selectedQuiz.questions.length - 1 ? (
+                  <button
+                    onClick={() => setCurrentQ((c) => c + 1)}
+                    className="flex items-center gap-1 px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+                  >
+                    بعدی
+                  </button>
+                ) : (
+                  <button
+                    onClick={submit}
+                    className="px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+                  >
+                    ثبت پاسخ‌ها
+                  </button>
+                )}
+              </div>
             </motion.div>
           </div>
         </div>
@@ -63,27 +170,62 @@ export default function QuizPage() {
     );
   }
 
-  if (showResult) {
+  if (selectedQuiz && showResult) {
     return (
       <main className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-20">
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="max-w-lg mx-auto text-center">
-            <div className={`h-24 w-24 rounded-full flex items-center justify-center mx-auto mb-6 ${percentage >= 60 ? 'bg-green-100' : 'bg-red-100'}`}>
-              {percentage >= 60 ? <FiCheckCircle className="h-12 w-12 text-green-600" /> : <FiXCircle className="h-12 w-12 text-red-600" />}
-            </div>
-            <h1 className="text-3xl font-bold mb-4">
-              {percentage >= 60 ? 'تبریک! قبول شدید' : 'متأسفانه قبول نشدید'}
-            </h1>
-            <p className="text-muted-foreground mb-2">نتیجه شما:</p>
-            <p className="text-5xl font-bold text-primary mb-2">{percentage}%</p>
-            <p className="text-muted-foreground mb-8">{score} از {MOCK_QUESTIONS.length} پاسخ صحیح</p>
-            <div className="flex gap-3 justify-center">
-              <button type="button" onClick={() => { setQuizStarted(false); setShowResult(false); setAnswers(new Array(MOCK_QUESTIONS.length).fill(null)); setCurrentQ(0); }} className="bg-primary text-primary-foreground px-6 py-3 rounded-xl font-bold hover:bg-primary/90 transition-all">
-                تلاش مجدد
-              </button>
-              <Link href="/courses" className="border px-6 py-3 rounded-xl font-medium hover:bg-muted transition-colors">بازگشت</Link>
-            </div>
-          </motion.div>
+        <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 pt-24 pb-12">
+          <div className="container mx-auto px-4">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-lg mx-auto text-center">
+              <div className={`h-28 w-28 rounded-3xl mx-auto mb-6 flex items-center justify-center ${pct >= 60 ? 'bg-green-50' : 'bg-red-50'}`}>
+                <span className={`text-3xl font-bold ${pct >= 60 ? 'text-green-600' : 'text-red-500'}`}>{pct}٪</span>
+              </div>
+              <h1 className="text-3xl font-bold mb-2">{pct >= 60 ? 'آفرین! قبول شدید' : 'دفعه بعد موفق می‌شوید'}</h1>
+              <p className="text-muted-foreground mb-4">
+                نتیجه شما در «{selectedQuiz.title}»: <span className="font-bold text-foreground">{score} از {selectedQuiz.questions.length}</span>
+              </p>
+              {!user && (
+                <p className="text-xs text-muted-foreground mb-6">
+                  برای ذخیره نتیجه خود <Link href="/auth/login" className="text-primary hover:underline">وارد شوید</Link>
+                </p>
+              )}
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={() => startQuiz(selectedQuiz)}
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl border font-medium hover:bg-muted/50 transition-colors"
+                >
+                  <FiRotateCcw className="h-4 w-4" /> آزمون مجدد
+                </button>
+                <button
+                  onClick={() => setSelectedQuiz(null)}
+                  className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors"
+                >
+                  بازگشت به لیست
+                </button>
+              </div>
+
+              <div className="mt-8 text-right bg-background border rounded-2xl p-5 space-y-3">
+                <h3 className="font-bold text-center mb-4">مرور پاسخ‌ها</h3>
+                {selectedQuiz.questions.map((q, i) => (
+                  <div key={i} className="flex items-start gap-2 text-sm">
+                    {answers[i] === q.correctIndex ? (
+                      <FiCheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                    ) : (
+                      <FiXCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+                    )}
+                    <div>
+                      <p className="font-medium">{q.question}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        پاسخ صحیح: <span className="text-green-600">{q.options[q.correctIndex]}</span>
+                        {answers[i] !== q.correctIndex && (
+                          <> — پاسخ شما: <span className="text-red-500">{answers[i] !== -1 ? q.options[answers[i]] : 'بدون پاسخ'}</span></>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
         </div>
       </main>
     );
@@ -91,47 +233,61 @@ export default function QuizPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-12">
+      <div className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 pt-24 pb-12">
         <div className="container mx-auto px-4">
-          <div className="max-w-2xl mx-auto">
-            <div className="flex items-center justify-between mb-4">
-              <Link href="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors">
-                <FiArrowRight className="ml-1 h-4 w-4" />
-                خروج
-              </Link>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <FiClock className="h-4 w-4" />
-                سوال {currentQ + 1} از {MOCK_QUESTIONS.length}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto">
+            <div className="text-center mb-10">
+              <div className="h-24 w-24 rounded-3xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto mb-6">
+                <FiAward className="h-12 w-12 text-primary/40" />
               </div>
+              <h1 className="text-3xl font-bold mb-3">آزمون‌های آنلاین</h1>
+              <p className="text-muted-foreground">
+                {user ? 'آزمون‌های دوره‌های شما' : 'برای دیدن آزمون‌های دوره‌های خود وارد شوید'}
+              </p>
             </div>
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <motion.div className="h-full bg-primary rounded-full" initial={{ width: 0 }} animate={{ width: `${((currentQ + 1) / MOCK_QUESTIONS.length) * 100}%` }} />
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <motion.div key={currentQ} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-background rounded-2xl border p-8">
-          <h2 className="text-xl font-bold mb-8">{question.question}</h2>
-          <div className="space-y-3">
-            {question.options.map((opt, i) => (
-              <button key={i} type="button" onClick={() => handleAnswer(i)} className={`w-full text-right p-4 rounded-xl border-2 transition-all ${answers[currentQ] === i ? 'border-primary bg-primary/5 shadow-sm' : 'border-border hover:border-primary/30 hover:bg-muted/30'}`}>
-                <span className="font-medium">{opt}</span>
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-3 mt-8">
-            {currentQ > 0 && (
-              <button type="button" onClick={() => setCurrentQ(currentQ - 1)} className="px-6 py-3 rounded-xl border font-medium hover:bg-muted transition-colors">سوال قبل</button>
-            )}
-            {currentQ < MOCK_QUESTIONS.length - 1 ? (
-              <button type="button" onClick={() => setCurrentQ(currentQ + 1)} className="flex-1 bg-primary text-primary-foreground py-3 rounded-xl font-bold hover:bg-primary/90 transition-all">سوال بعد</button>
+            {quizzes.length === 0 ? (
+              <div className="text-center py-12 bg-background border rounded-2xl">
+                <p className="font-bold">آزمونی برای شما تعریف نشده است</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {user ? 'آزمون‌های دوره‌های شما به‌زودی اضافه می‌شوند' : <Link href="/auth/login" className="text-primary hover:underline">ورود به حساب کاربری</Link>}
+                </p>
+              </div>
             ) : (
-              <button type="button" onClick={handleSubmit} className="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 transition-all">ارائه پاسخ‌ها</button>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {quizzes.map((quiz) => {
+                  const attempts = db.getAttemptsByQuiz(quiz.id);
+                  const mine = user?.id ? attempts.filter((a) => a.studentId === user.id) : [];
+                  const last = mine.length > 0 ? mine[mine.length - 1] : null;
+                  return (
+                    <motion.div key={quiz.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-background border rounded-2xl p-6 flex flex-col">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                        <FiAward className="h-6 w-6 text-primary" />
+                      </div>
+                      <h2 className="font-bold text-lg">{quiz.title}</h2>
+                      <p className="text-xs text-muted-foreground mt-1">{quiz.courseName}</p>
+                      <div className="flex gap-2 mt-3 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1"><FiClock className="h-3 w-3" /> {quiz.duration} دقیقه</span>
+                        <span>{quiz.questions.length} سوال</span>
+                      </div>
+                      {last && (
+                        <p className="text-xs mt-3">
+                          آخرین نتیجه: <span className={`font-bold ${last.score / last.maxScore >= 0.6 ? 'text-green-600' : 'text-red-500'}`}>{last.score} / {last.maxScore}</span>
+                        </p>
+                      )}
+                      <button
+                        onClick={() => startQuiz(quiz)}
+                        className="mt-5 w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+                      >
+                        {last ? 'آزمون مجدد' : 'شروع آزمون'}
+                      </button>
+                    </motion.div>
+                  );
+                })}
+              </div>
             )}
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     </main>
   );

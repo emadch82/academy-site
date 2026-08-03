@@ -150,6 +150,103 @@ export interface ActivityLog {
   timestamp: string;
 }
 
+export interface Appointment {
+  id: string;
+  studentId: string;
+  studentName: string;
+  teacherId: string;
+  teacherName: string;
+  courseId: string;
+  courseName: string;
+  date: string;
+  time: string;
+  reason: string;
+  status: 'pending' | 'approved' | 'rejected' | 'completed';
+  createdAt: string;
+}
+
+export interface LeaveRequest {
+  id: string;
+  studentId: string;
+  studentName: string;
+  teacherId: string;
+  courseId: string;
+  courseName: string;
+  date: string;
+  reason: string;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: string;
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  courseId: string;
+  description: string;
+  createdAt: string;
+}
+
+export interface GroupMessage {
+  id: string;
+  groupId: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  timestamp: string;
+}
+
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctIndex: number;
+}
+
+export interface Quiz {
+  id: string;
+  courseId: string;
+  courseName: string;
+  teacherId: string;
+  title: string;
+  description: string;
+  questions: QuizQuestion[];
+  duration: number;
+  createdAt: string;
+}
+
+export interface QuizAttempt {
+  id: string;
+  quizId: string;
+  quizTitle: string;
+  courseId: string;
+  studentId: string;
+  studentName: string;
+  score: number;
+  maxScore: number;
+  date: string;
+}
+
+export interface Material {
+  id: string;
+  courseId: string;
+  courseName: string;
+  teacherId: string;
+  title: string;
+  type: 'pdf' | 'video' | 'link' | 'file';
+  url: string;
+  addedAt: string;
+}
+
+export interface Certificate {
+  id: string;
+  studentId: string;
+  studentName: string;
+  courseId: string;
+  courseName: string;
+  teacherName: string;
+  date: string;
+  code: string;
+}
+
 const STORAGE_KEY = 'amz_db';
 const DB_VERSION_KEY = 'amz_db_version';
 const CURRENT_DB_VERSION = 3;
@@ -360,6 +457,79 @@ const SEED_ACTIVITY_LOGS: ActivityLog[] = [
   { id: 'al13', type: 'system', userId: 'u1', userName: 'مدیر سیستم', detail: 'کد تخفیف «ویرا۱۰» فعال شد', timestamp: '۱۴۰۵/۰۳/۱۵ ۱۱:۰۰' },
 ];
 
+const SEED_GROUPS: Group[] = [
+  { id: 'g1', name: 'گروه کودکان A', courseId: 'c1', description: 'ارتباط با مربی و اطلاع‌رسانی کلاس‌های دوره کودکان', createdAt: '۱۴۰۵/۰۱/۱۰' },
+  { id: 'g2', name: 'گروه نوجوانان B', courseId: 'c2', description: 'ارتباط با مربی و اطلاع‌رسانی کلاس‌های دوره نوجوانان', createdAt: '۱۴۰۵/۰۱/۱۵' },
+  { id: 'g3', name: 'گروه بزرگسالان A', courseId: 'c3', description: 'ارتباط با مدرس و اطلاع‌رسانی کلاس‌های دوره بزرگسالان', createdAt: '۱۴۰۵/۰۱/۲۰' },
+  { id: 'g4', name: 'گروه مکالمه SPO', courseId: 'c4', description: 'گروه تمرین مکالمه و اطلاع‌رسانی جلسات SPO', createdAt: '۱۴۰۵/۰۲/۰۱' },
+  { id: 'g5', name: 'گروه TTC', courseId: 'c5', description: 'گروه مدرسان TTC و اطلاع‌رسانی کارگاه‌ها', createdAt: '۱۴۰۵/۰۲/۱۰' },
+];
+
+const SEED_QUIZZES: Quiz[] = [
+  {
+    id: 'q1',
+    courseId: 'c3',
+    courseName: 'دوره بزرگسالان',
+    teacherId: 'u3',
+    title: 'آزمون گرامر درس ۱ تا ۳',
+    description: 'آزمون جمع‌بندی گرامر مباحث جلسات اخیر بزرگسالان',
+    duration: 15,
+    createdAt: '۱۴۰۵/۰۴/۰۱',
+    questions: [
+      { question: 'She ___ to school every day.', options: ['go', 'goes', 'going', 'gone'], correctIndex: 1 },
+      { question: 'I have ___ finished my homework.', options: ['just', 'yet', 'since', 'for'], correctIndex: 0 },
+      { question: '___ you like some tea?', options: ['Do', 'Would', 'Did', 'Have'], correctIndex: 1 },
+      { question: 'They ___ to the cinema last night.', options: ['go', 'went', 'goes', 'gone'], correctIndex: 1 },
+      { question: 'This is the book ___ I told you about.', options: ['who', 'which', 'what', 'whose'], correctIndex: 1 },
+    ],
+  },
+  {
+    id: 'q2',
+    courseId: 'c4',
+    courseName: 'دوره مکالمه SPO',
+    teacherId: 'u2',
+    title: 'آزمون واژگان و اصطلاحات',
+    description: 'مرور واژگان و اصطلاحات جلسات مکالمه',
+    duration: 10,
+    createdAt: '۱۴۰۵/۰۴/۱۰',
+    questions: [
+      { question: 'Meaning of "appointment":', options: ['قرار ملاقات', 'ساعت', 'قرارداد', 'مذاکره'], correctIndex: 0 },
+      { question: '"Take it easy" means:', options: ['سخت بگیر', 'آرام باش', 'عجله کن', 'ادامه بده'], correctIndex: 1 },
+      { question: 'Meaning of "schedule":', options: ['ساعت', 'برنامه زمانی', 'کار', 'جلسه'], correctIndex: 1 },
+      { question: 'Synonym of "begin":', options: ['start', 'end', 'stop', 'finish'], correctIndex: 0 },
+      { question: '"I\'m afraid of..." means:', options: ['من از... می‌ترسم', 'من خوشحالم', 'من ناراحتم', 'من مطمئنم'], correctIndex: 0 },
+    ],
+  },
+  {
+    id: 'q3',
+    courseId: 'c1',
+    courseName: 'دوره کودکان',
+    teacherId: 'u2',
+    title: 'آزمون رنگ‌ها و اعداد',
+    description: 'آزمون سرگرمی رنگ‌ها و اعداد برای کودکان',
+    duration: 10,
+    createdAt: '۱۴۰۵/۰۴/۱۵',
+    questions: [
+      { question: 'What color is the sky?', options: ['Red', 'Blue', 'Green', 'Yellow'], correctIndex: 1 },
+      { question: 'How many days are in a week?', options: ['5', '6', '7', '8'], correctIndex: 2 },
+      { question: 'What comes after 4?', options: ['3', '4', '5', '6'], correctIndex: 2 },
+      { question: 'Which one is a fruit?', options: ['Dog', 'Apple', 'Car', 'Book'], correctIndex: 1 },
+    ],
+  },
+];
+
+const SEED_MATERIALS: Material[] = [
+  { id: 'm1', courseId: 'c3', courseName: 'دوره بزرگسالان', teacherId: 'u3', title: 'جزوه گرامر درس ۱ تا ۳', type: 'pdf', url: '#', addedAt: '۱۴۰۵/۰۳/۲۰' },
+  { id: 'm2', courseId: 'c4', courseName: 'دوره مکالمه SPO', teacherId: 'u2', title: 'واژگان هفته چهارم', type: 'pdf', url: '#', addedAt: '۱۴۰۵/۰۴/۰۵' },
+  { id: 'm3', courseId: 'c1', courseName: 'دوره کودکان', teacherId: 'u2', title: 'فلش‌کارت رنگ‌ها', type: 'file', url: '#', addedAt: '۱۴۰۵/۰۴/۱۲' },
+  { id: 'm4', courseId: 'c2', courseName: 'دوره نوجوانان', teacherId: 'u4', title: 'ویدیوی تلفظ درس ۲', type: 'video', url: '#', addedAt: '۱۴۰۵/۰۳/۳۰' },
+];
+
+const SEED_CERTIFICATES: Certificate[] = [
+  { id: 'ct1', studentId: 'u7', studentName: 'علی محمدی', courseId: 'c1', courseName: 'دوره کودکان', teacherName: 'غزال امیرسلیمانی', date: '۱۴۰۵/۰۵/۰۱', code: 'VIR-1405-0001' },
+  { id: 'ct2', studentId: 'u8', studentName: 'سارا احمدی', courseId: 'c3', courseName: 'دوره بزرگسالان', teacherName: 'نسیم خدابخش', date: '۱۴۰۵/۰۵/۰۱', code: 'VIR-1405-0002' },
+];
+
 // ──── INITIALIZE ────
 
 export function initializeDB() {
@@ -450,6 +620,30 @@ export function initializeDB() {
     }
     if (!db.homework) {
       setCollection('homework', []);
+    }
+    if (!db.groups || db.groups.length === 0) {
+      setCollection('groups', SEED_GROUPS);
+    }
+    if (!db.quizzes || db.quizzes.length === 0) {
+      setCollection('quizzes', SEED_QUIZZES);
+    }
+    if (!db.materials || db.materials.length === 0) {
+      setCollection('materials', SEED_MATERIALS);
+    }
+    if (!db.certificates || db.certificates.length === 0) {
+      setCollection('certificates', SEED_CERTIFICATES);
+    }
+    if (!db.appointments) {
+      setCollection('appointments', []);
+    }
+    if (!db.leaveRequests) {
+      setCollection('leaveRequests', []);
+    }
+    if (!db.quizAttempts) {
+      setCollection('quizAttempts', []);
+    }
+    if (!db.groupMessages) {
+      setCollection('groupMessages', []);
     }
   }
 }
@@ -571,6 +765,67 @@ export const db = {
   },
   updateHomework: (id: string, updates: Partial<Homework>) => updateItem<Homework>('homework', id, updates),
   deleteHomework: (id: string) => deleteItem<Homework>('homework', id),
+
+  // Appointments
+  getAppointments: () => getCollection<Appointment>('appointments'),
+  getAppointmentsByStudent: (studentId: string) =>
+    getCollection<Appointment>('appointments').filter((a) => a.studentId === studentId).sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1)),
+  getAppointmentsByTeacher: (teacherId: string) =>
+    getCollection<Appointment>('appointments').filter((a) => a.teacherId === teacherId).sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1)),
+  addAppointment: (a: Omit<Appointment, 'id'>) => addItem<Appointment>('appointments', { ...a, id: generateId('ap') }),
+  updateAppointment: (id: string, updates: Partial<Appointment>) => updateItem<Appointment>('appointments', id, updates),
+
+  // Leave Requests
+  getLeaveRequests: () => getCollection<LeaveRequest>('leaveRequests'),
+  getLeaveRequestsByStudent: (studentId: string) =>
+    getCollection<LeaveRequest>('leaveRequests').filter((l) => l.studentId === studentId).sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1)),
+  getLeaveRequestsByTeacher: (teacherId: string) =>
+    getCollection<LeaveRequest>('leaveRequests').filter((l) => l.teacherId === teacherId).sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1)),
+  addLeaveRequest: (l: Omit<LeaveRequest, 'id'>) => addItem<LeaveRequest>('leaveRequests', { ...l, id: generateId('lr') }),
+  updateLeaveRequest: (id: string, updates: Partial<LeaveRequest>) => updateItem<LeaveRequest>('leaveRequests', id, updates),
+
+  // Groups
+  getGroups: () => getCollection<Group>('groups'),
+  getGroupsByCourse: (courseId: string) => getCollection<Group>('groups').filter((g) => g.courseId === courseId),
+  getGroupsByStudent: (studentId: string) => {
+    const courses = getCollection<Enrollment>('enrollments')
+      .filter((e) => e.studentId === studentId && e.status !== 'cancelled')
+      .map((e) => e.courseId);
+    return getCollection<Group>('groups').filter((g) => courses.includes(g.courseId));
+  },
+
+  // Group Messages
+  getGroupMessages: (groupId: string) => getCollection<GroupMessage>('groupMessages').filter((m) => m.groupId === groupId),
+  addGroupMessage: (m: Omit<GroupMessage, 'id'>) => addItem<GroupMessage>('groupMessages', { ...m, id: generateId('gm') }),
+
+  // Quizzes
+  getQuizzes: () => getCollection<Quiz>('quizzes'),
+  getQuizzesByTeacher: (teacherId: string) => getCollection<Quiz>('quizzes').filter((q) => q.teacherId === teacherId),
+  getQuizzesByCourse: (courseId: string) => getCollection<Quiz>('quizzes').filter((q) => q.courseId === courseId),
+  addQuiz: (q: Omit<Quiz, 'id'>) => addItem<Quiz>('quizzes', { ...q, id: generateId('q') }),
+  deleteQuiz: (id: string) => {
+    deleteItem<Quiz>('quizzes', id);
+    const attempts = getCollection<QuizAttempt>('quizAttempts').filter((a) => a.quizId !== id);
+    setCollection('quizAttempts', attempts);
+  },
+
+  // Quiz Attempts
+  getQuizAttempts: () => getCollection<QuizAttempt>('quizAttempts'),
+  getAttemptsByStudent: (studentId: string) => getCollection<QuizAttempt>('quizAttempts').filter((a) => a.studentId === studentId),
+  getAttemptsByQuiz: (quizId: string) => getCollection<QuizAttempt>('quizAttempts').filter((a) => a.quizId === quizId),
+  addQuizAttempt: (a: Omit<QuizAttempt, 'id'>) => addItem<QuizAttempt>('quizAttempts', { ...a, id: generateId('qa') }),
+
+  // Materials
+  getMaterials: () => getCollection<Material>('materials'),
+  getMaterialsByTeacher: (teacherId: string) => getCollection<Material>('materials').filter((m) => m.teacherId === teacherId),
+  getMaterialsByCourse: (courseId: string) => getCollection<Material>('materials').filter((m) => m.courseId === courseId),
+  addMaterial: (m: Omit<Material, 'id'>) => addItem<Material>('materials', { ...m, id: generateId('mt') }),
+  deleteMaterial: (id: string) => deleteItem<Material>('materials', id),
+
+  // Certificates
+  getCertificates: () => getCollection<Certificate>('certificates'),
+  getCertificatesByStudent: (studentId: string) => getCollection<Certificate>('certificates').filter((c) => c.studentId === studentId),
+  addCertificate: (c: Omit<Certificate, 'id'>) => addItem<Certificate>('certificates', { ...c, id: generateId('ct') }),
 
   // Students of courses (for attendance)
   getStudentsByCourse: (courseId: string) => {

@@ -1,10 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiArrowLeft, FiZap, FiSend, FiCheckCircle, FiThumbsUp, FiClock } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import Cookies from 'js-cookie';
+import { db, initializeDB } from '@/lib/store';
+import { useHydrated } from '@/hooks/use-hydrated';
 
 interface Suggestion {
   id: string;
@@ -16,13 +19,6 @@ interface Suggestion {
   status: 'pending' | 'reviewing' | 'accepted' | 'implemented';
 }
 
-const MOCK_SUGGESTIONS: Suggestion[] = [
-  { id: 's1', title: 'کلاس مکالمه فشرده', description: 'برگزاری کلاس‌های مکالمه فشرده هفتگی برای تقویت Speaking', author: 'سارا محمدی', date: '۱۴۰۵/۰۴/۱۰', votes: 25, status: 'implemented' },
-  { id: 's2', title: 'آزمون تعیین سطح آنلاین', description: 'سیستم آزمون آنلاین برای تعیین سطح زبان‌آموزان', author: 'مریم حسینی', date: '۱۴۰۵/۰۴/۰۵', votes: 32, status: 'implemented' },
-  { id: 's3', title: 'کلاب کتاب انگلیسی', description: 'برگزاری جلسات هفتگی کلاب کتاب با خواندن کتاب‌های انگلیسی', author: 'نیلوفر احمدی', date: '۱۴۰۵/۰۴/۰۱', votes: 15, status: 'reviewing' },
-  { id: 's4', title: 'دوره آمادگی آیلتس', description: 'برگزاری دوره تخصصی آمادگی آزمون IELTS با اساتید مجرب', author: 'رضا عباسی', date: '۱۴۰۵/۰۳/۲۸', votes: 28, status: 'accepted' },
-];
-
 const STATUS_MAP = {
   pending: { label: 'در انتظار بررسی', color: 'bg-yellow-100 text-yellow-700' },
   reviewing: { label: 'در حال بررسی', color: 'bg-blue-100 text-blue-700' },
@@ -31,10 +27,31 @@ const STATUS_MAP = {
 };
 
 export default function SuggestionsPage() {
-  const [suggestions, setSuggestions] = useState<Suggestion[]>(MOCK_SUGGESTIONS);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: '', description: '' });
   const [liked, setLiked] = useState<Set<string>>(new Set());
+
+  const hydrated = useHydrated();
+
+  const user = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    const raw = Cookies.get('amz_user');
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as { id: string; name: string; identifier: string; role: string };
+    } catch {
+      return null;
+    }
+  }, []);
+
+  useMemo(() => {
+    if (!hydrated) return;
+    initializeDB();
+    setSuggestions(db.getCollection<any>('suggestions'));
+  }, [hydrated]);
+
+  if (!hydrated) return <main className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground">در حال بارگذاری...</p></main>;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,16 +59,20 @@ export default function SuggestionsPage() {
       toast.error('لطفاً عنوان و توضیحات را وارد کنید');
       return;
     }
-    const newSuggestion: Suggestion = {
-      id: `s_${Date.now()}`,
-      title: form.title,
-      description: form.description,
-      author: 'کاربر',
-      date: new Date().toLocaleDateString('fa-IR'),
-      votes: 1,
-      status: 'pending',
-    };
-    setSuggestions([newSuggestion, ...suggestions]);
+    const items = db.getCollection<any>('suggestions');
+    db.setCollection('suggestions', [
+      {
+        id: `s_${Date.now()}`,
+        title: form.title,
+        description: form.description,
+        author: user?.name || 'کاربر',
+        date: new Date().toLocaleDateString('fa-IR'),
+        votes: 1,
+        status: 'pending',
+      },
+      ...items,
+    ]);
+    setSuggestions(db.getCollection<any>('suggestions'));
     setForm({ title: '', description: '' });
     setShowForm(false);
     toast.success('پیشنهاد شما ثبت شد!');
@@ -68,11 +89,11 @@ export default function SuggestionsPage() {
       }
       return next;
     });
-    setSuggestions((prev) =>
-      prev.map((s) =>
-        s.id === id ? { ...s, votes: s.votes + (isLiked ? -1 : 1) } : s
-      )
+    const items = db.getCollection<any>('suggestions').map((s: any) =>
+      s.id === id ? { ...s, votes: s.votes + (isLiked ? -1 : 1) } : s
     );
+    db.setCollection('suggestions', items);
+    setSuggestions(items);
   };
 
   return (

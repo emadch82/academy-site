@@ -55,7 +55,13 @@ function MobileHome() {
   useEffect(() => {
     const video = videoRef.current;
     const hero = heroVideoRef.current;
-    if (video) video.playbackRate = 0.7;
+    if (video) {
+      try {
+        video.playbackRate = 0.7;
+      } catch {
+        video.playbackRate = 1;
+      }
+    }
     if (hero) hero.playbackRate = 1;
     const timer = setTimeout(() => setShowButtons(true), 2500);
     return () => clearTimeout(timer);
@@ -98,6 +104,17 @@ function MobileHome() {
     };
     video.addEventListener('timeupdate', onTimeUpdate);
 
+    const onStall = () => {
+      const v = videoRef.current;
+      if (!v || heroVisible || v.paused) return;
+      if (v.readyState >= 2) {
+        const p = v.play();
+        if (p) p.catch(() => {});
+      }
+    };
+    video.addEventListener('waiting', onStall);
+    video.addEventListener('canplay', onStall);
+
     const switchToHero = () => {
       setHeroVisible(true);
       video.pause();
@@ -110,8 +127,24 @@ function MobileHome() {
     const switchToMain = (idx: number) => {
       setHeroVisible(false);
       if (hero) hero.pause();
-      video.currentTime = SECTIONS[idx].start;
-      video.play().catch(() => {});
+      const v = videoRef.current;
+      if (!v) return;
+      const seg = SECTIONS[idx];
+      if (!seg) return;
+      const tryPlay = () => {
+        const p = v.play();
+        if (p) p.catch(() => {});
+      };
+      v.currentTime = seg.start;
+      if (v.readyState >= 2) {
+        tryPlay();
+      } else {
+        const once = () => {
+          v.removeEventListener('canplay', once);
+          tryPlay();
+        };
+        v.addEventListener('canplay', once);
+      }
     };
 
     const onScroll = () => {
@@ -168,6 +201,8 @@ function MobileHome() {
     return () => {
       scrollEl.removeEventListener('scroll', onScroll);
       video.removeEventListener('timeupdate', onTimeUpdate);
+      video.removeEventListener('waiting', onStall);
+      video.removeEventListener('canplay', onStall);
       if (scrollTimer) clearTimeout(scrollTimer);
     };
   }, []);
@@ -201,7 +236,7 @@ function MobileHome() {
           ref={videoRef}
           muted
           playsInline
-          preload="auto"
+          preload="metadata"
           style={{
             willChange: 'transform',
             filter: `blur(${transitionBlur}px)`,
@@ -214,7 +249,7 @@ function MobileHome() {
             objectFit: 'cover',
           }}
         >
-          <source src="/motion/vira_final.mp4" type="video/mp4" />
+          <source src="/motion/vira_final_web.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-black/40" />
         <div

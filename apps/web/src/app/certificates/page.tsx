@@ -1,27 +1,40 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiArrowLeft, FiAward, FiDownload, FiCheckCircle } from 'react-icons/fi';
-import { useWallet } from '@/contexts/wallet-context';
-
-interface Certificate {
-  id: string;
-  courseName: string;
-  studentName: string;
-  date: string;
-  grade: string;
-}
-
-const MOCK_CERTIFICATES: Certificate[] = [
-  { id: 'CERT-001', courseName: 'دوره مکالمه SPO', studentName: 'کاربر نمونه', date: '۱۴۰۵/۰۴/۱۵', grade: 'عالی' },
-  { id: 'CERT-002', courseName: 'دوره بزرگسالان - سطح Intermediate', studentName: 'کاربر نمونه', date: '۱۴۰۵/۰۳/۲۰', grade: 'خوب' },
-  { id: 'CERT-003', courseName: 'دوره کودکان - First Friends', studentName: 'کاربر نمونه', date: '۱۴۰۵/۰۲/۱۰', grade: 'عالی' },
-];
+import Cookies from 'js-cookie';
+import { db, initializeDB, Certificate } from '@/lib/store';
+import { useHydrated } from '@/hooks/use-hydrated';
 
 export default function CertificatesPage() {
-  const [certificates] = useState<Certificate[]>(MOCK_CERTIFICATES);
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
+
+  const hydrated = useHydrated();
+
+  const user = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    const raw = Cookies.get('amz_user');
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as { id: string; name: string; identifier: string; role: string };
+    } catch {
+      return null;
+    }
+  }, []);
+
+  useMemo(() => {
+    if (!hydrated) return;
+    initializeDB();
+    if (user?.id) {
+      setCertificates(db.getCertificatesByStudent(user.id));
+    } else {
+      setCertificates([]);
+    }
+  }, [hydrated, user?.id]);
+
+  if (!hydrated) return <main className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground">در حال بارگذاری...</p></main>;
 
   const downloadCertificate = (cert: Certificate) => {
     const text = `
@@ -30,7 +43,7 @@ export default function CertificatesPage() {
 ║     گواهینامه پایان دوره                 ║
 ╚══════════════════════════════════════════╝
 
-شماره: ${cert.id}
+شماره: ${cert.code}
 تاریخ: ${cert.date}
 
 این گواهی به شناسایی می‌کند که
@@ -39,7 +52,7 @@ ${cert.studentName}
 
 دوره "${cert.courseName}" را با موفقیت به پایان رسانده است.
 
-نمره: ${cert.grade}
+مدرس دوره: ${cert.teacherName}
 
 تاریخ صدور: ${cert.date}
 آموزشگاه زبان ویرا
@@ -48,7 +61,7 @@ ${cert.studentName}
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `certificate-${cert.id}.txt`;
+    a.download = `certificate-${cert.code}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -62,55 +75,55 @@ ${cert.studentName}
               <FiArrowLeft className="ml-1 h-4 w-4" />
               بازگشت
             </Link>
-            <h1 className="text-3xl font-bold">گواهینامه‌های من</h1>
-            <p className="text-muted-foreground mt-2">گواهینامه‌های دوره‌های تکمیل شده</p>
+            <h1 className="text-3xl font-bold mb-2">گواهینامه‌های من</h1>
+            <p className="text-muted-foreground mb-10">گواهینامه‌های پایان دوره شما</p>
+
+            {!user ? (
+              <div className="text-center py-16 bg-background border rounded-2xl">
+                <FiAward className="h-12 w-12 mx-auto mb-3 opacity-40" />
+                <p className="font-bold mb-2">ابتدا وارد شوید</p>
+                <Link href="/auth/login" className="text-primary hover:underline text-sm">ورود به حساب کاربری</Link>
+              </div>
+            ) : certificates.length === 0 ? (
+              <div className="text-center py-16 bg-background border rounded-2xl">
+                <FiAward className="h-12 w-12 mx-auto mb-3 opacity-40" />
+                <p className="font-bold">گواهینامه‌ای ندارید</p>
+                <p className="text-sm text-muted-foreground mt-2">پس از اتمام موفق دوره، گواهینامه شما اینجا نمایش داده می‌شود</p>
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {certificates.map((cert) => (
+                  <motion.div
+                    key={cert.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-background border rounded-2xl p-6 text-center"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                      <FiAward className="h-8 w-8 text-white" />
+                    </div>
+                    <h2 className="font-bold">دوره {cert.courseName}</h2>
+                    <p className="text-xs text-muted-foreground mt-2">به نام {cert.studentName}</p>
+                    <p className="text-xs text-muted-foreground">مدرس: {cert.teacherName}</p>
+                    <p className="text-xs text-muted-foreground mt-1">تاریخ: {cert.date}</p>
+                    <div className="flex items-center justify-center gap-1 mt-2">
+                      <FiCheckCircle className="h-3.5 w-3.5 text-green-600" />
+                      <span className="text-xs text-green-600 font-medium">معتبر</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-1" dir="ltr">{cert.code}</p>
+                    <button
+                      onClick={() => downloadCertificate(cert)}
+                      className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                    >
+                      <FiDownload className="h-4 w-4" />
+                      دانلود گواهینامه
+                    </button>
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </motion.div>
         </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8">
-        {certificates.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="h-24 w-24 rounded-3xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto mb-6">
-              <FiAward className="h-12 w-12 text-primary/40" />
-            </div>
-            <h2 className="text-xl font-bold mb-4">هنوز گواهینامه‌ای ندارید</h2>
-            <p className="text-muted-foreground mb-8">دوره‌های خود را تکمیل کنید تا گواهینامه دریافت کنید.</p>
-            <Link href="/courses" className="bg-primary text-primary-foreground px-8 py-3 rounded-xl font-bold hover:bg-primary/90 transition-all inline-block">
-              مشاهده دوره‌ها
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {certificates.map((cert, i) => (
-              <motion.div key={cert.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="bg-background rounded-2xl border p-6 space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-xl bg-yellow-100 flex items-center justify-center">
-                    <FiAward className="h-6 w-6 text-yellow-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold">{cert.courseName}</h3>
-                    <p className="text-xs text-muted-foreground">{cert.id}</p>
-                  </div>
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">تاریخ صدور:</span>
-                    <span>{cert.date}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">نمره:</span>
-                    <span className="text-green-600 font-medium">{cert.grade}</span>
-                  </div>
-                </div>
-                <button type="button" onClick={() => downloadCertificate(cert)} className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-2.5 rounded-xl text-sm font-medium hover:bg-primary/90 transition-all">
-                  <FiDownload className="h-4 w-4" />
-                  دانلود گواهینامه
-                </button>
-              </motion.div>
-            ))}
-          </div>
-        )}
       </div>
     </main>
   );

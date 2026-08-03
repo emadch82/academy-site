@@ -24,6 +24,13 @@ import {
   FiLock,
   FiEye,
   FiEyeOff,
+  FiAward,
+  FiUserX,
+  FiDownload,
+  FiYoutube,
+  FiLink,
+  FiFile,
+  FiX,
 } from 'react-icons/fi';
 import Cookies from 'js-cookie';
 import { db, initializeDB } from '@/lib/store';
@@ -32,12 +39,17 @@ import { useInvoices } from '@/contexts/invoice-context';
 import { formatPrice } from '@/lib/courses-data';
 import toast from 'react-hot-toast';
 
-type Tab = 'courses' | 'homework' | 'attendance' | 'invoices' | 'reviews' | 'settings';
+type Tab = 'courses' | 'homework' | 'attendance' | 'invoices' | 'reviews' | 'quiz' | 'appointments' | 'leave' | 'materials' | 'certificates' | 'settings';
 
 const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: 'courses', label: 'دوره‌های من', icon: FiBookOpen },
   { id: 'homework', label: 'تکالیف', icon: FiEdit3 },
+  { id: 'quiz', label: 'آزمون‌ها', icon: FiAward },
   { id: 'attendance', label: 'حاضری و غیاب', icon: FiCalendar },
+  { id: 'materials', label: 'جزوات', icon: FiFileText },
+  { id: 'appointments', label: 'رزرو مشاوره', icon: FiClock },
+  { id: 'leave', label: 'غیبت موجه', icon: FiUserX },
+  { id: 'certificates', label: 'گواهینامه‌ها', icon: FiAward },
   { id: 'invoices', label: 'فاکتورها', icon: FiDollarSign },
   { id: 'reviews', label: 'نظرات من', icon: FiStar },
   { id: 'settings', label: 'پروفایل', icon: FiUser },
@@ -55,6 +67,16 @@ export default function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNew, setShowNew] = useState(false);
   const [showCurrent, setShowCurrent] = useState(false);
+  const [leaveCourseId, setLeaveCourseId] = useState('');
+  const [leaveDate, setLeaveDate] = useState('');
+  const [leaveReason, setLeaveReason] = useState('');
+  const [apptTeacherId, setApptTeacherId] = useState('');
+  const [apptCourseId, setApptCourseId] = useState('');
+  const [apptDate, setApptDate] = useState('');
+  const [apptTime, setApptTime] = useState('');
+  const [apptReason, setApptReason] = useState('');
+  const [activeQuiz, setActiveQuiz] = useState<any>(null);
+  const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
 
   const user = useMemo(() => {
     if (typeof window === 'undefined') return null;
@@ -77,6 +99,25 @@ export default function ProfilePage() {
       attendance: db.getAttendanceByStudent(user.id).sort((a, b) => (b.date > a.date ? 1 : -1)),
       transactions: db.getTransactionsByUser(user.id),
       reviews: db.getReviewsByStudent(user.id),
+      quizzes: db
+        .getQuizzes()
+        .filter((q) =>
+          db
+            .getEnrollmentsByStudent(user.id)
+            .some((e) => e.courseId === q.courseId && e.status !== 'cancelled')
+        ),
+      attempts: db.getAttemptsByStudent(user.id),
+      appointments: db.getAppointmentsByStudent(user.id),
+      leaveRequests: db.getLeaveRequestsByStudent(user.id),
+      materials: db
+        .getMaterials()
+        .filter((m) =>
+          db
+            .getEnrollmentsByStudent(user.id)
+            .some((e) => e.courseId === m.courseId && e.status !== 'cancelled')
+        ),
+      certificates: db.getCertificatesByStudent(user.id),
+      teachers: db.getUsers().filter((u) => u.role === 'teacher'),
     };
   }, [user, refreshKey]);
 
@@ -142,6 +183,78 @@ export default function ProfilePage() {
     setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
+  };
+
+  const addLeaveRequest = () => {
+    const course = db.getCourseById(leaveCourseId);
+    if (!course || !leaveDate || !leaveReason.trim()) {
+      toast.error('دوره، تاریخ و دلیل را وارد کنید');
+      return;
+    }
+    db.addLeaveRequest({
+      studentId: user.id,
+      studentName: data.userInfo?.fullName || user.name,
+      teacherId: course.teacherId,
+      courseId: course.id,
+      courseName: course.title,
+      date: leaveDate,
+      reason: leaveReason.trim(),
+      status: 'pending',
+      createdAt: new Date().toLocaleDateString('fa-IR'),
+    });
+    db.addNotification({
+      title: 'درخواست غیبت موجه جدید',
+      message: `${user.name} درخواست غیبت موجه برای ${leaveDate} در دوره «${course.title}» ثبت کرد.`,
+      type: 'info',
+      target: 'individual',
+      recipientId: course.teacherId,
+      status: 'sent',
+      date: new Date().toLocaleDateString('fa-IR'),
+    });
+    toast.success('درخواست غیبت ثبت شد و به استاد اطلاع داده شد');
+    setLeaveCourseId('');
+    setLeaveDate('');
+    setLeaveReason('');
+    setRefreshKey((k) => k + 1);
+  };
+
+  const addAppointment = () => {
+    if (!apptTeacherId || !apptDate || !apptTime || !apptReason.trim()) {
+      toast.error('استاد، تاریخ، ساعت و موضوع را وارد کنید');
+      return;
+    }
+    const teacher = db.getUserById(apptTeacherId);
+    if (!teacher) return;
+    const course = db.getCourseById(apptCourseId);
+    db.addAppointment({
+      studentId: user.id,
+      studentName: data.userInfo?.fullName || user.name,
+      teacherId: teacher.id,
+      teacherName: teacher.fullName,
+      courseId: course?.id || '',
+      courseName: course?.title || '—',
+      date: apptDate,
+      time: apptTime,
+      reason: apptReason.trim(),
+      status: 'pending',
+      createdAt: new Date().toLocaleDateString('fa-IR'),
+    });
+    db.addNotification({
+      title: 'درخواست رزرو مشاوره جدید',
+      message: `${user.name} جلسه مشاوره ${apptDate} ساعت ${apptTime} با شما رزرو کرد.`,
+      type: 'info',
+      target: 'individual',
+      recipientId: teacher.id,
+      status: 'sent',
+      date: new Date().toLocaleDateString('fa-IR'),
+    });
+    toast.success('رزرو مشاوره ثبت شد و به استاد اطلاع داده شد');
+    setApptTeacherId('');
+    setApptCourseId('');
+    setApptDate('');
+    setApptTime('');
+    setApptReason('');
+    setRefreshKey((k) => k + 1);
   };
 
   const addReview = (courseId: string, courseName: string, rating: number, comment: string) => {
@@ -473,6 +586,315 @@ export default function ProfilePage() {
             </>
           )}
 
+          {/* Quizzes */}
+          {tab === 'quiz' && (
+            <>
+              {data.quizzes.length === 0 ? (
+                <div className="text-center py-16 bg-background border rounded-2xl">
+                  <FiAward className="h-12 w-12 mx-auto mb-3 opacity-40" />
+                  <p className="font-bold">آزمونی برای دوره‌های شما تعریف نشده است</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {data.quizzes.map((quiz) => {
+                    const attempts = data.attempts.filter((a) => a.quizId === quiz.id);
+                    const last = attempts.length > 0 ? attempts[attempts.length - 1] : null;
+                    const best = attempts.length > 0
+                      ? Math.max(...attempts.map((a) => (a.maxScore > 0 ? a.score / a.maxScore : 0)))
+                      : 0;
+                    return (
+                      <div key={quiz.id} className="bg-background border rounded-2xl p-5 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <h3 className="font-bold">{quiz.title}</h3>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {quiz.courseName} — {quiz.questions.length} سوال — {quiz.duration} دقیقه
+                          </p>
+                          {last ? (
+                            <p className="text-xs mt-2">
+                              آخرین نتیجه: <span className={`font-bold ${last.score / last.maxScore >= 0.7 ? 'text-green-600' : last.score / last.maxScore >= 0.4 ? 'text-yellow-600' : 'text-red-500'}`}>{last.score} / {last.maxScore}</span>
+                              {' '}— بهترین: <span className="font-bold text-primary">{Math.round(best * 100)}٪</span>
+                            </p>
+                          ) : (
+                            <p className="text-xs text-muted-foreground mt-2">هنوز شرکت نکرده‌اید</p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => {
+                            setActiveQuiz(quiz);
+                            setQuizAnswers(new Array(quiz.questions.length).fill(-1));
+                          }}
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                        >
+                          <FiEdit3 className="h-4 w-4" />
+                          {last ? 'آزمون مجدد' : 'شرکت در آزمون'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Appointments */}
+          {tab === 'appointments' && (
+            <div className="space-y-6">
+              <div className="bg-background border rounded-2xl p-6">
+                <h2 className="font-bold mb-4 flex items-center gap-2">
+                  <FiClock className="h-4 w-4 text-primary" /> رزرو جلسه مشاوره
+                </h2>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">استاد</label>
+                    <select
+                      value={apptTeacherId}
+                      onChange={(e) => {
+                        setApptTeacherId(e.target.value);
+                        setApptCourseId('');
+                      }}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    >
+                      <option value="">انتخاب استاد...</option>
+                      {data.teachers.map((t) => (
+                        <option key={t.id} value={t.id}>{t.fullName}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">دوره</label>
+                    <select
+                      value={apptCourseId}
+                      onChange={(e) => setApptCourseId(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    >
+                      <option value="">انتخاب دوره (اختیاری)...</option>
+                      {data.enrollments.map((e) => (
+                        <option key={e.courseId} value={e.courseId}>{e.courseName}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">تاریخ</label>
+                    <input
+                      type="date"
+                      value={apptDate}
+                      onChange={(e) => setApptDate(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">ساعت</label>
+                    <input
+                      type="time"
+                      value={apptTime}
+                      onChange={(e) => setApptTime(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="text-sm font-medium mb-1 block">موضوع مشاوره</label>
+                    <textarea
+                      value={apptReason}
+                      onChange={(e) => setApptReason(e.target.value)}
+                      rows={2}
+                      placeholder="موضوع جلسه مشاوره..."
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                    />
+                  </div>
+                </div>
+                <button
+                  onClick={addAppointment}
+                  className="mt-4 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                >
+                  ثبت رزرو مشاوره
+                </button>
+              </div>
+
+              {data.appointments.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="font-bold">رزروهای من</h3>
+                  {data.appointments.map((ap) => (
+                    <div key={ap.id} className="bg-background border rounded-xl p-4 flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-medium">{ap.teacherName} <span className="text-muted-foreground">— {ap.courseName}</span></p>
+                        <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
+                          <span className="flex items-center gap-1"><FiCalendar className="h-3 w-3" /> {ap.date}</span>
+                          <span className="flex items-center gap-1"><FiClock className="h-3 w-3" /> {ap.time}</span>
+                        </p>
+                        {ap.reason && <p className="text-xs text-muted-foreground mt-1">{ap.reason}</p>}
+                      </div>
+                      <span
+                        className={`text-xs px-2.5 py-1 rounded-full ${
+                          ap.status === 'pending'
+                            ? 'bg-yellow-50 text-yellow-700'
+                            : ap.status === 'approved'
+                            ? 'bg-blue-50 text-blue-700'
+                            : ap.status === 'rejected'
+                            ? 'bg-red-50 text-red-600'
+                            : 'bg-green-50 text-green-700'
+                        }`}
+                      >
+                        {ap.status === 'pending' ? 'در انتظار تایید' : ap.status === 'approved' ? 'تایید شده' : ap.status === 'rejected' ? 'رد شده' : 'انجام شده'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Leave Requests */}
+          {tab === 'leave' && (
+            <div className="space-y-6">
+              <div className="bg-background border rounded-2xl p-6">
+                <h2 className="font-bold mb-4 flex items-center gap-2">
+                  <FiUserX className="h-4 w-4 text-primary" /> درخواست غیبت موجه
+                </h2>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">دوره</label>
+                    <select
+                      value={leaveCourseId}
+                      onChange={(e) => setLeaveCourseId(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    >
+                      <option value="">انتخاب دوره...</option>
+                      {data.enrollments.map((e) => (
+                        <option key={e.courseId} value={e.courseId}>{e.courseName}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">تاریخ غیبت</label>
+                    <input
+                      type="date"
+                      value={leaveDate}
+                      onChange={(e) => setLeaveDate(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="text-sm font-medium mb-1 block">دلیل غیبت</label>
+                    <textarea
+                      value={leaveReason}
+                      onChange={(e) => setLeaveReason(e.target.value)}
+                      rows={2}
+                      placeholder="دلیل غیبت خود را توضیح دهید..."
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                    />
+                  </div>
+                </div>
+                <button
+                  onClick={addLeaveRequest}
+                  className="mt-4 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                >
+                  ثبت درخواست
+                </button>
+              </div>
+
+              {data.leaveRequests.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="font-bold">درخواست‌های من</h3>
+                  {data.leaveRequests.map((l) => (
+                    <div key={l.id} className="bg-background border rounded-xl p-4 flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-medium">{l.courseName} <span className="text-muted-foreground">— {l.date}</span></p>
+                        <p className="text-xs text-muted-foreground mt-1">{l.reason}</p>
+                      </div>
+                      <span
+                        className={`text-xs px-2.5 py-1 rounded-full ${
+                          l.status === 'pending'
+                            ? 'bg-yellow-50 text-yellow-700'
+                            : l.status === 'approved'
+                            ? 'bg-green-50 text-green-700'
+                            : 'bg-red-50 text-red-600'
+                        }`}
+                      >
+                        {l.status === 'pending' ? 'در انتظار بررسی' : l.status === 'approved' ? 'تایید شده' : 'رد شده'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Materials */}
+          {tab === 'materials' && (
+            <>
+              {data.materials.length === 0 ? (
+                <div className="text-center py-16 bg-background border rounded-2xl">
+                  <FiFileText className="h-12 w-12 mx-auto mb-3 opacity-40" />
+                  <p className="font-bold">جزوه‌ای برای دوره‌های شما منتشر نشده است</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {data.materials.map((m) => (
+                    <div key={m.id} className="bg-background border rounded-2xl p-5 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                          {m.type === 'pdf' ? <FiFileText className="h-5 w-5 text-primary" /> : m.type === 'video' ? <FiYoutube className="h-5 w-5 text-primary" /> : m.type === 'link' ? <FiLink className="h-5 w-5 text-primary" /> : <FiFile className="h-5 w-5 text-primary" />}
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="font-bold truncate">{m.title}</h3>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {m.courseName} — {m.type === 'pdf' ? 'جزوه PDF' : m.type === 'video' ? 'ویدیو' : m.type === 'link' ? 'لینک' : 'فایل'} — {m.addedAt}
+                          </p>
+                        </div>
+                      </div>
+                      <a
+                        href={m.url === '#' ? undefined : m.url}
+                        target={m.url === '#' ? undefined : '_blank'}
+                        rel="noreferrer"
+                        onClick={(e) => {
+                          if (m.url === '#') {
+                            e.preventDefault();
+                            toast('فایل هنوز بارگذاری نشده است');
+                          }
+                        }}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          m.url === '#'
+                            ? 'bg-muted/60 text-muted-foreground'
+                            : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                        }`}
+                      >
+                        <FiDownload className="h-4 w-4" />
+                        دریافت
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Certificates */}
+          {tab === 'certificates' && (
+            <>
+              {data.certificates.length === 0 ? (
+                <div className="text-center py-16 bg-background border rounded-2xl">
+                  <FiAward className="h-12 w-12 mx-auto mb-3 opacity-40" />
+                  <p className="font-bold">گواهینامه‌ای ندارید</p>
+                  <p className="text-sm text-muted-foreground mt-1">پس از اتمام موفق دوره، گواهینامه شما اینجا قرار می‌گیرد</p>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {data.certificates.map((c) => (
+                    <div key={c.id} className="bg-gradient-to-l from-primary/10 to-secondary/10 border rounded-2xl p-6 text-center">
+                      <div className="w-14 h-14 mx-auto rounded-full bg-primary text-primary-foreground flex items-center justify-center mb-3">
+                        <FiAward className="h-7 w-7" />
+                      </div>
+                      <p className="font-bold">گواهینامه دوره {c.courseName}</p>
+                      <p className="text-xs text-muted-foreground mt-2">به نام {c.studentName}</p>
+                      <p className="text-xs text-muted-foreground">مدرس: {c.teacherName} — {c.date}</p>
+                      <p className="text-[10px] text-muted-foreground mt-1" dir="ltr">{c.code}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
           {/* Settings */}
           {tab === 'settings' && (
             <div className="grid md:grid-cols-2 gap-6">
@@ -575,6 +997,93 @@ export default function ProfilePage() {
           )}
         </motion.div>
       </div>
+
+      {/* Quiz Modal */}
+      {activeQuiz && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-background rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold">{activeQuiz.title}</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {activeQuiz.courseName} — {activeQuiz.questions.length} سوال
+                </p>
+              </div>
+              <button onClick={() => setActiveQuiz(null)} className="p-1 hover:bg-muted rounded-lg">
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+
+            {quizAnswers.every((a) => a !== -1) ? (
+              <QuizResult
+                quiz={activeQuiz}
+                answers={quizAnswers}
+                onClose={() => setActiveQuiz(null)}
+                onRetry={() => setQuizAnswers(new Array(activeQuiz.questions.length).fill(-1))}
+              />
+            ) : (
+              <div className="space-y-4">
+                {activeQuiz.questions.map((q: any, qIdx: number) => (
+                  <div key={qIdx} className="border rounded-xl p-4">
+                    <p className="font-medium text-sm mb-3">
+                      {qIdx + 1}. {q.question}
+                    </p>
+                    <div className="grid gap-2">
+                      {q.options.map((opt: string, oIdx: number) => (
+                        <button
+                          key={oIdx}
+                          onClick={() =>
+                            setQuizAnswers((prev) => prev.map((a, i) => (i === qIdx ? oIdx : a)))
+                          }
+                          className={`text-right px-3 py-2 rounded-lg border text-sm transition-colors ${
+                            quizAnswers[qIdx] === oIdx
+                              ? 'border-primary bg-primary/10 text-primary'
+                              : 'hover:bg-muted/50'
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <button
+                  onClick={() => {
+                    const unanswered = quizAnswers.filter((a) => a === -1).length;
+                    if (unanswered > 0) {
+                      toast(`هنوز ${unanswered} سوال بدون پاسخ دارید`);
+                      return;
+                    }
+                    const score = activeQuiz.questions.reduce(
+                      (s: number, q: any, i: number) => s + (quizAnswers[i] === q.correctIndex ? 1 : 0),
+                      0
+                    );
+                    db.addQuizAttempt({
+                      quizId: activeQuiz.id,
+                      quizTitle: activeQuiz.title,
+                      courseId: activeQuiz.courseId,
+                      studentId: user.id,
+                      studentName: data.userInfo?.fullName || user.name,
+                      score,
+                      maxScore: activeQuiz.questions.length,
+                      date: new Date().toLocaleDateString('fa-IR'),
+                    });
+                    setQuizAnswers((prev) => prev.map((_, i) => i + 999));
+                    toast.success('نتیجه آزمون ثبت شد');
+                  }}
+                  className="w-full px-4 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+                >
+                  ثبت پاسخ‌ها
+                </button>
+              </div>
+            )}
+          </motion.div>
+        </div>
+      )}
     </main>
   );
 }
@@ -635,6 +1144,58 @@ function ReviewCard({
         <FiStar className="h-4 w-4" />
         {submitted ? 'به‌روزرسانی نظر' : 'ثبت نظر'}
       </button>
+    </div>
+  );
+}
+
+function QuizResult({
+  quiz,
+  answers,
+  onClose,
+  onRetry,
+}: {
+  quiz: any;
+  answers: number[];
+  onClose: () => void;
+  onRetry: () => void;
+}) {
+  const score = quiz.questions.reduce(
+    (s: number, q: any, i: number) => s + (answers[i] === q.correctIndex ? 1 : 0),
+    0
+  );
+  const pct = Math.round((score / quiz.questions.length) * 100);
+  const passed = pct >= 60;
+
+  return (
+    <div className="text-center py-6">
+      <div
+        className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center text-2xl font-bold ${
+          passed ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'
+        }`}
+      >
+        {pct}٪
+      </div>
+      <h3 className="text-xl font-bold mt-4">{passed ? 'آفرین، قبول شدید!' : 'دفعه بعد موفق می‌شوید'}</h3>
+      <p className="text-muted-foreground mt-2">
+        نتیجه شما: <span className="font-bold">{score}</span> از <span className="font-bold">{quiz.questions.length}</span>
+      </p>
+      <p className="text-xs text-muted-foreground mt-1">
+        {passed ? 'گواهینامه این آزمون به پرونده شما اضافه شد' : 'پس از مرور مجدد، دوباره تلاش کنید'}
+      </p>
+      <div className="flex gap-3 justify-center mt-6">
+        <button
+          onClick={onRetry}
+          className="px-5 py-2.5 rounded-lg border font-medium hover:bg-muted/50 transition-colors"
+        >
+          آزمون مجدد
+        </button>
+        <button
+          onClick={onClose}
+          className="px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+        >
+          بستن
+        </button>
+      </div>
     </div>
   );
 }

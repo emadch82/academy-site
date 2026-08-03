@@ -1,42 +1,122 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FiArrowLeft, FiUsers, FiMessageCircle, FiSend, FiBookOpen, FiHash } from 'react-icons/fi';
-
-const MOCK_GROUPS = [
-  { id: '1', name: 'دوره کودکان', members: 12, description: 'گروه کلاس کودکان', unread: 3 },
-  { id: '2', name: 'دوره بزرگسالان', members: 18, description: 'گروه کلاس بزرگسالان', unread: 0 },
-  { id: '3', name: 'مکالمه SPO', members: 10, description: 'گروه کلاس مکالمه', unread: 7 },
-  { id: '4', name: 'دوره TTC', members: 8, description: 'گروه کلاس تربیت مدرس', unread: 1 },
-];
-
-const MOCK_MESSAGES: Record<string, { id: string; sender: string; text: string; time: string }[]> = {
-  '1': [
-    { id: 'm1', sender: 'استاد رضایی', text: 'سلام بچه‌ها. تکالیف هفته بعد رو آپلود کردم.', time: '۱۰:۳۰' },
-    { id: 'm2', sender: 'امیر', text: 'ممنون استاد', time: '۱۰:۳۵' },
-    { id: 'm3', sender: 'سارا', text: 'استاد آیا امتحان هفته آینده داریم؟', time: '۱۱:۰۰' },
-  ],
-  '3': [
-    { id: 'm4', sender: 'استاد نوری', text: 'Good morning everyone!', time: '۰۹:۰۰' },
-    { id: 'm5', sender: 'رضا', text: 'Good morning teacher!', time: '۰۹:۰۵' },
-  ],
-};
-
-type Tab = 'list' | 'chat';
+import { FiArrowLeft, FiUsers, FiMessageCircle, FiSend, FiBookOpen } from 'react-icons/fi';
+import Cookies from 'js-cookie';
+import { db, initializeDB, Group } from '@/lib/store';
+import { useHydrated } from '@/hooks/use-hydrated';
 
 export default function ClassGroupsPage() {
-  const [activeTab, setActiveTab] = useState<Tab>('list');
+  const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [messageInput, setMessageInput] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const groupMessages = selectedGroup ? MOCK_MESSAGES[selectedGroup] || [] : [];
+  const hydrated = useHydrated();
+
+  const user = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    const raw = Cookies.get('amz_user');
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as { id: string; name: string; identifier: string; role: string };
+    } catch {
+      return null;
+    }
+  }, []);
+
+  useMemo(() => {
+    if (!hydrated) return;
+    initializeDB();
+    if (user?.role === 'student') {
+      setGroups(db.getGroupsByStudent(user.id));
+    } else {
+      setGroups(db.getGroups());
+    }
+  }, [hydrated, user?.id, user?.role, refreshKey]);
+
+  if (!hydrated) return <main className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground">در حال بارگذاری...</p></main>;
+
+  const messages = selectedGroup ? db.getGroupMessages(selectedGroup) : [];
 
   const sendMessage = () => {
     if (!messageInput.trim() || !selectedGroup) return;
+    db.addGroupMessage({
+      groupId: selectedGroup,
+      senderId: user?.id || 'guest',
+      senderName: user?.name || 'مهمان',
+      text: messageInput.trim(),
+      timestamp: new Date().toLocaleTimeString('fa-IR'),
+    });
     setMessageInput('');
+    setRefreshKey((k) => k + 1);
   };
+
+  if (selectedGroup) {
+    const group = groups.find((g) => g.id === selectedGroup);
+    const memberCount = group ? db.getStudentsByCourse(group.courseId).length : 0;
+    return (
+      <main className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-24 max-w-3xl">
+          <div className="bg-background border rounded-2xl overflow-hidden shadow-lg">
+            <div className="bg-gradient-to-l from-primary/10 to-secondary/10 p-4 flex items-center justify-between border-b">
+              <div>
+                <h1 className="font-bold">{group?.name}</h1>
+                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                  <FiUsers className="h-3 w-3" /> {memberCount} عضو — {group?.description}
+                </p>
+              </div>
+              <button onClick={() => setSelectedGroup(null)} className="text-sm text-muted-foreground hover:text-foreground">
+                بازگشت به گروه‌ها
+              </button>
+            </div>
+
+            <div className="h-96 overflow-y-auto p-4 space-y-3 bg-muted/20">
+              {messages.length === 0 ? (
+                <div className="text-center py-16">
+                  <FiMessageCircle className="h-10 w-10 mx-auto mb-2 opacity-40" />
+                  <p className="text-sm text-muted-foreground">اولین پیام را ارسال کنید</p>
+                </div>
+              ) : (
+                messages.map((m) => {
+                  const mine = m.senderId === user?.id;
+                  return (
+                    <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm ${
+                        mine ? 'bg-primary text-primary-foreground rounded-bl-sm' : 'bg-background border rounded-br-sm'
+                      }`}>
+                        {!mine && <p className="text-[10px] font-bold text-primary mb-1">{m.senderName}</p>}
+                        <p>{m.text}</p>
+                        <p className={`text-[10px] mt-1 ${mine ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>{m.timestamp}</p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="p-3 border-t flex items-center gap-2">
+              <input
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+                placeholder="پیام خود را بنویسید..."
+                className="flex-1 px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              <button
+                onClick={sendMessage}
+                className="p-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                <FiSend className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-background">
@@ -47,74 +127,48 @@ export default function ClassGroupsPage() {
               <FiArrowLeft className="ml-1 h-4 w-4" />
               بازگشت
             </Link>
-            <h1 className="text-3xl font-bold">گروه‌های کلاسی</h1>
-            <p className="text-muted-foreground mt-2">گفتگو و تبادل نظر با همکلاسی‌ها</p>
+            <h1 className="text-3xl font-bold mb-2">گروه‌های کلاسی</h1>
+            <p className="text-muted-foreground mb-10">
+              {user ? 'گروه‌های دوره‌های شما' : 'برای دیدن گروه‌های دوره‌های خود وارد شوید'}
+            </p>
+
+            {groups.length === 0 ? (
+              <div className="text-center py-16 bg-background border rounded-2xl">
+                <FiUsers className="h-12 w-12 mx-auto mb-3 opacity-40" />
+                <p className="font-bold">گروهی برای شما یافت نشد</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {user ? 'با ثبت‌نام در دوره‌ها به گروه آن اضافه می‌شوید' : <Link href="/auth/login" className="text-primary hover:underline">ورود به حساب کاربری</Link>}
+                </p>
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {groups.map((g) => {
+                  const memberCount = db.getStudentsByCourse(g.courseId).length;
+                  const msgCount = db.getGroupMessages(g.id).length;
+                  return (
+                    <motion.button
+                      key={g.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      onClick={() => setSelectedGroup(g.id)}
+                      className="text-right bg-background border rounded-2xl p-6 hover:shadow-lg hover:border-primary/30 transition-all group"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                        <FiBookOpen className="h-6 w-6 text-primary" />
+                      </div>
+                      <h2 className="font-bold text-lg group-hover:text-primary transition-colors">{g.name}</h2>
+                      <p className="text-xs text-muted-foreground mt-1">{g.description}</p>
+                      <div className="flex items-center gap-4 mt-4 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1"><FiUsers className="h-3.5 w-3.5" /> {memberCount} عضو</span>
+                        <span className="flex items-center gap-1"><FiMessageCircle className="h-3.5 w-3.5" /> {msgCount} پیام</span>
+                      </div>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            )}
           </motion.div>
         </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
-        {activeTab === 'list' ? (
-          <div className="space-y-4">
-            {MOCK_GROUPS.map((group, i) => (
-              <motion.button key={group.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} onClick={() => { setSelectedGroup(group.id); setActiveTab('chat'); }} className="w-full bg-background rounded-2xl border p-5 flex items-center gap-4 hover:shadow-lg transition-all text-right">
-                <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <FiBookOpen className="h-7 w-7 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-bold">{group.name}</h3>
-                    {group.unread > 0 && <span className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">{group.unread}</span>}
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">{group.description}</p>
-                  <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><FiUsers className="h-3 w-3" /> {group.members} عضو</p>
-                </div>
-              </motion.button>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-background rounded-2xl border overflow-hidden flex flex-col h-[50vh] lg:h-[calc(100vh-280px)]">
-            <div className="border-b p-4 flex items-center gap-3">
-              <button type="button" onClick={() => setActiveTab('list')} className="text-muted-foreground hover:text-primary transition-colors"><FiArrowLeft className="h-5 w-5" /></button>
-              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center"><FiBookOpen className="h-5 w-5 text-primary" /></div>
-              <div>
-                <h3 className="font-bold text-sm">{MOCK_GROUPS.find((g) => g.id === selectedGroup)?.name}</h3>
-                <p className="text-xs text-muted-foreground">{MOCK_GROUPS.find((g) => g.id === selectedGroup)?.members} عضو</p>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {groupMessages.length === 0 ? (
-                <div className="text-center text-muted-foreground py-12">
-                  <FiMessageCircle className="h-12 w-12 mx-auto mb-4 opacity-40" />
-                  <p>هنوز پیامی ارسال نشده</p>
-                </div>
-              ) : (
-                groupMessages.map((msg) => (
-                  <div key={msg.id} className="flex gap-3">
-                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <span className="text-xs font-bold text-primary">{msg.sender[0]}</span>
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">{msg.sender}</span>
-                        <span className="text-xs text-muted-foreground">{msg.time}</span>
-                      </div>
-                      <p className="text-sm mt-1 bg-muted rounded-xl rounded-tr-sm px-3 py-2">{msg.text}</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="border-t p-4">
-              <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
-                <input type="text" value={messageInput} onChange={(e) => setMessageInput(e.target.value)} className="flex-1 h-10 rounded-xl border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="پیام بنویسید..." />
-                <button type="submit" disabled={!messageInput.trim()} className="h-10 w-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 disabled:opacity-50"><FiSend className="h-4 w-4" /></button>
-              </form>
-            </div>
-          </div>
-        )}
       </div>
     </main>
   );
