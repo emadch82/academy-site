@@ -29,6 +29,7 @@ import {
   FiUserCheck,
   FiUsers as FiStudents,
   FiAward,
+  FiZap,
 } from 'react-icons/fi';
 
 const sidebarLinks = [
@@ -39,6 +40,8 @@ const sidebarLinks = [
   { icon: FiBookOpen, label: 'مدیریت دوره‌ها', href: '/admin/courses' },
   { icon: FiCalendar, label: 'حاضری و غیاب', href: '/admin/attendance' },
   { icon: FiEdit3, label: 'تکالیف', href: '/admin/homework' },
+  { icon: FiClock, label: 'برنامه کلاسی', href: '/admin/schedule' },
+  { icon: FiStar, label: 'نظرات دوره‌ها', href: '/admin/reviews' },
   { icon: FiDollarSign, label: 'مدیریت مالی', href: '/admin/finance' },
   { icon: FiTag, label: 'کدهای تخفیف', href: '/admin/discounts' },
   { icon: FiGrid, label: 'CMS', href: '/admin/cms' },
@@ -46,10 +49,11 @@ const sidebarLinks = [
   { icon: FiImage, label: 'گالری', href: '/admin/gallery' },
   { icon: FiBell, label: 'اعلان‌ها', href: '/admin/notifications' },
   { icon: FiMessageCircle, label: 'چت پشتیبانی', href: '/admin/chats' },
-  { icon: FiStar, label: 'پیشنهادات', href: '/admin/suggestions' },
+  { icon: FiZap, label: 'پیشنهادات', href: '/admin/suggestions' },
   { icon: FiBarChart2, label: 'گزارشات', href: '/admin/reports' },
   { icon: FiClock, label: 'لاگ فعالیت‌ها', href: '/admin/activity-log' },
   { icon: FiSettings, label: 'تنظیمات', href: '/admin/settings' },
+  { icon: FiUserCheck, label: 'پروفایل', href: '/admin/profile' },
 ];
 
 const teacherLinks = [
@@ -57,7 +61,10 @@ const teacherLinks = [
   { icon: FiStudents, label: 'دانش‌آموزان من', href: '/admin/students' },
   { icon: FiCalendar, label: 'حاضری و غیاب', href: '/admin/attendance' },
   { icon: FiEdit3, label: 'تکالیف', href: '/admin/homework' },
+  { icon: FiClock, label: 'برنامه کلاسی', href: '/admin/schedule' },
+  { icon: FiStar, label: 'نظرات دوره‌ها', href: '/admin/reviews' },
   { icon: FiMessageCircle, label: 'چت پشتیبانی', href: '/admin/chats' },
+  { icon: FiUserCheck, label: 'پروفایل', href: '/admin/profile' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

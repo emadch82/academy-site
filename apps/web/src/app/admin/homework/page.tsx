@@ -25,6 +25,10 @@ export default function HomeworkPage() {
   const [dueDate, setDueDate] = useState('');
   const [filterCourse, setFilterCourse] = useState<string>('all');
   const [notifyStudent, setNotifyStudent] = useState(true);
+  const [gradingId, setGradingId] = useState<string | null>(null);
+  const [gradeValue, setGradeValue] = useState('');
+  const [gradeComment, setGradeComment] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const currentUser = useCurrentUser();
   const teacherId = currentUser?.role === 'teacher' ? currentUser.id : null;
@@ -42,7 +46,7 @@ export default function HomeworkPage() {
   const allHomework = useMemo(() => {
     initializeDB();
     return db.getHomework();
-  }, []);
+  }, [refreshKey]);
 
   const hydrated = useHydrated();
   if (!hydrated) return <div className="p-6 text-muted-foreground">در حال بارگذاری...</div>;
@@ -101,9 +105,42 @@ export default function HomeworkPage() {
     setStudentId('');
   };
 
-  const handleStatusChange = (id: string, status: 'submitted' | 'graded') => {
-    db.updateHomework(id, { status });
-    toast.success('وضعیت تکلیف به‌روزرسانی شد');
+  const openGrading = (h: any) => {
+    setGradingId(h.id);
+    setGradeValue(h.grade ? String(h.grade) : '');
+    setGradeComment(h.comment || '');
+  };
+
+  const handleSaveGrade = () => {
+    if (!gradingId) return;
+    const grade = gradeValue ? Number(gradeValue) : undefined;
+    if (gradeValue && (grade === undefined || isNaN(grade) || grade < 0 || grade > 20)) {
+      toast.error('نمره باید بین ۰ تا ۲۰ باشد');
+      return;
+    }
+    const hw = db.getHomework().find((h) => h.id === gradingId);
+    if (!hw) return;
+    db.updateHomework(gradingId, {
+      status: 'graded',
+      grade,
+      comment: gradeComment,
+    });
+    db.addNotification({
+      title: 'نمره تکلیف',
+      message: `تکلیف «${hw.title}» تصحیح شد${gradeValue ? ` — نمره: ${gradeValue}` : ''}${gradeComment ? ` — نظر استاد: ${gradeComment}` : ''}.`,
+      type: 'success',
+      target: 'individual',
+      status: 'sent',
+      recipientId: hw.studentId,
+      recipientName: hw.studentName,
+      link: '/profile',
+      date: new Date().toLocaleDateString('fa-IR'),
+    });
+    toast.success('نمره تکلیف ثبت شد');
+    setGradingId(null);
+    setGradeValue('');
+    setGradeComment('');
+    setRefreshKey((k) => k + 1);
   };
 
   const handleDelete = (id: string, title: string) => {
@@ -269,28 +306,42 @@ export default function HomeworkPage() {
                       {h.description && (
                         <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{h.description}</p>
                       )}
+                      {h.status === 'graded' && h.comment && (
+                        <div className="mt-2 bg-purple-50 text-purple-800 rounded-lg p-2.5 text-xs">
+                          <p className="font-bold mb-0.5">نظر استاد:</p>
+                          <p>{h.comment}</p>
+                        </div>
+                      )}
                     </div>
-                    {getStatusBadge(h.status)}
+                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                      {getStatusBadge(h.status)}
+                      {h.status === 'graded' && h.grade !== undefined && (
+                        <span className="px-2 py-1 rounded-lg bg-purple-100 text-purple-700 text-xs font-bold">
+                          نمره: {h.grade}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center justify-between mt-3 pt-3 border-t text-xs">
                     <span className="text-muted-foreground">
                       مهلت: {h.dueDate} — {h.createdAt}
                     </span>
                     <div className="flex items-center gap-1.5">
-                      {h.status === 'pending' && (
-                        <button
-                          onClick={() => handleStatusChange(h.id, 'submitted')}
-                          className="px-2 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100"
-                        >
-                          تحویل شد
-                        </button>
-                      )}
                       {h.status === 'submitted' && (
                         <button
-                          onClick={() => handleStatusChange(h.id, 'graded')}
+                          onClick={() => openGrading(h)}
+                          className="flex items-center gap-1 px-2 py-1 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100"
+                        >
+                          <FiStar className="h-3 w-3" />
+                          تصحیح و نمره
+                        </button>
+                      )}
+                      {h.status === 'graded' && (
+                        <button
+                          onClick={() => openGrading(h)}
                           className="px-2 py-1 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100"
                         >
-                          تصحیح شد
+                          ویرایش نمره
                         </button>
                       )}
                       <button
@@ -307,6 +358,63 @@ export default function HomeworkPage() {
           )}
         </div>
       </div>
+
+      {/* Grading Modal */}
+      {gradingId && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-background rounded-2xl p-6 w-full max-w-md"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="flex items-center gap-2 font-bold">
+                <FiStar className="h-5 w-5 text-primary" />
+                تصحیح تکلیف
+              </h2>
+              <button onClick={() => setGradingId(null)} className="p-1 hover:bg-muted rounded-lg">
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium mb-1.5">نمره (۰ تا ۲۰)</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={20}
+                  step="0.5"
+                  value={gradeValue}
+                  onChange={(e) => setGradeValue(e.target.value)}
+                  placeholder="مثلاً ۱۸"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">نظر استاد</label>
+                <textarea
+                  value={gradeComment}
+                  onChange={(e) => setGradeComment(e.target.value)}
+                  rows={3}
+                  placeholder="بازخورد خود را بنویسید..."
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button
+                onClick={handleSaveGrade}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+              >
+                <FiCheckCircle className="h-4 w-4" /> ثبت نمره
+              </button>
+              <button onClick={() => setGradingId(null)} className="px-4 py-2 border rounded-lg hover:bg-muted">
+                انصراف
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

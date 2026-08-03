@@ -15,6 +15,8 @@ import {
   FiSave,
   FiAward,
   FiUsers as FiStudentIcon,
+  FiEye,
+  FiStar,
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { db, initializeDB, type User } from '@/lib/store';
@@ -24,6 +26,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 export default function TeachersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingTeacher, setEditingTeacher] = useState<User | null>(null);
+  const [selectedTeacher, setSelectedTeacher] = useState<User | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTeacher, setNewTeacher] = useState({ fullName: '', email: '', mobile: '', password: '' });
 
@@ -174,17 +177,25 @@ export default function TeachersPage() {
               </div>
 
               <div className="mt-4 flex items-center justify-between">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setEditingTeacher(teacher)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm border hover:bg-muted transition-colors"
+                  >
+                    <FiEdit2 className="h-3.5 w-3.5" /> ویرایش
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTeacher(teacher.id, teacher.fullName)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm text-red-600 border border-red-200 hover:bg-red-50 transition-colors"
+                  >
+                    <FiTrash2 className="h-3.5 w-3.5" /> حذف
+                  </button>
+                </div>
                 <button
-                  onClick={() => setEditingTeacher(teacher)}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm border hover:bg-muted transition-colors"
+                  onClick={() => setSelectedTeacher(teacher)}
+                  className="flex items-center gap-1 text-sm text-primary hover:underline"
                 >
-                  <FiEdit2 className="h-3.5 w-3.5" /> ویرایش
-                </button>
-                <button
-                  onClick={() => handleDeleteTeacher(teacher.id, teacher.fullName)}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm text-red-600 border border-red-200 hover:bg-red-50 transition-colors"
-                >
-                  <FiTrash2 className="h-3.5 w-3.5" /> حذف
+                  <FiEye className="h-4 w-4" /> جزئیات
                 </button>
               </div>
 
@@ -313,6 +324,120 @@ export default function TeachersPage() {
                 انصراف
               </button>
             </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Teacher Detail Modal */}
+      {selectedTeacher && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-background rounded-2xl p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold">جزئیات {selectedTeacher.fullName}</h2>
+              <button onClick={() => setSelectedTeacher(null)} className="p-1 hover:bg-muted rounded-lg">
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+
+            {(() => {
+              const tc = db.getCoursesByTeacher(selectedTeacher.id);
+              const ts = db.getStudentsByTeacher(selectedTeacher.id);
+              const tReviews = db.getReviewsByTeacher(selectedTeacher.id);
+              const tHomework = db.getHomework().filter((h) => h.teacherId === selectedTeacher.id);
+              const avgRating = tReviews.length > 0 ? (tReviews.reduce((s, r) => s + r.rating, 0) / tReviews.length).toFixed(1) : '—';
+              const pendingHw = tHomework.filter((h) => h.status === 'pending').length;
+
+              return (
+                <div className="space-y-4 text-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                      <FiAward className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-bold">{selectedTeacher.fullName}</p>
+                      <p className="text-xs text-muted-foreground" dir="ltr">{selectedTeacher.email} — {selectedTeacher.mobile}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div className="p-3 rounded-xl bg-muted/50 text-center">
+                      <p className="text-xl font-bold text-primary">{tc.length}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">دوره</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-muted/50 text-center">
+                      <p className="text-xl font-bold text-primary">{ts.length}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">دانش‌آموز</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-muted/50 text-center">
+                      <p className="text-xl font-bold text-yellow-500">{avgRating}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">میانگین امتیاز</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-muted/50 text-center">
+                      <p className="text-xl font-bold text-orange-500">{pendingHw}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">تکلیف در انتظار</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-bold mb-2 flex items-center gap-2">
+                      <FiBookOpen className="h-4 w-4 text-primary" /> دوره‌ها
+                    </h3>
+                    {tc.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {tc.map((c) => (
+                          <span key={c.id} className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs">
+                            {c.title} ({c.enrolledCount} ثبت‌نام)
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground text-xs">بدون دوره</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <h3 className="font-bold mb-2 flex items-center gap-2">
+                      <FiStudentIcon className="h-4 w-4 text-primary" /> دانش‌آموزان
+                    </h3>
+                    {ts.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {ts.map((s) => (
+                          <div key={s.id} className="flex items-center justify-between p-2 rounded-lg border text-xs">
+                            <span>{s.fullName}</span>
+                            <span className="text-muted-foreground" dir="ltr">{s.mobile}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground text-xs">بدون دانش‌آموز</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <h3 className="font-bold mb-2 flex items-center gap-2">
+                      <FiStar className="h-4 w-4 text-yellow-500" /> نظرات ({tReviews.length})
+                    </h3>
+                    {tReviews.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {tReviews.slice(0, 4).map((r) => (
+                          <div key={r.id} className="p-2 rounded-lg border text-xs">
+                            <span className="font-medium">{r.studentName}</span>
+                            <span className="text-yellow-500"> ★{'★'.repeat(r.rating)}</span>
+                            <p className="text-muted-foreground mt-0.5 line-clamp-1">{r.comment || '—'}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground text-xs">نظری ثبت نشده</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
           </motion.div>
         </div>
       )}

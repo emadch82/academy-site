@@ -21,25 +21,40 @@ import {
   FiStar,
   FiDollarSign,
   FiShoppingBag,
+  FiLock,
+  FiEye,
+  FiEyeOff,
 } from 'react-icons/fi';
 import Cookies from 'js-cookie';
 import { db, initializeDB } from '@/lib/store';
 import { useHydrated } from '@/hooks/use-hydrated';
 import { useInvoices } from '@/contexts/invoice-context';
 import { formatPrice } from '@/lib/courses-data';
+import toast from 'react-hot-toast';
 
-type Tab = 'courses' | 'homework' | 'attendance' | 'invoices';
+type Tab = 'courses' | 'homework' | 'attendance' | 'invoices' | 'reviews' | 'settings';
 
 const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: 'courses', label: 'دوره‌های من', icon: FiBookOpen },
   { id: 'homework', label: 'تکالیف', icon: FiEdit3 },
   { id: 'attendance', label: 'حاضری و غیاب', icon: FiCalendar },
   { id: 'invoices', label: 'فاکتورها', icon: FiDollarSign },
+  { id: 'reviews', label: 'نظرات من', icon: FiStar },
+  { id: 'settings', label: 'پروفایل', icon: FiUser },
 ];
 
 export default function ProfilePage() {
   const [tab, setTab] = useState<Tab>('courses');
   const { invoices } = useInvoices();
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [mobile, setMobile] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNew, setShowNew] = useState(false);
+  const [showCurrent, setShowCurrent] = useState(false);
 
   const user = useMemo(() => {
     if (typeof window === 'undefined') return null;
@@ -61,8 +76,15 @@ export default function ProfilePage() {
       homework: db.getHomeworkByStudent(user.id),
       attendance: db.getAttendanceByStudent(user.id).sort((a, b) => (b.date > a.date ? 1 : -1)),
       transactions: db.getTransactionsByUser(user.id),
+      reviews: db.getReviewsByStudent(user.id),
     };
-  }, [user]);
+  }, [user, refreshKey]);
+
+  const submitHomework = (id: string) => {
+    db.updateHomework(id, { status: 'submitted' });
+    toast.success('تکلیف با موفقیت تحویل داده شد');
+    setRefreshKey((k) => k + 1);
+  };
 
   const hydrated = useHydrated();
   if (!hydrated) return <div className="p-6 text-muted-foreground">در حال بارگذاری...</div>;
@@ -83,6 +105,67 @@ export default function ProfilePage() {
 
   const pendingHomework = data.homework.filter((h) => h.status === 'pending').length;
   const presentCount = data.attendance.filter((a) => a.status === 'present').length;
+
+  const handleSaveProfile = () => {
+    if (fullName.trim().length < 3) {
+      toast.error('نام و نام خانوادگی حداقل ۳ حرف باشد');
+      return;
+    }
+    db.updateUser(user.id, { fullName: fullName.trim() });
+    if (email.trim()) db.updateUser(user.id, { email: email.trim() });
+    if (mobile.trim()) db.updateUser(user.id, { mobile: mobile.trim() });
+    Cookies.set(
+      'amz_user',
+      JSON.stringify({ ...user, name: fullName.trim() }),
+      { path: '/', expires: 7 }
+    );
+    toast.success('اطلاعات پروفایل ذخیره شد');
+    setRefreshKey((k) => k + 1);
+  };
+
+  const handleChangePassword = () => {
+    if (!data.userInfo) return;
+    if (data.userInfo.password !== currentPassword) {
+      toast.error('رمز عبور فعلی اشتباه است');
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error('رمز جدید حداقل ۶ کاراکتر باشد');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('تکرار رمز جدید مطابقت ندارد');
+      return;
+    }
+    db.updateUser(user.id, { password: newPassword });
+    toast.success('رمز عبور با موفقیت تغییر کرد');
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+  };
+
+  const addReview = (courseId: string, courseName: string, rating: number, comment: string) => {
+    const existing = db.getReviewsByStudent(user.id).find((r) => r.courseId === courseId);
+    if (existing) {
+      const items = db.getCollection<any>('reviews').map((r: any) =>
+        r.id === existing.id ? { ...r, rating, comment } : r
+      );
+      db.setCollection('reviews', items);
+      toast.success('نظر شما به‌روزرسانی شد');
+    } else {
+      db.addReview({
+        courseId,
+        courseName,
+        studentId: user.id,
+        studentName: data.userInfo?.fullName || user.name,
+        rating,
+        comment,
+        date: new Date().toLocaleDateString('fa-IR'),
+      });
+      toast.success('نظر شما ثبت شد');
+    }
+    setRefreshKey((k) => k + 1);
+  };
 
   return (
     <main className="min-h-screen bg-muted/30 pt-20">
@@ -227,6 +310,12 @@ export default function ProfilePage() {
                           {h.description && (
                             <p className="text-sm text-muted-foreground mt-2">{h.description}</p>
                           )}
+                          {h.status === 'graded' && h.comment && (
+                            <div className="mt-3 bg-purple-50 text-purple-800 rounded-xl p-3 text-sm">
+                              <p className="font-bold mb-1">نظر استاد:</p>
+                              <p>{h.comment}</p>
+                            </div>
+                          )}
                         </div>
                         <span
                           className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs shrink-0 ${
@@ -248,7 +337,18 @@ export default function ProfilePage() {
                       </div>
                       <div className="flex items-center justify-between mt-3 pt-3 border-t text-xs text-muted-foreground">
                         <span>مهلت: {h.dueDate}</span>
-                        <span>ارسال: {h.createdAt}</span>
+                        <div className="flex items-center gap-2">
+                          <span>ارسال: {h.createdAt}</span>
+                          {h.status === 'pending' && (
+                            <button
+                              onClick={() => submitHomework(h.id)}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+                            >
+                              <FiCheckCircle className="h-3.5 w-3.5" />
+                              تحویل تکلیف
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -343,8 +443,198 @@ export default function ProfilePage() {
               )}
             </>
           )}
+
+          {/* Reviews */}
+          {tab === 'reviews' && (
+            <>
+              {data.enrollments.length === 0 ? (
+                <div className="text-center py-16 bg-background border rounded-2xl">
+                  <FiStar className="h-12 w-12 mx-auto mb-3 opacity-40" />
+                  <p className="font-bold">برای ثبت نظر، ابتدا در یک دوره ثبت‌نام کنید</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {data.enrollments.map((e) => {
+                    const existing = data.reviews.find((r) => r.courseId === e.courseId);
+                    return (
+                      <ReviewCard
+                        key={e.courseId}
+                        courseId={e.courseId}
+                        courseName={e.courseName}
+                        initialRating={existing?.rating || 0}
+                        initialComment={existing?.comment || ''}
+                        submitted={!!existing}
+                        onSubmit={(rating, comment) => addReview(e.courseId, e.courseName, rating, comment)}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Settings */}
+          {tab === 'settings' && (
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-background border rounded-2xl p-6">
+                <h2 className="font-bold mb-4 flex items-center gap-2">
+                  <FiUser className="h-4 w-4 text-primary" /> اطلاعات شخصی
+                </h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">نام و نام خانوادگی</label>
+                    <input
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder={data.userInfo?.fullName || user.name}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">ایمیل</label>
+                    <input
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder={data.userInfo?.email || user.identifier}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">شماره موبایل</label>
+                    <input
+                      value={mobile}
+                      onChange={(e) => setMobile(e.target.value)}
+                      placeholder={data.userInfo?.mobile || '09...'}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+                  <button
+                    onClick={handleSaveProfile}
+                    className="w-full px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                  >
+                    ذخیره تغییرات
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-background border rounded-2xl p-6">
+                <h2 className="font-bold mb-4 flex items-center gap-2">
+                  <FiLock className="h-4 w-4 text-primary" /> تغییر رمز عبور
+                </h2>
+                <div className="space-y-4">
+                  <div className="relative">
+                    <label className="text-sm font-medium mb-1 block">رمز فعلی</label>
+                    <input
+                      type={showCurrent ? 'text' : 'password'}
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCurrent((s) => !s)}
+                      className="absolute left-3 top-9 text-muted-foreground hover:text-foreground"
+                    >
+                      {showCurrent ? <FiEyeOff className="h-4 w-4" /> : <FiEye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <label className="text-sm font-medium mb-1 block">رمز جدید</label>
+                    <input
+                      type={showNew ? 'text' : 'password'}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNew((s) => !s)}
+                      className="absolute left-3 top-9 text-muted-foreground hover:text-foreground"
+                    >
+                      {showNew ? <FiEyeOff className="h-4 w-4" /> : <FiEye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">تکرار رمز جدید</label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+                  <button
+                    onClick={handleChangePassword}
+                    className="w-full px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                  >
+                    تغییر رمز عبور
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </motion.div>
       </div>
     </main>
+  );
+}
+
+function ReviewCard({
+  courseId,
+  courseName,
+  initialRating,
+  initialComment,
+  submitted,
+  onSubmit,
+}: {
+  courseId: string;
+  courseName: string;
+  initialRating: number;
+  initialComment: string;
+  submitted: boolean;
+  onSubmit: (rating: number, comment: string) => void;
+}) {
+  const [rating, setRating] = useState(initialRating);
+  const [comment, setComment] = useState(initialComment);
+
+  return (
+    <div className="bg-background border rounded-xl p-5">
+      <div className="flex items-center justify-between mb-3">
+        <p className="font-bold">{courseName}</p>
+        {submitted && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs bg-green-100 text-green-700">
+            <FiCheckCircle className="h-3 w-3" /> نظر ثبت شده
+          </span>
+        )}
+      </div>
+      <div className="flex items-center gap-1 mb-3">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            onClick={() => setRating(star)}
+            className={`text-2xl transition-colors ${star <= rating ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-200'}`}
+          >
+            ★
+          </button>
+        ))}
+        <span className="text-sm text-muted-foreground mr-2">{rating > 0 ? `امتیاز ${rating} از ۵` : 'امتیاز بدهید'}</span>
+      </div>
+      <textarea
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        rows={3}
+        placeholder="نظر خود را درباره این دوره بنویسید..."
+        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+      />
+      <button
+        onClick={() => onSubmit(rating, comment)}
+        disabled={rating === 0}
+        className="mt-3 flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <FiStar className="h-4 w-4" />
+        {submitted ? 'به‌روزرسانی نظر' : 'ثبت نظر'}
+      </button>
+    </div>
   );
 }

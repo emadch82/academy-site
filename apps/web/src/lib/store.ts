@@ -504,6 +504,7 @@ export const db = {
   // Reviews
   getReviews: () => getCollection<Review>('reviews'),
   getReviewsByCourse: (courseId: string) => getCollection<Review>('reviews').filter((r) => r.courseId === courseId),
+  getReviewsByStudent: (studentId: string) => getCollection<Review>('reviews').filter((r) => r.studentId === studentId),
   getReviewsByTeacher: (teacherId: string) => {
     const courses = getCollection<Course>('courses').filter((c) => c.teacherId === teacherId);
     const courseIds = courses.map((c) => c.id);
