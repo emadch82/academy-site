@@ -294,8 +294,13 @@ function MobileHome() {
               </div>
             </div>
           </div>
-          {/* After VIRA fades: everything perfectly centered vertically */}
-          <div className={`absolute inset-0 flex flex-col items-center justify-center gap-3 text-center transition-all duration-1000 ease-in-out ${showButtons ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+          {/* After VIRA fades: everything slides up to center */}
+          <motion.div
+            initial={{ opacity: 0, y: 90, scale: 0.94 }}
+            animate={showButtons ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 90, scale: 0.94 }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            className={`absolute inset-0 flex flex-col items-center justify-center gap-3 text-center ${showButtons ? 'pointer-events-auto' : 'pointer-events-none'}`}
+          >
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 text-xs font-medium text-white">
               <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
               ثبت‌نام دوره‌های جدید آغاز شد
@@ -317,7 +322,7 @@ function MobileHome() {
                 </Link>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* STATS */}
