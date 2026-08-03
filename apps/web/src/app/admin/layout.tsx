@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
@@ -25,12 +25,20 @@ import {
   FiClock,
   FiStar,
   FiFileText,
+  FiEdit3,
+  FiUserCheck,
+  FiUsers as FiStudents,
+  FiAward,
 } from 'react-icons/fi';
 
 const sidebarLinks = [
   { icon: FiHome, label: 'داشبورد', href: '/admin' },
   { icon: FiUsers, label: 'مدیریت کاربران', href: '/admin/users' },
+  { icon: FiAward, label: 'مدیریت اساتید', href: '/admin/teachers' },
+  { icon: FiStudents, label: 'مدیریت دانش‌آموزان', href: '/admin/students' },
   { icon: FiBookOpen, label: 'مدیریت دوره‌ها', href: '/admin/courses' },
+  { icon: FiCalendar, label: 'حاضری و غیاب', href: '/admin/attendance' },
+  { icon: FiEdit3, label: 'تکالیف', href: '/admin/homework' },
   { icon: FiDollarSign, label: 'مدیریت مالی', href: '/admin/finance' },
   { icon: FiTag, label: 'کدهای تخفیف', href: '/admin/discounts' },
   { icon: FiGrid, label: 'CMS', href: '/admin/cms' },
@@ -44,10 +52,32 @@ const sidebarLinks = [
   { icon: FiSettings, label: 'تنظیمات', href: '/admin/settings' },
 ];
 
+const teacherLinks = [
+  { icon: FiHome, label: 'داشبورد', href: '/admin' },
+  { icon: FiStudents, label: 'دانش‌آموزان من', href: '/admin/students' },
+  { icon: FiCalendar, label: 'حاضری و غیاب', href: '/admin/attendance' },
+  { icon: FiEdit3, label: 'تکالیف', href: '/admin/homework' },
+  { icon: FiMessageCircle, label: 'چت پشتیبانی', href: '/admin/chats' },
+];
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState<{ id: string; name: string; role: string } | null>(null);
+
+  useEffect(() => {
+    const raw = Cookies.get('amz_user');
+    if (raw) {
+      try {
+        setUser(JSON.parse(raw));
+      } catch {}
+    }
+  }, []);
+
+  const isAdmin = user?.role === 'admin';
+  const links = isAdmin ? sidebarLinks : teacherLinks;
+  const userName = user?.name || (isAdmin ? 'مدیر سیستم' : 'استاد');
 
   return (
     <div className="min-h-screen bg-muted/30" dir="rtl">
@@ -64,7 +94,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <FiShield className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg hidden sm:inline">پنل مدیریت</span>
+            <span className="font-bold text-lg hidden sm:inline">{isAdmin ? 'پنل مدیریت' : 'پنل استاد'}</span>
           </Link>
         </div>
         <div className="flex items-center gap-4">
@@ -83,7 +113,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
               <FiShield className="h-4 w-4 text-primary" />
             </div>
-            <span className="text-sm font-medium hidden sm:inline">مدیر سیستم</span>
+            <span className="text-sm font-medium hidden sm:inline">{userName}</span>
           </div>
         </div>
       </header>
@@ -104,7 +134,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           }`}
         >
           <nav className="p-4 space-y-1 overflow-y-auto h-full">
-            {sidebarLinks.map((link) => {
+            {links.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link

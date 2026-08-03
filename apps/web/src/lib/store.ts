@@ -57,6 +57,9 @@ export interface Notification {
   status: 'sent' | 'draft';
   read: boolean;
   date: string;
+  recipientId?: string;
+  recipientName?: string;
+  link?: string;
 }
 
 export interface Attendance {
@@ -66,6 +69,24 @@ export interface Attendance {
   studentName: string;
   date: string;
   status: 'present' | 'absent' | 'late';
+}
+
+export interface Homework {
+  id: string;
+  title: string;
+  description: string;
+  courseId: string;
+  courseName: string;
+  teacherId: string;
+  teacherName: string;
+  studentId: string;
+  studentName: string;
+  dueDate: string;
+  status: 'pending' | 'submitted' | 'graded';
+  grade?: number;
+  comment?: string;
+  createdAt: string;
+  notified: boolean;
 }
 
 export interface Schedule {
@@ -131,7 +152,7 @@ export interface ActivityLog {
 
 const STORAGE_KEY = 'amz_db';
 const DB_VERSION_KEY = 'amz_db_version';
-const CURRENT_DB_VERSION = 2;
+const CURRENT_DB_VERSION = 3;
 
 function getDB(): Record<string, any[]> {
   if (typeof window === 'undefined') return {};
@@ -371,6 +392,7 @@ export function initializeDB() {
     setCollection('chats', SEED_CHATS);
     setCollection('chatMessages', SEED_CHAT_MESSAGES);
     setCollection('activityLogs', SEED_ACTIVITY_LOGS);
+    setCollection('homework', []);
   } else {
     const users = db.users as User[];
     const hasAdmin = users.some((u) => u.role === 'admin');
@@ -425,6 +447,9 @@ export function initializeDB() {
     }
     if (!db.activityLogs || db.activityLogs.length === 0) {
       setCollection('activityLogs', SEED_ACTIVITY_LOGS);
+    }
+    if (!db.homework) {
+      setCollection('homework', []);
     }
   }
 }
@@ -527,6 +552,26 @@ export const db = {
     const courseIds = courses.map((c) => c.id);
     const enrollments = getCollection<Enrollment>('enrollments').filter((e) => courseIds.includes(e.courseId));
     const studentIds = [...new Set(enrollments.map((e) => e.studentId))];
+    return getCollection<User>('users').filter((u) => studentIds.includes(u.id));
+  },
+
+  // Homework
+  getHomework: () => getCollection<Homework>('homework'),
+  getHomeworkByStudent: (studentId: string) => getCollection<Homework>('homework').filter((h) => h.studentId === studentId).sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1)),
+  getHomeworkByTeacher: (teacherId: string) => getCollection<Homework>('homework').filter((h) => h.teacherId === teacherId).sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1)),
+  getHomeworkByCourse: (courseId: string) => getCollection<Homework>('homework').filter((h) => h.courseId === courseId),
+  addHomework: (h: Omit<Homework, 'id' | 'createdAt' | 'notified'>) => {
+    const now = new Date();
+    const ts = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    return addItem<Homework>('homework', { ...h, id: generateId('hw'), createdAt: ts, notified: false });
+  },
+  updateHomework: (id: string, updates: Partial<Homework>) => updateItem<Homework>('homework', id, updates),
+  deleteHomework: (id: string) => deleteItem<Homework>('homework', id),
+
+  // Students of courses (for attendance)
+  getStudentsByCourse: (courseId: string) => {
+    const enrollments = getCollection<Enrollment>('enrollments').filter((e) => e.courseId === courseId && e.status === 'confirmed');
+    const studentIds = enrollments.map((e) => e.studentId);
     return getCollection<User>('users').filter((u) => studentIds.includes(u.id));
   },
 
