@@ -19,6 +19,7 @@ import {
   FiMenu,
   FiX,
   FiBookOpen,
+  FiPenTool,
 } from 'react-icons/fi';
 
 const teacherLinks = [
@@ -33,6 +34,7 @@ const teacherLinks = [
   { icon: FiCalendar, label: 'رزرو کلاس', href: '/teacher/appointments' },
   { icon: FiStar, label: 'نظرات دوره‌ها', href: '/teacher/reviews' },
   { icon: FiMessageCircle, label: 'چت پشتیبانی', href: '/teacher/chats' },
+  { icon: FiPenTool, label: 'مقالات بلاگ', href: '/teacher/blog' },
   { icon: FiBookOpen, label: 'پروفایل', href: '/teacher/profile' },
 ];
 

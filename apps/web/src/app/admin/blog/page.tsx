@@ -19,7 +19,7 @@ import toast from 'react-hot-toast';
 import { db, initializeDB, type BlogPost } from '@/lib/store';
 import { useHydrated } from '@/hooks/use-hydrated';
 
-const EMPTY_FORM = { title: '', excerpt: '', category: '', author: '', status: 'draft' as 'published' | 'draft' };
+const EMPTY_FORM = { title: '', excerpt: '', category: '', author: '', content: '', imageUrl: '/images/blog2.jpg', readTime: '', status: 'draft' as 'published' | 'draft' };
 
 export default function AdminBlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -57,7 +57,7 @@ export default function AdminBlogPage() {
 
   const openEdit = (post: BlogPost) => {
     setEditingId(post.id);
-    setForm({ title: post.title, excerpt: post.excerpt, category: post.category, author: post.author, status: post.status });
+    setForm({ title: post.title, excerpt: post.excerpt, category: post.category, author: post.author, content: post.content || '', imageUrl: post.imageUrl || '/images/blog2.jpg', readTime: post.readTime || '', status: post.status });
     setShowModal(true);
   };
 
@@ -71,10 +71,10 @@ export default function AdminBlogPage() {
       return;
     }
     if (editingId) {
-      db.updateBlogPost(editingId, form);
+      db.updateBlogPost(editingId, { ...form, readTime: form.readTime || `${Math.max(1, Math.ceil(form.content.length / 350))} دقیقه` });
       toast.success('مقاله ویرایش شد');
     } else {
-      db.addBlogPost({ ...form, date: new Date().toLocaleDateString('fa-IR') });
+      db.addBlogPost({ ...form, date: new Date().toLocaleDateString('fa-IR'), readTime: form.readTime || `${Math.max(1, Math.ceil(form.content.length / 350))} دقیقه` });
       toast.success('مقاله جدید اضافه شد');
     }
     reload();
@@ -197,6 +197,20 @@ export default function AdminBlogPage() {
                 <div>
                   <label className="block text-sm font-medium mb-1">خلاصه</label>
                   <textarea value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} rows={3} className="w-full px-3 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none" placeholder="خلاصه مقاله" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">متن مقاله *</label>
+                  <textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} rows={6} className="w-full px-3 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none" placeholder="متن کامل مقاله (هر پاراگراف در یک خط)" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">تصویر</label>
+                    <input type="text" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} className="w-full px-3 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="/images/blog2.jpg" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">زمان مطالعه</label>
+                    <input type="text" value={form.readTime} onChange={(e) => setForm({ ...form, readTime: e.target.value })} className="w-full px-3 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="مثلاً ۵ دقیقه" />
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>

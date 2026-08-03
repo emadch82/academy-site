@@ -1,3 +1,5 @@
+import { blogPosts as STATIC_BLOG_POSTS } from './blog-data';
+
 export interface User {
   id: string;
   fullName: string;
@@ -118,6 +120,10 @@ export interface BlogPost {
   author: string;
   status: 'published' | 'draft';
   date: string;
+  content: string;
+  imageUrl: string;
+  readTime: string;
+  authorId?: string;
 }
 
 export interface Chat {
@@ -403,14 +409,20 @@ const SEED_TRANSACTIONS: Transaction[] = [
   { id: 't8', userId: 'u13', userName: 'امیر محمدی', type: 'income', amount: 1500000, description: 'شهریه دوره آنلاین', date: '۱۴۰۵/۰۲/۰۵', status: 'completed', paymentMethod: 'آنلاین' },
 ];
 
-const SEED_BLOG_POSTS: BlogPost[] = [
-  { id: 'bp1', title: '۱۰ روش مؤثر یادگیری زبان انگلیسی', excerpt: 'روش‌های عملی و اثبات‌شده برای یادگیری سریعتر زبان انگلیسی.', category: 'یادگیری زبان', author: 'نسیم خدابخش', status: 'published', date: '۱۴۰۵/۰۴/۱۵' },
-  { id: 'bp2', title: 'روش‌های آموزش زبان انگلیسی به کودکان', excerpt: 'بهترین متدهای آموزش زبان برای کودکان ۵ تا ۱۰ سال.', category: 'آموزش کودکان', author: 'غزال امیرسلیمانی', status: 'published', date: '۱۴۰۵/۰۴/۱۰' },
-  { id: 'bp3', title: 'چگونه مکالمه زبان انگلیسی را تقویت کنیم؟', excerpt: 'راهکارهای عملی برای بهبود مهارت Speaking و Listening.', category: 'مکالمه', author: 'زهرا مردانی', status: 'published', date: '۱۴۰۵/۰۴/۰۵' },
-  { id: 'bp4', title: 'راهنمای آمادگی آزمون آیلتس', excerpt: 'نکات کلیدی برای کسب نمره بالا در آزمون IELTS.', category: 'آزمون آیلتس', author: 'نسیم خدابخش', status: 'published', date: '۱۴۰۵/۰۳/۲۸' },
-  { id: 'bp5', title: 'مزایای شرکت در دوره TTC', excerpt: 'چرا مدرک تربیت مدرس ارزشمند است و چه مزایایی دارد.', category: 'TTC', author: 'زهرا مردانی', status: 'draft', date: '۱۴۰۵/۰۳/۲۰' },
-  { id: 'bp6', title: 'یادگیری زبان از طریق کتاب و فیلم', excerpt: 'چگونه با خواندن کتاب و تماشای فیلم زبان یاد بگیریم.', category: 'فرهنگی', author: 'نسیم خدابخش', status: 'published', date: '۱۴۰۵/۰۳/۱۵' },
-];
+const DRAFT_BLOG_TITLES = ['مزایای شرکت در دوره TTC'];
+
+const SEED_BLOG_POSTS: BlogPost[] = STATIC_BLOG_POSTS.map((p) => ({
+  id: p.id,
+  title: p.title,
+  excerpt: p.excerpt,
+  category: p.category,
+  author: p.author,
+  status: DRAFT_BLOG_TITLES.includes(p.title) ? 'draft' : 'published',
+  date: p.date,
+  content: p.content,
+  imageUrl: p.imageUrl,
+  readTime: p.readTime,
+}));
 
 const SEED_CHATS: Chat[] = [
   { id: 'ch1', userId: 'u7', userName: 'علی محمدی', subject: 'سوال درباره دوره کودکان', status: 'open', unreadCount: 2, createdAt: '۱۴۰۵/۰۴/۱۵ ۱۰:۳۰', updatedAt: '۱۴۰۵/۰۴/۱۵ ۱۱:۰۰' },
@@ -601,6 +613,18 @@ export function initializeDB() {
     }
     if (!db.blogPosts || db.blogPosts.length === 0) {
       setCollection('blogPosts', SEED_BLOG_POSTS);
+    } else {
+      let blogChanged = false;
+      (db.blogPosts as BlogPost[]).forEach((p) => {
+        if (!p.content || !p.imageUrl || !p.readTime) {
+          const src = STATIC_BLOG_POSTS.find((s) => s.title === p.title);
+          if (!p.content) p.content = src?.content || p.excerpt || '';
+          if (!p.imageUrl) p.imageUrl = src?.imageUrl || '/images/blog2.jpg';
+          if (!p.readTime) p.readTime = src?.readTime || `${Math.max(1, Math.ceil((p.content || '').length / 350))} دقیقه`;
+          blogChanged = true;
+        }
+      });
+      if (blogChanged) saveDB(db);
     }
     if (!db.discounts) {
       setCollection('discounts', [
@@ -717,6 +741,7 @@ export const db = {
   // Blog Posts
   getBlogPosts: () => getCollection<BlogPost>('blogPosts'),
   getBlogPostById: (id: string) => getCollection<BlogPost>('blogPosts').find((p) => p.id === id),
+  getBlogPostsByAuthor: (authorId: string) => getCollection<BlogPost>('blogPosts').filter((p) => p.authorId === authorId),
   addBlogPost: (post: Omit<BlogPost, 'id'>) => addItem<BlogPost>('blogPosts', { ...post, id: generateId('bp') }),
   updateBlogPost: (id: string, updates: Partial<BlogPost>) => updateItem<BlogPost>('blogPosts', id, updates),
   deleteBlogPost: (id: string) => deleteItem<BlogPost>('blogPosts', id),
