@@ -563,6 +563,14 @@ export function initializeDB() {
     setCollection('chatMessages', SEED_CHAT_MESSAGES);
     setCollection('activityLogs', SEED_ACTIVITY_LOGS);
     setCollection('homework', []);
+    setCollection('groups', SEED_GROUPS);
+    setCollection('quizzes', SEED_QUIZZES);
+    setCollection('materials', SEED_MATERIALS);
+    setCollection('certificates', SEED_CERTIFICATES);
+    setCollection('appointments', []);
+    setCollection('leaveRequests', []);
+    setCollection('quizAttempts', []);
+    setCollection('groupMessages', []);
   } else {
     const users = db.users as User[];
     const hasAdmin = users.some((u) => u.role === 'admin');

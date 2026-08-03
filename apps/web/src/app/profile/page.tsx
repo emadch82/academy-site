@@ -1072,7 +1072,25 @@ export default function ProfilePage() {
                       maxScore: activeQuiz.questions.length,
                       date: new Date().toLocaleDateString('fa-IR'),
                     });
+                    if (score / activeQuiz.questions.length >= 0.6) {
+                      const hasCert = db
+                        .getCertificatesByStudent(user.id)
+                        .some((c) => c.courseId === activeQuiz.courseId);
+                      if (!hasCert) {
+                        const course = db.getCourseById(activeQuiz.courseId);
+                        db.addCertificate({
+                          studentId: user.id,
+                          studentName: data.userInfo?.fullName || user.name,
+                          courseId: activeQuiz.courseId,
+                          courseName: activeQuiz.courseName,
+                          teacherName: course?.teacherName || '—',
+                          date: new Date().toLocaleDateString('fa-IR'),
+                          code: `VIR-${new Date().getTime().toString().slice(-6)}`,
+                        });
+                      }
+                    }
                     setQuizAnswers((prev) => prev.map((_, i) => i + 999));
+                    setRefreshKey((k) => k + 1);
                     toast.success('نتیجه آزمون ثبت شد');
                   }}
                   className="w-full px-4 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"

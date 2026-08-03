@@ -30,6 +30,7 @@ export default function TeachersPage() {
   const [editingTeacher, setEditingTeacher] = useState<User | null>(null);
   const [selectedTeacher, setSelectedTeacher] = useState<User | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [newTeacher, setNewTeacher] = useState({ fullName: '', email: '', mobile: '', password: '' });
 
   const currentUser = useCurrentUser();
@@ -38,7 +39,7 @@ export default function TeachersPage() {
   const teachers = useMemo(() => {
     initializeDB();
     return db.getUsers().filter((u) => u.role === 'teacher');
-  }, []);
+  }, [refreshKey]);
 
   const hydrated = useHydrated();
   if (!hydrated) return <div className="p-6 text-muted-foreground">در حال بارگذاری...</div>;
@@ -65,6 +66,7 @@ export default function TeachersPage() {
     if (confirm(`آیا از حذف استاد ${name} مطمئن هستید؟`)) {
       db.deleteUser(teacherId);
       toast.success('استاد حذف شد');
+      setRefreshKey((k) => k + 1);
     }
   };
 
@@ -82,6 +84,7 @@ export default function TeachersPage() {
     toast.success('استاد جدید اضافه شد');
     setShowAddModal(false);
     setNewTeacher({ fullName: '', email: '', mobile: '', password: '' });
+    setRefreshKey((k) => k + 1);
   };
 
   const handleSaveEdit = () => {
@@ -93,6 +96,7 @@ export default function TeachersPage() {
     });
     toast.success('اطلاعات استاد به‌روزرسانی شد');
     setEditingTeacher(null);
+    setRefreshKey((k) => k + 1);
   };
 
   return (

@@ -39,12 +39,13 @@ export default function UsersPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [newUser, setNewUser] = useState({ fullName: '', email: '', mobile: '', password: '', role: 'student' as User['role'] });
 
   const users = useMemo(() => {
     initializeDB();
     return db.getUsers();
-  }, []);
+  }, [refreshKey]);
 
   const hydrated = useHydrated();
   if (!hydrated) return <div className="p-6 text-muted-foreground">در حال بارگذاری...</div>;
@@ -63,17 +64,20 @@ export default function UsersPage() {
     db.changeUserRole(userId, newRole);
     toast.success(`نقش کاربر به ${ROLE_LABELS[newRole]} تغییر کرد`);
     setEditingUser(null);
+    setRefreshKey((k) => k + 1);
   };
 
   const handleStatusChange = (userId: string, newStatus: User['status']) => {
     db.updateUser(userId, { status: newStatus });
     toast.success('وضعیت کاربر تغییر کرد');
+    setRefreshKey((k) => k + 1);
   };
 
   const handleDeleteUser = (userId: string, name: string) => {
     if (confirm(`آیا از حذف ${name} مطمئن هستید؟`)) {
       db.deleteUser(userId);
       toast.success('کاربر حذف شد');
+      setRefreshKey((k) => k + 1);
     }
   };
 
@@ -90,6 +94,7 @@ export default function UsersPage() {
     toast.success('کاربر جدید اضافه شد');
     setShowAddModal(false);
     setNewUser({ fullName: '', email: '', mobile: '', password: '', role: 'student' });
+    setRefreshKey((k) => k + 1);
   };
 
   const getStatusBadge = (status: string) => {
