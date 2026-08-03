@@ -38,21 +38,6 @@ const STATUS_ICONS: Record<string, React.ReactNode> = {
 
 const PAYMENT_METHODS = ['آنلاین', 'کارت به کارت', 'نقدی', 'اقساطی'];
 
-const SEED_TRANSACTIONS_DATA: Omit<Transaction, 'id'>[] = [
-  { userId: 'u7', userName: 'علی محمدی', type: 'income', amount: 2500000, description: 'شهریه دوره هوش مصنوعی', date: '۱۴۰۴/۰۶/۱۵', status: 'completed', paymentMethod: 'آنلاین' },
-  { userId: 'u8', userName: 'سارا احمدی', type: 'income', amount: 2000000, description: 'شهریه دوره React', date: '۱۴۰۴/۰۶/۱۰', status: 'completed', paymentMethod: 'کارت به کارت' },
-  { userId: 'u9', userName: 'رضا حسینی', type: 'income', amount: 1500000, description: 'شهریه دوره زبان', date: '۱۴۰۴/۰۶/۰۵', status: 'completed', paymentMethod: 'نقدی' },
-  { userId: 'u0', userName: 'آموزشگاه', type: 'expense', amount: 500000, description: 'اجاره محل', date: '۱۴۰۴/۰۶/۰۱', status: 'completed', paymentMethod: 'نقدی' },
-  { userId: 'u10', userName: 'نیلوفر احمدی', type: 'income', amount: 1800000, description: 'شهریه دوره رباتیک', date: '۱۴۰۴/۰۵/۲۰', status: 'completed', paymentMethod: 'آنلاین' },
-  { userId: 'u0', userName: 'آموزشگاه', type: 'expense', amount: 200000, description: 'تبلیغات اینستاگرام', date: '۱۴۰۴/۰۵/۱۵', status: 'completed', paymentMethod: 'کارت به کارت' },
-  { userId: 'u12', userName: 'زهرا کریمی', type: 'income', amount: 2500000, description: 'شهریه دوره هوش مصنوعی', date: '۱۴۰۴/۰۵/۱۰', status: 'completed', paymentMethod: 'اقساطی' },
-  { userId: 'u13', userName: 'امیر محمدی', type: 'income', amount: 1800000, description: 'شهریه دوره پایتون', date: '۱۴۰۴/۰۵/۰۵', status: 'completed', paymentMethod: 'آنلاین' },
-  { userId: 'u0', userName: 'آموزشگاه', type: 'expense', amount: 150000, description: 'لوازم التحریر', date: '۱۴۰۴/۰۴/۲۰', status: 'completed', paymentMethod: 'نقدی' },
-  { userId: 'u15', userName: 'امین رستمی', type: 'income', amount: 1000000, description: 'شهریه دوره مدیریت پروژه', date: '۱۴۰۴/۰۴/۱۵', status: 'completed', paymentMethod: 'نقدی' },
-  { userId: 'u0', userName: 'آموزشگاه', type: 'expense', amount: 80000, description: 'هزینه اینترنت ماهانه', date: '۱۴۰۴/۰۴/۰۱', status: 'completed', paymentMethod: 'کارت به کارت' },
-  { userId: 'u11', userName: 'علی رضایی', type: 'income', amount: 800000, description: 'شهریه دوره فن بیان', date: '۱۴۰۴/۰۳/۲۵', status: 'pending', paymentMethod: 'اقساطی' },
-];
-
 export default function FinancePage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -72,13 +57,7 @@ export default function FinancePage() {
 
   useEffect(() => {
     initializeDB();
-    const loaded = db.getTransactions();
-    if (loaded.length === 0) {
-      SEED_TRANSACTIONS_DATA.forEach((tx) => db.addTransaction(tx));
-      setTransactions(db.getTransactions());
-    } else {
-      setTransactions(loaded);
-    }
+    setTransactions(db.getTransactions());
   }, []);
 
   const refresh = () => setTransactions([...db.getTransactions()]);

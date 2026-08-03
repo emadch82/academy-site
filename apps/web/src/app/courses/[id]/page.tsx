@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -17,21 +17,51 @@ import {
   FiCheck,
 } from 'react-icons/fi';
 import { getCourseById, getRelatedCourses, formatPrice, courses } from '@/lib/courses-data';
+import { db, initializeDB, type Course as DbCourse } from '@/lib/store';
 import { useCart } from '@/contexts/cart-context';
 import { ReviewForm } from '@/components/review-form';
 import { ReviewsList } from '@/components/reviews-list';
 import { useReviews } from '@/contexts/reviews-context';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
+import { useHydrated } from '@/hooks/use-hydrated';
+
+type StaticCourse = ReturnType<typeof getCourseById>;
+type MergedCourse = (StaticCourse & { dbId?: string }) | undefined;
 
 export default function CourseDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
-  const course = getCourseById(id);
+  const staticCourse = getCourseById(id);
+  const [course, setCourse] = useState<MergedCourse>(staticCourse);
   const { addItem, isInCart, isPurchased } = useCart();
   const { getAverageRating, getReviewCount } = useReviews();
   const [reviewRefresh, setReviewRefresh] = useState(0);
+  const hydrated = useHydrated();
+
+  useEffect(() => {
+    if (!hydrated) return;
+    initializeDB();
+    const dbCourse: DbCourse | undefined =
+      db.getCourseByDataId(id) || db.getCourses().find((c) => c.id === id) || (staticCourse ? db.getCourses().find((c) => c.title === staticCourse.title) : undefined);
+    if (!dbCourse) return;
+    const merged: MergedCourse = {
+      ...(staticCourse || ({} as NonNullable<typeof staticCourse>)),
+      dbId: dbCourse.id,
+      id: staticCourse?.id || id,
+      title: dbCourse.title,
+      teacher: dbCourse.teacherName,
+      price: dbCourse.price,
+      category: dbCourse.category || staticCourse?.category || 'عمومی',
+      level: dbCourse.level || staticCourse?.level,
+      imageUrl: dbCourse.imageUrl || staticCourse?.imageUrl || '/images/ai.jpg',
+      description: staticCourse?.description || dbCourse.title,
+      fullDescription: staticCourse?.fullDescription || dbCourse.title,
+      schedule: staticCourse?.schedule || dbCourse.duration || '',
+    };
+    setCourse(merged);
+  }, [hydrated, id]);
 
   const handleAddToCart = () => {
     if (!course) return;
@@ -240,8 +270,8 @@ export default function CourseDetailPage() {
             className="space-y-6"
           >
             <h2 className="text-2xl font-bold">نظرات کاربران</h2>
-            <ReviewForm courseId={course.id} onReviewAdded={() => setReviewRefresh((r) => r + 1)} />
-            <ReviewsList courseId={course.id} refreshKey={reviewRefresh} />
+            <ReviewForm courseId={course.dbId || course.id} onReviewAdded={() => setReviewRefresh((r) => r + 1)} />
+            <ReviewsList courseId={course.dbId || course.id} refreshKey={reviewRefresh} />
           </motion.div>
 
           {relatedCourses.length > 0 && (

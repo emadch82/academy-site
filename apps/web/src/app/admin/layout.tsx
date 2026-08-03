@@ -12,12 +12,34 @@ import {
   FiMenu,
   FiX,
   FiUserCheck,
+  FiBookOpen,
+  FiDollarSign,
+  FiTag,
+  FiBell,
+  FiBarChart2,
+  FiMessageSquare,
+  FiClock,
+  FiFileText,
+  FiImage,
+  FiSettings,
+  FiEdit3,
 } from 'react-icons/fi';
 
 const sidebarLinks = [
   { icon: FiHome, label: 'داشبورد', href: '/admin' },
   { icon: FiUsers, label: 'مدیریت کاربران', href: '/admin/users' },
   { icon: FiUserCheck, label: 'مدیریت اساتید', href: '/admin/teachers' },
+  { icon: FiBookOpen, label: 'دوره‌ها', href: '/admin/courses' },
+  { icon: FiDollarSign, label: 'مدیریت مالی', href: '/admin/finance' },
+  { icon: FiTag, label: 'کدهای تخفیف', href: '/admin/discounts' },
+  { icon: FiBell, label: 'اعلان‌ها', href: '/admin/notifications' },
+  { icon: FiMessageSquare, label: 'پیشنهادات', href: '/admin/suggestions' },
+  { icon: FiBarChart2, label: 'گزارشات', href: '/admin/reports' },
+  { icon: FiClock, label: 'گزارش فعالیت‌ها', href: '/admin/activity-log' },
+  { icon: FiFileText, label: 'بلاگ', href: '/admin/blog' },
+  { icon: FiEdit3, label: 'مدیریت محتوا (CMS)', href: '/admin/cms' },
+  { icon: FiImage, label: 'گالری', href: '/admin/gallery' },
+  { icon: FiSettings, label: 'تنظیمات', href: '/admin/settings' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

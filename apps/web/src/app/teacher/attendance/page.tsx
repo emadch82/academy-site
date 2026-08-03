@@ -12,7 +12,7 @@ import {
   FiRefreshCw,
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
-import { db, initializeDB } from '@/lib/store';
+import { db, initializeDB, todayFa, addDaysFa, faWeekdayIndex } from '@/lib/store';
 import { useHydrated } from '@/hooks/use-hydrated';
 import { useCurrentUser } from '@/hooks/use-current-user';
 
@@ -28,9 +28,16 @@ const STATUS_COLORS: Record<string, string> = {
   late: 'bg-yellow-100 text-yellow-700 border-yellow-200',
 };
 
+const DAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+
 export default function AttendancePage() {
   const [courseId, setCourseId] = useState<string>('');
-  const [date, setDate] = useState<string>(new Date().toLocaleDateString('fa-IR'));
+  const [date, setDate] = useState<string>(todayFa());
+  const [weekStart, setWeekStart] = useState<string>(() => {
+    const today = todayFa();
+    const idx = faWeekdayIndex(today);
+    return addDaysFa(today, -idx);
+  });
   const [records, setRecords] = useState<Record<string, string>>({});
   const [savedFor, setSavedFor] = useState<string>('');
 
@@ -60,9 +67,26 @@ export default function AttendancePage() {
     }
   }, [hydrated, courseId, date]);
 
+  const weeklyStats = useMemo(() => {
+    if (!hydrated || !teacherId) return [];
+    return db.getWeeklyAttendanceStats(teacherId, weekStart);
+  }, [hydrated, teacherId, weekStart]);
+
   if (!hydrated) return <div className="p-6 text-muted-foreground">در حال بارگذاری...</div>;
 
   const students = courseId ? db.getStudentsByCourse(courseId) : [];
+
+  const weeklyTable = useMemo(() => {
+    if (!hydrated || !teacherId || !courseId) return [];
+    const weekDates = DAYS.map((_, idx) => addDaysFa(weekStart, idx));
+    return students.map((student) => ({
+      student,
+      cells: weekDates.map((d) =>
+        db.getAttendanceByCourse(courseId).find((a) => a.studentId === student.id && a.date === d)
+      ),
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, teacherId, courseId, weekStart, students.length]);
 
   const setStatus = (studentId: string, status: string) => {
     setRecords((prev) => ({ ...prev, [studentId]: status }));
@@ -107,6 +131,16 @@ export default function AttendancePage() {
 
   const markedCount = students.filter((s) => records[s.id]).length;
 
+  const overallRate = useMemo(() => {
+    if (!hydrated || !teacherId) return 0;
+    const atts = db.getAttendance().filter((a) => {
+      const ids = new Set(db.getCoursesByTeacher(teacherId).map((c) => c.id));
+      return ids.has(a.courseId);
+    });
+    if (atts.length === 0) return 0;
+    return Math.round((atts.filter((a) => a.status === 'present').length / atts.length) * 100);
+  }, [hydrated, teacherId]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -116,12 +150,36 @@ export default function AttendancePage() {
         </p>
       </div>
 
+      {/* Overall stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="bg-background border rounded-xl p-4">
+          <p className="text-xs text-muted-foreground">نرخ حضور کل</p>
+          <p className="text-2xl font-bold mt-1">{overallRate}٪</p>
+        </div>
+        <div className="bg-background border rounded-xl p-4">
+          <p className="text-xs text-muted-foreground">کلاس‌های هفته</p>
+          <p className="text-2xl font-bold mt-1">{weeklyStats.filter((s) => s.total > 0).length}</p>
+        </div>
+        <div className="bg-background border rounded-xl p-4">
+          <p className="text-xs text-muted-foreground">ثبت‌شده هفته</p>
+          <p className="text-2xl font-bold mt-1">{weeklyStats.reduce((s, d) => s + d.total, 0)}</p>
+        </div>
+        <div className="bg-background border rounded-xl p-4">
+          <p className="text-xs text-muted-foreground">معدل نرخ حضور هفته</p>
+          <p className="text-2xl font-bold mt-1">
+            {weeklyStats.filter((s) => s.total > 0).length > 0
+              ? Math.round(weeklyStats.filter((s) => s.total > 0).reduce((s, d) => s + d.rate, 0) / weeklyStats.filter((s) => s.total > 0).length)
+              : 0}٪
+          </p>
+        </div>
+      </div>
+
       {/* Controls */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <select
           value={courseId}
           onChange={(e) => setCourseId(e.target.value)}
-          className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background"
+          className="px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
         >
           <option value="">انتخاب دوره...</option>
           {courses.map((c) => (
@@ -156,6 +214,91 @@ export default function AttendancePage() {
               </span>
             )}
           </div>
+
+          {/* Weekly stats */}
+          <div className="bg-background border rounded-2xl p-5">
+            <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+              <h2 className="font-semibold flex items-center gap-2">
+                <FiCalendar className="h-4 w-4 text-primary" /> آمار حضور هفته
+              </h2>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setWeekStart(addDaysFa(weekStart, -7))}
+                  className="px-3 py-1.5 rounded-lg border text-sm hover:bg-muted/50 transition-colors"
+                >
+                  هفته قبل
+                </button>
+                <span className="text-xs text-muted-foreground" dir="ltr">{weekStart}</span>
+                <button
+                  onClick={() => setWeekStart(addDaysFa(weekStart, 7))}
+                  className="px-3 py-1.5 rounded-lg border text-sm hover:bg-muted/50 transition-colors"
+                >
+                  هفته بعد
+                </button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+              {weeklyStats.map((s) => (
+                <div key={s.day} className={`rounded-xl border p-3 text-center ${s.total > 0 ? 'bg-background' : 'bg-muted/30'}`}>
+                  <p className="text-sm font-medium mb-2">{s.day}</p>
+                  <p className="text-[10px] text-muted-foreground" dir="ltr">{s.date}</p>
+                  <div className="mt-2 space-y-1 text-[11px]">
+                    <p className="flex justify-between"><span className="text-muted-foreground">حاضر</span><span className="font-bold text-green-600">{s.present}</span></p>
+                    <p className="flex justify-between"><span className="text-muted-foreground">تأخیر</span><span className="font-bold text-yellow-600">{s.late}</span></p>
+                    <p className="flex justify-between"><span className="text-muted-foreground">غایب</span><span className="font-bold text-red-600">{s.absent}</span></p>
+                    <p className="flex justify-between border-t pt-1 mt-1"><span className="text-muted-foreground">٪</span><span className="font-bold">{s.rate}٪</span></p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-3">
+              نرخ حضور = نسبت حضور به کل ثبت‌شده‌ها در آن روز (بر اساس همه دوره‌های شما)
+            </p>
+          </div>
+
+          {/* Weekly table */}
+          {courseId && (
+            <div className="bg-background border rounded-2xl p-5 overflow-x-auto">
+              <h2 className="font-semibold flex items-center gap-2 mb-4">
+                <FiUserCheck className="h-4 w-4 text-primary" /> وضعیت هفتگی این دوره
+              </h2>
+              <table className="w-full text-sm min-w-[640px]">
+                <thead>
+                  <tr className="text-muted-foreground">
+                    <th className="text-right pb-2 font-medium">دانش‌آموز</th>
+                    {DAYS.map((d) => (
+                      <th key={d} className="pb-2 font-medium text-center">{d}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {weeklyTable.map(({ student, cells }) => (
+                    <tr key={student.id} className="border-t">
+                      <td className="py-2 font-medium">{student.fullName}</td>
+                      {cells.map((cell, i) => (
+                        <td key={i} className="py-2 text-center">
+                          {cell ? (
+                            <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] ${STATUS_COLORS[cell.status]}`}>
+                              {STATUS_LABELS[cell.status]}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground/40">—</span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                  {weeklyTable.length === 0 && (
+                    <tr>
+                      <td colSpan={8} className="py-6 text-center text-muted-foreground">
+                        برای نمایش جدول هفتگی، دوره را انتخاب کنید
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {/* Student list */}
           <div className="space-y-2">

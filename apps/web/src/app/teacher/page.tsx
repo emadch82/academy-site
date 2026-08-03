@@ -10,6 +10,8 @@ import {
   FiCalendar,
   FiStar,
   FiSend,
+  FiCheckCircle,
+  FiFileText,
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { db, initializeDB } from '@/lib/store';
@@ -38,6 +40,7 @@ export default function TeacherDashboard() {
     const avgRating = reviews.length > 0
       ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
       : '—';
+    const tStats = teacherId ? db.getTeacherStats(teacherId) : null;
 
     return {
       courses,
@@ -47,6 +50,7 @@ export default function TeacherDashboard() {
       appointments,
       reviews,
       avgRating,
+      tStats,
     };
   }, [teacherId]);
 
@@ -101,6 +105,8 @@ export default function TeacherDashboard() {
           { icon: FiStar, label: 'میانگین امتیاز', value: stats.avgRating, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
           { icon: FiUserX, label: 'غیبت در انتظار', value: stats.leaveRequests.filter((l) => l.status === 'pending').length.toString(), color: 'text-red-500', bg: 'bg-red-500/10' },
           { icon: FiCalendar, label: 'رزرو کلاس در انتظار', value: stats.appointments.filter((a) => a.status === 'pending').length.toString(), color: 'text-purple-500', bg: 'bg-purple-500/10' },
+          { icon: FiCheckCircle, label: 'نرخ حضور کلاس‌ها', value: stats.tStats ? `${stats.tStats.attendanceRate}٪` : '—', color: 'text-teal-500', bg: 'bg-teal-500/10' },
+          { icon: FiFileText, label: 'جزوات منتشرشده', value: (stats.tStats?.totalMaterials ?? 0).toString(), color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
         ].map((stat, index) => (
           <motion.div
             key={stat.label}
@@ -131,7 +137,7 @@ export default function TeacherDashboard() {
           <select
             value={announceCourseId}
             onChange={(e) => setAnnounceCourseId(e.target.value)}
-            className="px-3 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="px-3 py-2.5 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
             <option value="">انتخاب دوره...</option>
             {stats.courses.map((c) => (

@@ -272,7 +272,7 @@ export default function QuizPage() {
                   <select
                     value={courseId}
                     onChange={(e) => setCourseId(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                   >
                     <option value="">انتخاب دوره...</option>
                     {courses.map((c) => (

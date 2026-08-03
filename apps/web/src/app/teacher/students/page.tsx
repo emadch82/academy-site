@@ -173,7 +173,7 @@ export default function StudentsPage() {
         <select
           value={courseFilter}
           onChange={(e) => setCourseFilter(e.target.value)}
-          className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background"
+          className="px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
         >
           <option value="all">همه دوره‌ها</option>
           {courses.map((c) => (
@@ -183,7 +183,7 @@ export default function StudentsPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background"
+          className="px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
         >
           <option value="all">همه وضعیت‌ها</option>
           <option value="active">فعال</option>

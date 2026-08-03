@@ -159,12 +159,19 @@ export default function MaterialsPage() {
                       </p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleDelete(m.id)}
-                    className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <FiTrash2 className="h-4 w-4" />
-                  </button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {m.studentId && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] bg-purple-100 text-purple-700">
+                        ارسال دانشجو: {db.getUserById(m.studentId)?.fullName || '—'}
+                      </span>
+                    )}
+                    <button
+                      onClick={() => handleDelete(m.id)}
+                      className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <FiTrash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -227,7 +234,7 @@ export default function MaterialsPage() {
                 <select
                   value={courseId}
                   onChange={(e) => setCourseId(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
                   <option value="">انتخاب دوره...</option>
                   {courses.map((c) => (

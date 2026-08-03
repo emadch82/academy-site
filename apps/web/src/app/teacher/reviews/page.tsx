@@ -70,7 +70,7 @@ export default function ReviewsPage() {
       <select
         value={filterCourse}
         onChange={(e) => setFilterCourse(e.target.value)}
-        className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background max-w-sm"
+        className="px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 max-w-sm"
       >
         <option value="all">همه دوره‌ها</option>
         {courses.map((c) => (

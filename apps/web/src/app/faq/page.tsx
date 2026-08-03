@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronDown, FiSearch } from 'react-icons/fi';
+import { db, initializeDB } from '@/lib/store';
+import { useHydrated } from '@/hooks/use-hydrated';
 
 const faqCategories = [
   {
@@ -74,8 +76,30 @@ const faqCategories = [
 export default function FAQPage() {
   const [search, setSearch] = useState('');
   const [openIndex, setOpenIndex] = useState<string | null>(null);
+  const [categories, setCategories] = useState(faqCategories);
+  const hydrated = useHydrated();
 
-  const filteredCategories = faqCategories
+  useEffect(() => {
+    if (!hydrated) return;
+    initializeDB();
+    const cmsFaq = db.getCollection<{ id: string; question: string; answer: string; category: string }>('cms_faq');
+    if (cmsFaq && cmsFaq.length > 0) {
+      const merged = [...faqCategories];
+      cmsFaq.forEach((item) => {
+        const cat = item.category || 'عمومی';
+        const target = merged.find((c) => c.name === cat);
+        const entry = { q: item.question, a: item.answer };
+        if (target) {
+          if (!target.questions.some((t) => t.q === entry.q)) target.questions.push(entry);
+        } else {
+          merged.push({ name: cat, questions: [entry] });
+        }
+      });
+      setCategories(merged);
+    }
+  }, [hydrated]);
+
+  const filteredCategories = categories
     .map((cat) => ({
       ...cat,
       questions: cat.questions.filter(

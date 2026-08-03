@@ -195,7 +195,7 @@ export default function SchedulePage() {
               <select
                 value={newItem.courseId}
                 onChange={(e) => setNewItem({ ...newItem, courseId: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">انتخاب دوره...</option>
                 {courses.map((c) => (
@@ -205,7 +205,7 @@ export default function SchedulePage() {
               <select
                 value={newItem.day}
                 onChange={(e) => setNewItem({ ...newItem, day: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               >
                 {DAYS.map((d) => (
                   <option key={d} value={d}>{d}</option>

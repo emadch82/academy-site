@@ -31,6 +31,8 @@ import {
   FiLink,
   FiFile,
   FiX,
+  FiUpload,
+  FiPlus,
 } from 'react-icons/fi';
 import Cookies from 'js-cookie';
 import { db, initializeDB } from '@/lib/store';
@@ -77,6 +79,11 @@ export default function ProfilePage() {
   const [apptReason, setApptReason] = useState('');
   const [activeQuiz, setActiveQuiz] = useState<any>(null);
   const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
+  const [showMaterialModal, setShowMaterialModal] = useState(false);
+  const [matTitle, setMatTitle] = useState('');
+  const [matCourseId, setMatCourseId] = useState('');
+  const [matType, setMatType] = useState<'pdf' | 'video' | 'link' | 'file'>('pdf');
+  const [matUrl, setMatUrl] = useState('');
 
   const user = useMemo(() => {
     if (typeof window === 'undefined') return null;
@@ -124,6 +131,32 @@ export default function ProfilePage() {
   const submitHomework = (id: string) => {
     db.updateHomework(id, { status: 'submitted' });
     toast.success('تکلیف با موفقیت تحویل داده شد');
+    setRefreshKey((k) => k + 1);
+  };
+
+  const handleAddMaterial = () => {
+    if (!user?.id) return;
+    const course = db.getCourseById(matCourseId);
+    if (!matTitle.trim() || !course) {
+      toast.error('عنوان جزوه و دوره را وارد کنید');
+      return;
+    }
+    db.addMaterialByStudent({
+      courseId: course.id,
+      courseName: course.title,
+      teacherId: course.teacherId || '',
+      studentId: user.id,
+      title: matTitle.trim(),
+      type: matType,
+      url: matUrl.trim() || '#',
+      addedAt: new Date().toLocaleDateString('fa-IR'),
+    });
+    toast.success('جزوه شما ارسال شد');
+    setShowMaterialModal(false);
+    setMatTitle('');
+    setMatCourseId('');
+    setMatUrl('');
+    setMatType('pdf');
     setRefreshKey((k) => k + 1);
   };
 
@@ -370,24 +403,41 @@ export default function ProfilePage() {
                   </Link>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {data.enrollments.map((e) => {
-                    const course = db.getCourseById(e.courseId);
-                    return (
-                      <div key={e.id} className="bg-background border rounded-xl p-5 hover:shadow-lg transition-shadow">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <FiBookOpen className="h-5 w-5 text-primary" />
+                <>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-5">
+                    {[
+                      { label: 'دوره‌های من', value: db.getStudentStats(user.id).enrolledCourses.toString(), icon: FiBookOpen, color: 'text-primary' },
+                      { label: 'نرخ حضور', value: `${db.getStudentStats(user.id).attendanceRate}٪`, icon: FiCalendar, color: 'text-green-600' },
+                      { label: 'تکالیف در انتظار', value: db.getStudentStats(user.id).pendingHomework.toString(), icon: FiEdit3, color: 'text-orange-500' },
+                      { label: 'رزرو در انتظار', value: db.getStudentStats(user.id).pendingAppointments.toString(), icon: FiClock, color: 'text-purple-500' },
+                      { label: 'معدل آزمون', value: (db.getStudentStats(user.id).avgQuizScore || '—').toString(), icon: FiAward, color: 'text-yellow-500' },
+                      { label: 'جزوات من', value: db.getStudentStats(user.id).totalMaterials.toString(), icon: FiFileText, color: 'text-blue-500' },
+                    ].map((s) => (
+                      <div key={s.label} className="bg-background border rounded-xl p-4 text-center">
+                        <s.icon className={`h-4 w-4 mx-auto mb-2 ${s.color}`} />
+                        <p className="text-lg font-bold">{s.value}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {data.enrollments.map((e) => {
+                      const course = db.getCourseById(e.courseId);
+                      return (
+                        <div key={e.id} className="bg-background border rounded-xl p-5 hover:shadow-lg transition-shadow">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                              <FiBookOpen className="h-5 w-5 text-primary" />
+                            </div>
+                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-green-100 text-green-700">
+                              <FiCheckCircle className="h-3 w-3" /> فعال
+                            </span>
                           </div>
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-green-100 text-green-700">
-                            <FiCheckCircle className="h-3 w-3" /> فعال
-                          </span>
-                        </div>
-                        <h3 className="font-bold">{e.courseName}</h3>
-                        <p className="text-xs text-muted-foreground mt-1">استاد: {course?.teacherName || '—'}</p>
-                        <p className="text-xs text-muted-foreground mt-1">سطح: {course?.level || '—'} — {course?.duration || ''}</p>
-                        <div className="flex items-center justify-between mt-4 pt-3 border-t">
-                          <span className="text-xs text-muted-foreground">ثبت‌نام: {e.date}</span>
+                          <h3 className="font-bold">{e.courseName}</h3>
+                          <p className="text-xs text-muted-foreground mt-1">استاد: {course?.teacherName || '—'}</p>
+                          <p className="text-xs text-muted-foreground mt-1">سطح: {course?.level || '—'} — {course?.duration || ''}</p>
+                          <div className="flex items-center justify-between mt-4 pt-3 border-t">
+                            <span className="text-xs text-muted-foreground">ثبت‌نام: {e.date}</span>
                           {course ? (
                             <Link href={`/courses/${course.id}`} className="text-xs text-primary hover:underline">جزئیات دوره</Link>
                           ) : (
@@ -397,7 +447,8 @@ export default function ProfilePage() {
                       </div>
                     );
                   })}
-                </div>
+                  </div>
+                </>
               )}
             </>
           )}
@@ -473,6 +524,32 @@ export default function ProfilePage() {
           {/* Attendance */}
           {tab === 'attendance' && (
             <>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+                <div className="bg-background border rounded-xl p-4 text-center">
+                  <p className="text-xs text-muted-foreground">نرخ حضور</p>
+                  <p className="text-2xl font-bold mt-1 text-green-600">
+                    {db.getStudentStats(user.id).attendanceRate}٪
+                  </p>
+                </div>
+                <div className="bg-background border rounded-xl p-4 text-center">
+                  <p className="text-xs text-muted-foreground">جلسات ثبت‌شده</p>
+                  <p className="text-2xl font-bold mt-1">
+                    {db.getStudentStats(user.id).totalAttendance}
+                  </p>
+                </div>
+                <div className="bg-background border rounded-xl p-4 text-center">
+                  <p className="text-xs text-muted-foreground">حضورها</p>
+                  <p className="text-2xl font-bold mt-1 text-green-600">
+                    {db.getStudentStats(user.id).presentCount}
+                  </p>
+                </div>
+                <div className="bg-background border rounded-xl p-4 text-center">
+                  <p className="text-xs text-muted-foreground">معدل آزمون‌ها</p>
+                  <p className="text-2xl font-bold mt-1 text-primary">
+                    {db.getStudentStats(user.id).avgQuizScore || '—'}
+                  </p>
+                </div>
+              </div>
               {data.attendance.length === 0 ? (
                 <div className="text-center py-16 bg-background border rounded-2xl">
                   <FiCalendar className="h-12 w-12 mx-auto mb-3 opacity-40" />
@@ -659,6 +736,28 @@ export default function ProfilePage() {
                         <option key={t.id} value={t.id}>{t.fullName}</option>
                       ))}
                     </select>
+                    {apptTeacherId && (
+                      <div className="mt-3 p-3 rounded-xl bg-primary/5 border border-primary/20 text-sm">
+                        <p className="text-xs font-medium text-primary mb-2">برنامه کلاس‌های هفتگی استاد:</p>
+                        {db.getSchedule().filter((s) => s.teacherId === apptTeacherId).length === 0 ? (
+                          <p className="text-xs text-muted-foreground">برنامه‌ای ثبت نشده است</p>
+                        ) : (
+                          <div className="space-y-1">
+                            {db.getSchedule()
+                              .filter((s) => s.teacherId === apptTeacherId)
+                              .sort((a, b) => ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'].indexOf(a.day) - ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'].indexOf(b.day))
+                              .map((s) => (
+                                <p key={s.id} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                                  <FiCalendar className="h-3 w-3 text-primary" /> {s.day} — {s.time} <span className="opacity-60">({s.courseName})</span>
+                                </p>
+                              ))}
+                          </div>
+                        )}
+                        <p className="text-[11px] text-muted-foreground mt-2">
+                          اگر زمان متفاوتی مدنظر دارید، تاریخ و ساعت دلخواه را انتخاب و درخواست دهید.
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-1 block">دوره</label>
@@ -822,10 +921,22 @@ export default function ProfilePage() {
           {/* Materials */}
           {tab === 'materials' && (
             <>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-bold flex items-center gap-2">
+                  <FiFileText className="h-5 w-5 text-primary" /> جزوه‌های دوره‌ها
+                </h2>
+                <button
+                  onClick={() => setShowMaterialModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                >
+                  <FiPlus className="h-4 w-4" /> آپلود جزوه
+                </button>
+              </div>
               {data.materials.length === 0 ? (
                 <div className="text-center py-16 bg-background border rounded-2xl">
                   <FiFileText className="h-12 w-12 mx-auto mb-3 opacity-40" />
                   <p className="font-bold">جزوه‌ای برای دوره‌های شما منتشر نشده است</p>
+                  <p className="text-sm text-muted-foreground mt-1">با دکمه بالا جزوه خود را برای استاد ارسال کنید</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -839,6 +950,7 @@ export default function ProfilePage() {
                           <h3 className="font-bold truncate">{m.title}</h3>
                           <p className="text-xs text-muted-foreground mt-0.5">
                             {m.courseName} — {m.type === 'pdf' ? 'جزوه PDF' : m.type === 'video' ? 'ویدیو' : m.type === 'link' ? 'لینک' : 'فایل'} — {m.addedAt}
+                            {m.studentId && <span className="text-primary"> — ارسال شما</span>}
                           </p>
                         </div>
                       </div>
@@ -1100,6 +1212,75 @@ export default function ProfilePage() {
               </div>
             )}
           </motion.div>
+        </div>
+      )}
+
+      {showMaterialModal && (
+        <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4" onClick={() => setShowMaterialModal(false)}>
+          <div className="bg-background border rounded-2xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-bold flex items-center gap-2">
+                <FiUpload className="h-5 w-5 text-primary" /> آپلود جزوه
+              </h3>
+              <button onClick={() => setShowMaterialModal(false)} className="p-2 rounded-lg hover:bg-muted/60 transition-colors">
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1.5">عنوان جزوه</label>
+                <input
+                  value={matTitle}
+                  onChange={(e) => setMatTitle(e.target.value)}
+                  placeholder="مثلاً: جزوه جلسه سوم"
+                  className="w-full px-3 py-2.5 border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">دوره</label>
+                <select
+                  value={matCourseId}
+                  onChange={(e) => setMatCourseId(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                >
+                  <option value="">انتخاب دوره...</option>
+                  {data.enrollments.map((e) => (
+                    <option key={e.courseId} value={e.courseId}>{e.courseName}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">نوع فایل</label>
+                <select
+                  value={matType}
+                  onChange={(e) => setMatType(e.target.value as 'pdf' | 'video' | 'link' | 'file')}
+                  className="w-full px-3 py-2.5 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                >
+                  <option value="pdf">جزوه PDF</option>
+                  <option value="video">ویدیو</option>
+                  <option value="link">لینک</option>
+                  <option value="file">فایل</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">لینک فایل</label>
+                <input
+                  value={matUrl}
+                  onChange={(e) => setMatUrl(e.target.value)}
+                  placeholder="https://..."
+                  dir="ltr"
+                  className="w-full px-3 py-2.5 border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+                <p className="text-[11px] text-muted-foreground mt-1">اگر فایل هنوز منتشر نشده، این بخش را خالی بگذارید</p>
+              </div>
+              <button
+                onClick={handleAddMaterial}
+                className="w-full px-4 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+              >
+                ارسال جزوه
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </main>

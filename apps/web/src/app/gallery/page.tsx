@@ -1,28 +1,48 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiArrowRight, FiX, FiZoomIn } from 'react-icons/fi';
+import { db, initializeDB } from '@/lib/store';
+import { useHydrated } from '@/hooks/use-hydrated';
 
-const galleryImages = [
-  { id: 1, src: '/images/vira-slide2.jpg', alt: 'کلاس آموزشگاه زبان ویرا', category: 'آموزشگاه' },
-  { id: 2, src: '/images/vira-slide1.jpg', alt: 'کتاب‌های American English File', category: 'کتاب‌ها' },
-  { id: 3, src: '/images/vira-slide3.jpg', alt: 'کتاب‌های First Friends ویژه کودکان', category: 'کتاب‌ها' },
-  { id: 4, src: '/images/vira-news.jpg', alt: 'آغاز ثبت نام ترم جدید', category: 'اخبار' },
-  { id: 5, src: '/images/nasim.jpg', alt: 'نسیم خدابخش - موسس و مدیریت', category: 'اساتید' },
-  { id: 6, src: '/images/zahra.jpg', alt: 'زهرا مردانی - مدرس TTC و بزرگسال', category: 'اساتید' },
-  { id: 7, src: '/images/vira-logo.jpg', alt: 'لوگوی آموزشگاه زبان ویرا', category: 'آموزشگاه' },
-  { id: 8, src: '/images/english.jpg', alt: 'محیط آموزشی', category: 'آموزشگاه' },
-  { id: 9, src: '/images/speech.jpg', alt: 'کلاس مکالمه', category: 'کلاس‌ها' },
-  { id: 10, src: '/images/about.jpg', alt: 'فضای آموزشگاه', category: 'آموزشگاه' },
+interface GalleryItem {
+  id: string;
+  src: string;
+  alt: string;
+  category: string;
+}
+
+const FALLBACK_IMAGES: GalleryItem[] = [
+  { id: 'fallback1', src: '/images/vira-slide2.jpg', alt: 'کلاس آموزشگاه زبان ویرا', category: 'آموزشگاه' },
+  { id: 'fallback2', src: '/images/vira-slide1.jpg', alt: 'کتاب‌های American English File', category: 'کتاب‌ها' },
+  { id: 'fallback3', src: '/images/vira-slide3.jpg', alt: 'کتاب‌های First Friends ویژه کودکان', category: 'کتاب‌ها' },
+  { id: 'fallback4', src: '/images/vira-news.jpg', alt: 'آغاز ثبت نام ترم جدید', category: 'اخبار' },
+  { id: 'fallback5', src: '/images/nasim.jpg', alt: 'نسیم خدابخش - موسس و مدیریت', category: 'اساتید' },
+  { id: 'fallback6', src: '/images/zahra.jpg', alt: 'زهرا مردانی - مدرس TTC و بزرگسال', category: 'اساتید' },
+  { id: 'fallback7', src: '/images/vira-logo.jpg', alt: 'لوگوی آموزشگاه زبان ویرا', category: 'آموزشگاه' },
+  { id: 'fallback8', src: '/images/english.jpg', alt: 'محیط آموزشی', category: 'آموزشگاه' },
+  { id: 'fallback9', src: '/images/speech.jpg', alt: 'کلاس مکالمه', category: 'کلاس‌ها' },
+  { id: 'fallback10', src: '/images/about.jpg', alt: 'فضای آموزشگاه', category: 'آموزشگاه' },
 ];
 
-const categories = ['همه', 'آموزشگاه', 'کتاب‌ها', 'کلاس‌ها', 'اساتید', 'اخبار'];
-
 export default function GalleryPage() {
+  const [galleryImages, setGalleryImages] = useState<GalleryItem[]>(FALLBACK_IMAGES);
   const [selectedCategory, setSelectedCategory] = useState('همه');
-  const [lightbox, setLightbox] = useState<typeof galleryImages[0] | null>(null);
+  const [lightbox, setLightbox] = useState<GalleryItem | null>(null);
+  const hydrated = useHydrated();
+
+  useEffect(() => {
+    if (!hydrated) return;
+    initializeDB();
+    const stored = db.getCollection<{ id: string; title: string; category: string; imageUrl: string }>('galleryImages');
+    if (stored && stored.length > 0) {
+      setGalleryImages(stored.map((g) => ({ id: g.id, src: g.imageUrl, alt: g.title, category: g.category })));
+    }
+  }, [hydrated]);
+
+  const categories = ['همه', ...Array.from(new Set(galleryImages.map((img) => img.category)))];
 
   const filtered = selectedCategory === 'همه' ? galleryImages : galleryImages.filter((img) => img.category === selectedCategory);
 

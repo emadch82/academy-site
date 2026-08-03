@@ -150,10 +150,19 @@ export default function CmsPage() {
   const [faqForm, setFaqForm] = useState({ question: '', answer: '', category: '' });
 
   const loadData = useCallback(() => {
-    setArticles(seedCollection<Article>(COLLECTIONS.articles, SEED_ARTICLES));
     setBanners(seedCollection<Banner>(COLLECTIONS.banners, SEED_BANNERS));
     setFaqItems(seedCollection<FaqItem>(COLLECTIONS.faq, SEED_FAQ));
-    setComments(seedCollection<Comment>(COLLECTIONS.comments, SEED_COMMENTS));
+    const posts = db.getBlogPosts().map((p) => ({ id: p.id, title: p.title, content: p.excerpt || p.title, status: p.status }));
+    setArticles(posts);
+    const realComments = db.getReviews().map((r) => ({
+      id: r.id,
+      author: r.studentName,
+      content: r.comment,
+      course: r.courseName,
+      date: r.date,
+      status: 'approved' as 'approved' | 'pending',
+    }));
+    setComments(realComments);
   }, []);
 
   useEffect(() => {
@@ -207,11 +216,25 @@ export default function CmsPage() {
         id: generateId('ca'),
         ...articleForm,
       };
-      addItem<Article>(COLLECTIONS.articles, newItem);
+      db.addBlogPost({
+        title: articleForm.title,
+        excerpt: articleForm.content.slice(0, 150),
+        content: articleForm.content,
+        category: 'عمومی',
+        author: 'مدیر سیستم',
+        status: articleForm.status,
+        date: new Date().toLocaleDateString('fa-IR'),
+        imageUrl: '/images/blog2.jpg',
+        readTime: `${Math.max(1, Math.ceil(articleForm.content.length / 350))} دقیقه`,
+      });
       setArticles((prev) => [...prev, newItem]);
       toast.success('مقاله اضافه شد');
     } else if (editingId) {
-      updateItem<Article>(COLLECTIONS.articles, editingId, articleForm);
+      const items = db.getBlogPosts();
+      const post = items.find((p) => p.id === editingId);
+      if (post) {
+        db.updateBlogPost(editingId, { title: articleForm.title, excerpt: articleForm.content.slice(0, 150), content: articleForm.content, status: articleForm.status });
+      }
       setArticles((prev) => prev.map((a) => (a.id === editingId ? { ...a, ...articleForm } : a)));
       toast.success('مقاله ویرایش شد');
     }
@@ -267,7 +290,7 @@ export default function CmsPage() {
     if (!confirmDelete) return;
     const { id } = confirmDelete;
     if (activeTab === 'articles') {
-      removeItem<Article>(COLLECTIONS.articles, id);
+      db.deleteBlogPost(id);
       setArticles((prev) => prev.filter((a) => a.id !== id));
     } else if (activeTab === 'banners') {
       removeItem<Banner>(COLLECTIONS.banners, id);
@@ -276,7 +299,7 @@ export default function CmsPage() {
       removeItem<FaqItem>(COLLECTIONS.faq, id);
       setFaqItems((prev) => prev.filter((f) => f.id !== id));
     } else if (activeTab === 'comments') {
-      removeItem<Comment>(COLLECTIONS.comments, id);
+      db.deleteReview(id);
       setComments((prev) => prev.filter((c) => c.id !== id));
     }
     toast.success('حذف شد');
@@ -686,11 +709,6 @@ export default function CmsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  {comment.status === 'pending' && (
-                    <button onClick={() => handleApproveComment(comment.id)} className="p-1.5 rounded-lg hover:bg-green-50 transition-colors" title="تایید">
-                      <FiCheckCircle className="h-4 w-4 text-green-500" />
-                    </button>
-                  )}
                   <button onClick={() => setConfirmDelete({ id: comment.id, label: comment.author })} className="p-1.5 rounded-lg hover:bg-red-50 transition-colors">
                     <FiTrash2 className="h-4 w-4 text-red-500" />
                   </button>

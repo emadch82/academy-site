@@ -1,5 +1,122 @@
 import { blogPosts as STATIC_BLOG_POSTS } from './blog-data';
 
+const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+const toEnDigits = (s: string) => s.replace(/[۰-۹]/g, (d) => String(FA_DIGITS.indexOf(d)));
+
+function div(a: number, b: number) {
+  return ~~(a / b);
+}
+function mod(a: number, b: number) {
+  return a - ~~(a / b) * b;
+}
+
+function jalCal(jy: number) {
+  const breaks = [-61, 9, 38, 199, 426, 686, 756, 818, 1111, 1181, 1210, 1635, 2060, 2097, 2192, 2262, 2324, 2394, 2456, 3178];
+  const gy = jy + 621;
+  let leapJ = -14;
+  let jp = breaks[0];
+  let jump = 0;
+  for (let i = 1; i < breaks.length; i += 1) {
+    const jm = breaks[i];
+    jump = jm - jp;
+    if (jy < jm) break;
+    leapJ = leapJ + div(jump, 33) * 8 + div(mod(jump, 33), 4);
+    jp = jm;
+  }
+  let n = jy - jp;
+  leapJ = leapJ + div(n, 33) * 8 + div(mod(n, 33) + 3, 4);
+  if (mod(jump, 33) === 4 && jump - n === 4) leapJ += 1;
+  const leapG = div(gy, 4) - div((div(gy, 100) + 1) * 3, 4) - 150;
+  const march = 20 + leapJ - leapG;
+  if (jump - n < 6) n = n - jump + div(jump + 4, 33) * 33;
+  let leap = mod(mod(n + 1, 33) - 1, 4);
+  if (leap === -1) leap = 4;
+  return { leap, gy, march };
+}
+
+function g2d(gy: number, gm: number, gd: number) {
+  let d = div((gy + div(gm - 8, 6) + 100100) * 1461, 4) + div(153 * mod(gm + 9, 12) + 2, 5) + gd - 34840408;
+  d = d - div(div(gy + 100100 + div(gm - 8, 6), 100) * 3, 4) + 752;
+  return d;
+}
+
+function j2d(jy: number, jm: number, jd: number) {
+  const r = jalCal(jy);
+  return g2d(r.gy, 3, r.march) + (jm - 1) * 31 - div(jm, 7) * (jm - 7) + jd - 1;
+}
+
+function d2j(jdn: number) {
+  const gy = d2g(jdn);
+  let jy = gy - 621;
+  const r = jalCal(jy);
+  const jdn1f = g2d(gy, 3, r.march);
+  let k = jdn - jdn1f;
+  if (k >= 0) {
+    if (k <= 185) {
+      return { jy, jm: 1 + div(k, 31), jd: mod(k, 31) + 1 };
+    }
+    k -= 186;
+  } else {
+    jy -= 1;
+    k += 179;
+    if (r.leap === 1) k += 1;
+  }
+  return { jy, jm: 7 + div(k, 30), jd: mod(k, 30) + 1 };
+}
+
+function d2g(jdn: number) {
+  let j = 4 * jdn + 139361631;
+  j = j + div(div(4 * jdn + 183187720, 146097) * 3, 4) * 4 - 3908;
+  const i = div(mod(j, 1461), 4) * 5 + 308;
+  const gd = div(mod(i, 153), 5) + 1;
+  const gm = mod(div(i, 153), 12) + 1;
+  const gy = div(j, 1461) - 100100 + div(8 - gm, 6);
+  return gy;
+}
+
+export function parseFaDate(faDate: string): Date | null {
+  const parts = toEnDigits(faDate).split('/');
+  if (parts.length !== 3) return null;
+  const jy = parseInt(parts[0], 10);
+  const jm = parseInt(parts[1], 10);
+  const jd = parseInt(parts[2], 10);
+  if (!jy || !jm || !jd) return null;
+  return new Date(g2d(jy, jm, jd) * 86400000);
+}
+
+export function faWeekdayIndex(faDate: string): number {
+  const parts = toEnDigits(faDate).split('/');
+  if (parts.length !== 3) return -1;
+  const jy = parseInt(parts[0], 10);
+  const jm = parseInt(parts[1], 10);
+  const jd = parseInt(parts[2], 10);
+  if (!jy || !jm || !jd) return -1;
+  const jdn = j2d(jy, jm, jd);
+  const mondayIndex = mod(jdn, 7);
+  return mod(mondayIndex + 2, 7);
+}
+
+export function faDateFromJdn(jdn: number): string {
+  const { jy, jm, jd } = d2j(jdn);
+  const mm = jm < 10 ? `0${jm}` : `${jm}`;
+  const dd = jd < 10 ? `0${jd}` : `${jd}`;
+  return `${jy}/${mm}/${dd}`;
+}
+
+export function todayFa(): string {
+  return faDateFromJdn(div(Date.now() / 86400000, 1) + 2440588);
+}
+
+export function addDaysFa(faDate: string, days: number): string {
+  const parts = toEnDigits(faDate).split('/');
+  if (parts.length !== 3) return faDate;
+  const jy = parseInt(parts[0], 10);
+  const jm = parseInt(parts[1], 10);
+  const jd = parseInt(parts[2], 10);
+  if (!jy || !jm || !jd) return faDate;
+  return faDateFromJdn(j2d(jy, jm, jd) + days);
+}
+
 export interface User {
   id: string;
   fullName: string;
@@ -236,6 +353,7 @@ export interface Material {
   courseId: string;
   courseName: string;
   teacherId: string;
+  studentId?: string;
   title: string;
   type: 'pdf' | 'video' | 'link' | 'file';
   url: string;
@@ -544,6 +662,30 @@ const SEED_CERTIFICATES: Certificate[] = [
 
 // ──── INITIALIZE ────
 
+export interface SiteSettings {
+  academyName: string;
+  phone: string;
+  mobile: string;
+  email: string;
+  website: string;
+  address: string;
+  hours: string;
+  supportPhone: string;
+  description: string;
+}
+
+export const DEFAULT_SITE_SETTINGS: SiteSettings = {
+  academyName: 'آموزشگاه زبان ویرا',
+  phone: '۰۳۱-۳۷۷۵۹۵۵۶',
+  mobile: '۰۹۱۳۲۰۱۹۱۳۹',
+  email: 'info@viraacademyesf.ir',
+  website: 'viraacademyesf.ir',
+  address: 'اصفهان، خیابان رودکی، کوچه شهید سلیمانی (84)',
+  hours: 'شنبه تا پنجشنبه ۸ صبح تا ۸ شب',
+  supportPhone: '۰۹۱۳۲۰۱۹۱۳۹',
+  description: 'مرکز تخصصی آموزش زبان انگلیسی',
+};
+
 export function initializeDB() {
   if (typeof window === 'undefined') return;
   
@@ -737,6 +879,7 @@ export const db = {
     return getCollection<Review>('reviews').filter((r) => courseIds.includes(r.courseId));
   },
   addReview: (r: Omit<Review, 'id'>) => addItem<Review>('reviews', { ...r, id: generateId('rv') }),
+  deleteReview: (id: string) => deleteItem<Review>('reviews', id),
 
   // Blog Posts
   getBlogPosts: () => getCollection<BlogPost>('blogPosts'),
@@ -852,8 +995,94 @@ export const db = {
   getMaterials: () => getCollection<Material>('materials'),
   getMaterialsByTeacher: (teacherId: string) => getCollection<Material>('materials').filter((m) => m.teacherId === teacherId),
   getMaterialsByCourse: (courseId: string) => getCollection<Material>('materials').filter((m) => m.courseId === courseId),
+  getMaterialsByStudent: (studentId: string) => getCollection<Material>('materials').filter((m) => m.studentId === studentId),
   addMaterial: (m: Omit<Material, 'id'>) => addItem<Material>('materials', { ...m, id: generateId('mt') }),
+  addMaterialByStudent: (m: Omit<Material, 'id'>) => addItem<Material>('materials', { ...m, id: generateId('mt'), studentId: m.studentId || '' }),
   deleteMaterial: (id: string) => deleteItem<Material>('materials', id),
+
+  // Stats helpers
+  getTeacherStats: (teacherId: string) => {
+    const courses = getCollection<Course>('courses').filter((c) => c.teacherId === teacherId);
+    const courseIds = courses.map((c) => c.id);
+    const enrollments = getCollection<Enrollment>('enrollments').filter((e) => courseIds.includes(e.courseId));
+    const students = getCollection<User>('users').filter((u) => enrollments.some((e) => e.studentId === u.id));
+    const attendances = getCollection<Attendance>('attendance').filter((a) => courseIds.includes(a.courseId));
+    const presentCount = attendances.filter((a) => a.status === 'present').length;
+    const totalCount = attendances.length;
+    const appointments = getCollection<Appointment>('appointments').filter((a) => a.teacherId === teacherId);
+    const pendingAppointments = appointments.filter((a) => a.status === 'pending').length;
+    const leaveRequests = getCollection<LeaveRequest>('leaveRequests').filter((l) => l.teacherId === teacherId);
+    const pendingLeave = leaveRequests.filter((l) => l.status === 'pending').length;
+    const materials = getCollection<Material>('materials').filter((m) => m.teacherId === teacherId);
+    const homework = getCollection<Homework>('homework').filter((h) => h.teacherId === teacherId);
+    const quizzes = getCollection<Quiz>('quizzes').filter((q) => q.teacherId === teacherId);
+    const schedule = getCollection<any>('schedule').filter((s) => s.teacherId === teacherId);
+    
+    return {
+      totalCourses: courses.length,
+      totalStudents: students.length,
+      totalEnrollments: enrollments.length,
+      attendanceRate: totalCount > 0 ? Math.round((presentCount / totalCount) * 100) : 0,
+      pendingAppointments,
+      pendingLeave,
+      totalMaterials: materials.length,
+      totalHomework: homework.length,
+      totalQuizzes: quizzes.length,
+      totalSchedule: schedule.length,
+    };
+  },
+
+  getStudentStats: (studentId: string) => {
+    const enrollments = getCollection<Enrollment>('enrollments').filter((e) => e.studentId === studentId && e.status === 'confirmed');
+    const courses = getCollection<Course>('courses').filter((c) => enrollments.some((e) => e.courseId === c.id));
+    const attendances = getCollection<Attendance>('attendance').filter((a) => a.studentId === studentId);
+    const presentCount = attendances.filter((a) => a.status === 'present').length;
+    const totalCount = attendances.length;
+    const appointments = getCollection<Appointment>('appointments').filter((a) => a.studentId === studentId);
+    const pendingAppointments = appointments.filter((a) => a.status === 'pending').length;
+    const completedAppointments = appointments.filter((a) => a.status === 'completed').length;
+    const leaveRequests = getCollection<LeaveRequest>('leaveRequests').filter((l) => l.studentId === studentId);
+    const pendingLeave = leaveRequests.filter((l) => l.status === 'pending').length;
+    const homework = getCollection<Homework>('homework').filter((h) => h.studentId === studentId);
+    const pendingHomework = homework.filter((h) => h.status === 'pending').length;
+    const quizAttempts = getCollection<QuizAttempt>('quizAttempts').filter((a) => a.studentId === studentId);
+    const avgScore = quizAttempts.length > 0 ? Math.round(quizAttempts.reduce((s, a) => s + a.score, 0) / quizAttempts.length) : 0;
+    const materials = getCollection<Material>('materials').filter((m) => m.studentId === studentId);
+    
+    return {
+      enrolledCourses: courses.length,
+      totalEnrollments: enrollments.length,
+      attendanceRate: totalCount > 0 ? Math.round((presentCount / totalCount) * 100) : 0,
+      totalAttendance: totalCount,
+      presentCount,
+      pendingAppointments,
+      completedAppointments,
+      pendingLeave,
+      totalHomework: homework.length,
+      pendingHomework,
+      avgQuizScore: avgScore,
+      totalMaterials: materials.length,
+    };
+  },
+
+  // Weekly attendance stats for teacher
+  getWeeklyAttendanceStats: (teacherId: string, weekStart: string) => {
+    const courses = getCollection<Course>('courses').filter((c) => c.teacherId === teacherId);
+    const courseIds = courses.map((c) => c.id);
+    const days = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+    const stats = days.map((day, idx) => {
+      const dayDate = addDaysFa(weekStart, idx);
+      const dayAttendances = getCollection<Attendance>('attendance').filter((a) => {
+        return courseIds.includes(a.courseId) && a.date === dayDate;
+      });
+      const present = dayAttendances.filter((a) => a.status === 'present').length;
+      const absent = dayAttendances.filter((a) => a.status === 'absent').length;
+      const late = dayAttendances.filter((a) => a.status === 'late').length;
+      const total = dayAttendances.length;
+      return { day, date: dayDate, present, absent, late, total, rate: total > 0 ? Math.round((present / total) * 100) : 0 };
+    });
+    return stats;
+  },
 
   // Certificates
   getCertificates: () => getCollection<Certificate>('certificates'),

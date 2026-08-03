@@ -196,7 +196,7 @@ export default function HomeworkPage() {
                 setCourseId(e.target.value);
                 setStudentId('');
               }}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background"
+              className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
               <option value="">انتخاب دوره...</option>
               {courses.map((c) => (
@@ -210,7 +210,7 @@ export default function HomeworkPage() {
               value={studentId}
               onChange={(e) => setStudentId(e.target.value)}
               disabled={!courseId}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background disabled:opacity-50"
+              className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
             >
               <option value="">انتخاب دانش‌آموز...</option>
               {students.map((s) => (
@@ -274,7 +274,7 @@ export default function HomeworkPage() {
             <select
               value={filterCourse}
               onChange={(e) => setFilterCourse(e.target.value)}
-              className="px-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background"
+              className="px-3 py-1.5 bg-card border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
               <option value="all">همه دوره‌ها</option>
               {courses.map((c) => (

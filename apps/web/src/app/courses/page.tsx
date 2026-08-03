@@ -1,23 +1,64 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FiSearch, FiStar, FiUsers, FiArrowLeft, FiArrowRight, FiShoppingCart, FiCheck, FiCheckCircle } from 'react-icons/fi';
-import { courses, formatPrice } from '@/lib/courses-data';
+import { courses as staticCourses, formatPrice, type Course as StaticCourse } from '@/lib/courses-data';
+import { db, initializeDB, type Course as DbCourse } from '@/lib/store';
 import { useCart } from '@/contexts/cart-context';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 import { AutoPlayVideo } from '@/components/auto-play-video';
+import { useHydrated } from '@/hooks/use-hydrated';
 
 const categories = ['همه', 'کودکان', 'نوجوانان', 'بزرگسالان', 'مکالمه', 'TTC', 'آزمون', 'فرهنگی', 'آنلاین'];
+
+interface MergedCourse extends StaticCourse {
+  dbId: string;
+}
+
+function mergeCourses(dbCourses: DbCourse[]): MergedCourse[] {
+  return dbCourses
+    .filter((c) => c.status === 'active')
+    .map((dc) => {
+      const st = staticCourses.find((s) => db.getCourseByDataId(s.id)?.id === dc.id);
+      return {
+        dbId: dc.id,
+        id: st?.id || dc.id,
+        title: dc.title,
+        teacher: dc.teacherName,
+        price: dc.price,
+        sessions: st?.sessions ?? 0,
+        rating: st?.rating ?? 5,
+        category: dc.category || st?.category || 'عمومی',
+        description: st?.description || dc.title,
+        fullDescription: st?.fullDescription || dc.title,
+        schedule: st?.schedule || '',
+        prerequisites: st?.prerequisites || '',
+        syllabus: st?.syllabus || [],
+        highlights: st?.highlights || [],
+        imageUrl: dc.imageUrl || '/images/ai.jpg',
+        ageRange: st?.ageRange,
+        level: dc.level || st?.level,
+      };
+    });
+}
 
 export default function CoursesPage() {
   const router = useRouter();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('همه');
+  const [courses, setCourses] = useState<MergedCourse[]>([]);
   const { addItem, removeItem, isInCart, isPurchased } = useCart();
+  const hydrated = useHydrated();
+
+  useEffect(() => {
+    if (!hydrated) return;
+    initializeDB();
+    setCourses(mergeCourses(db.getCourses()));
+  }, [hydrated]);
 
   const requireAuth = (callback: () => void) => {
     if (!Cookies.get('amz_access')) {
@@ -28,7 +69,7 @@ export default function CoursesPage() {
     callback();
   };
 
-  const handleAddToCart = (e: React.MouseEvent, course: typeof courses[0]) => {
+  const handleAddToCart = (e: React.MouseEvent, course: MergedCourse) => {
     e.preventDefault();
     e.stopPropagation();
     requireAuth(() => {
@@ -218,7 +259,13 @@ export default function CoursesPage() {
           ))}
         </div>
 
-        {filteredCourses.length === 0 && (
+        {filteredCourses.length === 0 && !hydrated && (
+          <div className="text-center py-16">
+            <p className="text-lg font-medium text-muted-foreground">در حال بارگذاری دوره‌ها...</p>
+          </div>
+        )}
+
+        {filteredCourses.length === 0 && hydrated && (
           <div className="text-center py-16">
             <FiSearch className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-lg font-medium">دوره‌ای یافت نشد</p>
