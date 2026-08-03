@@ -252,7 +252,7 @@ export default function NotificationsPage() {
                         {cfg.label}
                       </span>
                       {notification.status === 'draft' && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">پیش‌نویس</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">پیش‌نویس</span>
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">{notification.message}</p>

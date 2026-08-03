@@ -216,14 +216,14 @@ export default function SchedulePage() {
                 placeholder="ساعت (مثلاً ۱۶:۰۰ - ۱۸:۰۰)"
                 value={newItem.time}
                 onChange={(e) => setNewItem({ ...newItem, time: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <input
                 type="text"
                 placeholder="کلاس (مثلاً کلاس ۲)"
                 value={newItem.room}
                 onChange={(e) => setNewItem({ ...newItem, room: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="flex gap-3 mt-5">

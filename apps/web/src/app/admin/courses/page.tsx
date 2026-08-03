@@ -112,7 +112,7 @@ export default function CoursesPage() {
                     <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
                       course.status === 'active' ? 'bg-green-100 text-green-700' :
                       course.status === 'inactive' ? 'bg-red-100 text-red-700' :
-                      'bg-gray-100 text-gray-700'
+                      'bg-muted text-muted-foreground'
                     }`}>{STATUS_LABELS[course.status]}</span>
                   </td>
                   <td className="px-4 py-3">

@@ -252,7 +252,7 @@ export default function AdminGalleryPage() {
             <div className="p-3">
               <p className="text-sm font-medium truncate">{img.title}</p>
               <span
-                className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full ${CATEGORY_COLORS[img.category] || 'bg-gray-100 text-gray-600'}`}
+                className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full ${CATEGORY_COLORS[img.category] || 'bg-muted text-muted-foreground'}`}
               >
                 {img.category}
               </span>

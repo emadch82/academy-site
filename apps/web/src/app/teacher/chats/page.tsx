@@ -217,7 +217,7 @@ export default function ChatsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs px-2 py-1 rounded-full ${selectedChat.status === 'open' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                  <span className={`text-xs px-2 py-1 rounded-full ${selectedChat.status === 'open' ? 'bg-green-100 text-green-700' : 'bg-muted text-muted-foreground'}`}>
                     {selectedChat.status === 'open' ? 'باز' : 'بسته'}
                   </span>
                 </div>

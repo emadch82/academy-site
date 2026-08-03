@@ -253,7 +253,7 @@ export default function QuizPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="مثلا: آزمون گرامر درس ۱ تا ۳"
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <div>
@@ -263,7 +263,7 @@ export default function QuizPage() {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
                   placeholder="توضیح کوتاه درباره آزمون..."
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                  className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -287,7 +287,7 @@ export default function QuizPage() {
                     min={1}
                     value={duration}
                     onChange={(e) => setDuration(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
                 </div>
               </div>

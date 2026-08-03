@@ -151,7 +151,7 @@ export default function TeacherDashboard() {
               if (e.key === 'Enter') sendAnnounce();
             }}
             placeholder="متن اعلان برای همه دانش‌آموزان دوره (Enter)"
-            className="px-3 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="px-3 py-2.5 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
           <button
             onClick={sendAnnounce}

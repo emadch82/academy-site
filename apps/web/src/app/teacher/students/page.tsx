@@ -167,7 +167,7 @@ export default function StudentsPage() {
             placeholder="جستجوی نام، ایمیل یا موبایل..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pr-9 pl-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="w-full pr-9 pl-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
         </div>
         <select
@@ -299,28 +299,28 @@ export default function StudentsPage() {
                 placeholder="نام و نام خانوادگی *"
                 value={newStudent.fullName}
                 onChange={(e) => setNewStudent({ ...newStudent, fullName: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <input
                 type="email"
                 placeholder="ایمیل *"
                 value={newStudent.email}
                 onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <input
                 type="text"
                 placeholder="شماره موبایل"
                 value={newStudent.mobile}
                 onChange={(e) => setNewStudent({ ...newStudent, mobile: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <input
                 type="password"
                 placeholder="رمز عبور *"
                 value={newStudent.password}
                 onChange={(e) => setNewStudent({ ...newStudent, password: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="flex gap-3 mt-5">
@@ -360,19 +360,19 @@ export default function StudentsPage() {
                 type="text"
                 value={editingStudent.fullName}
                 onChange={(e) => setEditingStudent({ ...editingStudent, fullName: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <input
                 type="email"
                 value={editingStudent.email}
                 onChange={(e) => setEditingStudent({ ...editingStudent, email: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <input
                 type="text"
                 value={editingStudent.mobile}
                 onChange={(e) => setEditingStudent({ ...editingStudent, mobile: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="flex gap-3 mt-5">

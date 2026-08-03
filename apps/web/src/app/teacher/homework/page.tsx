@@ -225,7 +225,7 @@ export default function HomeworkPage() {
               placeholder="عنوان تکلیف *"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
 
             <textarea
@@ -233,7 +233,7 @@ export default function HomeworkPage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+              className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
             />
 
             <input
@@ -241,7 +241,7 @@ export default function HomeworkPage() {
               placeholder="مهلت تحویل (مثلاً ۱۴۰۵/۰۵/۲۰)"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
 
             <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
@@ -387,7 +387,7 @@ export default function HomeworkPage() {
                   value={gradeValue}
                   onChange={(e) => setGradeValue(e.target.value)}
                   placeholder="مثلاً ۱۸"
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <div>
@@ -397,7 +397,7 @@ export default function HomeworkPage() {
                   onChange={(e) => setGradeComment(e.target.value)}
                   rows={3}
                   placeholder="بازخورد خود را بنویسید..."
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                  className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
                 />
               </div>
             </div>

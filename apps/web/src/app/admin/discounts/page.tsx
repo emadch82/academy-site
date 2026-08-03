@@ -187,7 +187,7 @@ export default function DiscountsPage() {
                     <button
                       type="button"
                       onClick={() => handleToggleStatus(d.id)}
-                      className={`text-xs px-2 py-1 rounded-full cursor-pointer transition-all ${d.status === 'active' ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                      className={`text-xs px-2 py-1 rounded-full cursor-pointer transition-all ${d.status === 'active' ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}
                     >
                       {d.status === 'active' ? 'فعال' : 'غیرفعال'}
                     </button>
@@ -303,7 +303,7 @@ export default function DiscountsPage() {
                     <button
                       type="button"
                       onClick={() => setForm({ ...form, status: 'inactive' })}
-                      className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm border transition-all ${form.status === 'inactive' ? 'bg-gray-100 text-gray-700 border-gray-300' : 'border-muted hover:bg-muted/50'}`}
+                      className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm border transition-all ${form.status === 'inactive' ? 'bg-muted text-muted-foreground border-border' : 'border-muted hover:bg-muted/50'}`}
                     >
                       <FiX className="h-4 w-4" /> غیرفعال
                     </button>

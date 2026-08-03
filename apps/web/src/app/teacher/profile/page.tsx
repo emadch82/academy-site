@@ -129,7 +129,7 @@ export default function AdminProfilePage() {
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div>
@@ -141,7 +141,7 @@ export default function AdminProfilePage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   dir="ltr"
-                  className="w-full pr-9 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full pr-9 px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
             </div>
@@ -154,7 +154,7 @@ export default function AdminProfilePage() {
                   value={mobile}
                   onChange={(e) => setMobile(e.target.value)}
                   dir="ltr"
-                  className="w-full pr-9 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full pr-9 px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
             </div>
@@ -188,7 +188,7 @@ export default function AdminProfilePage() {
                   type={showCurrent ? 'text' : 'password'}
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full pr-9 pl-9 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full pr-9 pl-9 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
                 <button
                   type="button"
@@ -207,7 +207,7 @@ export default function AdminProfilePage() {
                   type={showNew ? 'text' : 'password'}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full pr-9 pl-9 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full pr-9 pl-9 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
                 <button
                   type="button"
@@ -226,7 +226,7 @@ export default function AdminProfilePage() {
                   type={showNew ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pr-9 pl-9 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full pr-9 pl-9 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
             </div>

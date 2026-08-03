@@ -447,7 +447,7 @@ export default function CmsPage() {
                       type="checkbox"
                       checked={bannerForm.active}
                       onChange={(e) => setBannerForm((p) => ({ ...p, active: e.target.checked }))}
-                      className="h-4 w-4 rounded border-gray-300"
+                      className="h-4 w-4 rounded border-border bg-background accent-primary"
                       id="banner-active"
                     />
                     <label htmlFor="banner-active" className="text-sm font-medium">فعال</label>
@@ -642,7 +642,7 @@ export default function CmsPage() {
                       <FiCheckCircle className="h-3 w-3" /> فعال
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
                       <FiXCircle className="h-3 w-3" /> غیرفعال
                     </span>
                   )}

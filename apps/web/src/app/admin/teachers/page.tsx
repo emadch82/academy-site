@@ -125,7 +125,7 @@ export default function TeachersPage() {
           placeholder="جستجوی نام، ایمیل یا موبایل..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pr-9 pl-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="w-full pr-9 pl-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </div>
 
@@ -245,28 +245,28 @@ export default function TeachersPage() {
                 placeholder="نام و نام خانوادگی *"
                 value={newTeacher.fullName}
                 onChange={(e) => setNewTeacher({ ...newTeacher, fullName: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <input
                 type="email"
                 placeholder="ایمیل *"
                 value={newTeacher.email}
                 onChange={(e) => setNewTeacher({ ...newTeacher, email: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <input
                 type="text"
                 placeholder="شماره موبایل"
                 value={newTeacher.mobile}
                 onChange={(e) => setNewTeacher({ ...newTeacher, mobile: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <input
                 type="password"
                 placeholder="رمز عبور *"
                 value={newTeacher.password}
                 onChange={(e) => setNewTeacher({ ...newTeacher, password: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="flex gap-3 mt-5">
@@ -306,19 +306,19 @@ export default function TeachersPage() {
                 type="text"
                 value={editingTeacher.fullName}
                 onChange={(e) => setEditingTeacher({ ...editingTeacher, fullName: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <input
                 type="email"
                 value={editingTeacher.email}
                 onChange={(e) => setEditingTeacher({ ...editingTeacher, email: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <input
                 type="text"
                 value={editingTeacher.mobile}
                 onChange={(e) => setEditingTeacher({ ...editingTeacher, mobile: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="flex gap-3 mt-5">

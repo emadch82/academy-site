@@ -73,8 +73,6 @@ export default function AttendancePage() {
     return db.getWeeklyAttendanceStats(teacherId, weekStart);
   }, [hydrated, teacherId, weekStart]);
 
-  if (!hydrated) return <div className="p-6 text-muted-foreground">در حال بارگذاری...</div>;
-
   const students = courseId ? db.getStudentsByCourse(courseId) : [];
 
   const weeklyTable = useMemo(() => {
@@ -88,6 +86,18 @@ export default function AttendancePage() {
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, teacherId, courseId, weekStart, students.length]);
+
+  const overallRate = useMemo(() => {
+    if (!hydrated || !teacherId) return 0;
+    const atts = db.getAttendance().filter((a) => {
+      const ids = new Set(db.getCoursesByTeacher(teacherId).map((c) => c.id));
+      return ids.has(a.courseId);
+    });
+    if (atts.length === 0) return 0;
+    return Math.round((atts.filter((a) => a.status === 'present').length / atts.length) * 100);
+  }, [hydrated, teacherId]);
+
+  if (!hydrated) return <div className="p-6 text-muted-foreground">در حال بارگذاری...</div>;
 
   const setStatus = (studentId: string, status: string) => {
     setRecords((prev) => ({ ...prev, [studentId]: status }));
@@ -131,16 +141,6 @@ export default function AttendancePage() {
   };
 
   const markedCount = students.filter((s) => records[s.id]).length;
-
-  const overallRate = useMemo(() => {
-    if (!hydrated || !teacherId) return 0;
-    const atts = db.getAttendance().filter((a) => {
-      const ids = new Set(db.getCoursesByTeacher(teacherId).map((c) => c.id));
-      return ids.has(a.courseId);
-    });
-    if (atts.length === 0) return 0;
-    return Math.round((atts.filter((a) => a.status === 'present').length / atts.length) * 100);
-  }, [hydrated, teacherId]);
 
   return (
     <div className="space-y-6">
@@ -194,7 +194,7 @@ export default function AttendancePage() {
           value={date}
           onChange={(e) => setDate(e.target.value)}
           placeholder="تاریخ (مثلاً ۱۴۰۵/۰۵/۱۵)"
-          className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="px-3 py-2 bg-card border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </div>
 
