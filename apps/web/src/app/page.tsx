@@ -35,9 +35,11 @@ const testimonials = [
 function MobileHome() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
   const [transitionOpacity, setTransitionOpacity] = useState(0);
   const [transitionBlur, setTransitionBlur] = useState(0);
   const [showButtons, setShowButtons] = useState(false);
+  const [heroVisible, setHeroVisible] = useState(true);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const SECTIONS = [
@@ -52,14 +54,16 @@ function MobileHome() {
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
-    video.playbackRate = 0.7;
+    const hero = heroVideoRef.current;
+    if (video) video.playbackRate = 0.7;
+    if (hero) hero.playbackRate = 1;
     const timer = setTimeout(() => setShowButtons(true), 2500);
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     const video = videoRef.current;
+    const hero = heroVideoRef.current;
     const scrollEl = scrollRef.current;
     if (!video || !scrollEl) return;
 
@@ -94,20 +98,38 @@ function MobileHome() {
     };
     video.addEventListener('timeupdate', onTimeUpdate);
 
+    const switchToHero = () => {
+      setHeroVisible(true);
+      video.pause();
+      if (hero) {
+        hero.currentTime = 0;
+        hero.play().catch(() => {});
+      }
+    };
+
+    const switchToMain = (idx: number) => {
+      setHeroVisible(false);
+      if (hero) hero.pause();
+      video.currentTime = SECTIONS[idx].start;
+      video.play().catch(() => {});
+    };
+
     const onScroll = () => {
       if (scrollTimer) clearTimeout(scrollTimer);
 
       const idx = findSection();
 
       if (idx === 0) {
+        if (!heroVisible) switchToHero();
         const el = sectionRefs.current[0];
-        if (el) {
+        if (el && hero) {
           const rect = el.getBoundingClientRect();
           const progress = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / (window.innerHeight + rect.height)));
-          const time = progress * SECTIONS[0].end;
-          video.currentTime = Math.min(time, SECTIONS[0].end - 0.1);
-          video.play().catch(() => {});
+          hero.currentTime = Math.min(progress * hero.duration || 4, 3.9);
+          if (hero.paused) hero.play().catch(() => {});
         }
+      } else if (heroVisible) {
+        switchToMain(idx);
       }
 
       if (idx !== lastSection) {
@@ -115,20 +137,19 @@ function MobileHome() {
         lastSection = idx;
         activeIdx = idx;
 
-        if (idx !== 0) {
-          video.currentTime = SECTIONS[idx].start;
-          video.play().catch(() => {});
+        if (idx !== 0 && heroVisible) {
+          switchToMain(idx);
         }
       }
 
       scrollTimer = setTimeout(() => {
         const current = findSection();
-        if (current === 0) {
+        if (current === 0 && hero) {
           const el = sectionRefs.current[0];
           if (el) {
             const rect = el.getBoundingClientRect();
             if (Math.abs(rect.top) < 10) {
-              video.pause();
+              hero.pause();
             }
           }
         }
@@ -138,7 +159,11 @@ function MobileHome() {
     scrollEl.addEventListener('scroll', onScroll, { passive: true });
 
     video.currentTime = 0;
-    video.play().catch(() => {});
+    video.pause();
+    if (hero) {
+      hero.currentTime = 0;
+      hero.play().catch(() => {});
+    }
 
     return () => {
       scrollEl.removeEventListener('scroll', onScroll);
@@ -151,6 +176,27 @@ function MobileHome() {
     <div ref={scrollRef} className="h-screen overflow-y-auto" style={{ scrollSnapType: 'y proximity' }}>
       {/* Fixed Video Background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
+        {/* Hero HD video (section 0) */}
+        <video
+          ref={heroVideoRef}
+          muted
+          playsInline
+          preload="auto"
+          style={{
+            willChange: 'transform',
+            filter: `blur(${transitionBlur}px)`,
+            transition: 'filter 0.3s ease, opacity 0.4s ease',
+            opacity: heroVisible ? 1 : 0,
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        >
+          <source src="/motion/s0_hero_hd.mp4" type="video/mp4" />
+        </video>
+        {/* Main combined video (sections 1-6) */}
         <video
           ref={videoRef}
           muted
@@ -159,9 +205,14 @@ function MobileHome() {
           style={{
             willChange: 'transform',
             filter: `blur(${transitionBlur}px)`,
-            transition: 'filter 0.3s ease',
+            transition: 'filter 0.3s ease, opacity 0.4s ease',
+            opacity: heroVisible ? 0 : 1,
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
           }}
-          className="scroll-video w-full h-full object-cover"
         >
           <source src="/motion/vira_final.mp4" type="video/mp4" />
         </video>
