@@ -99,6 +99,20 @@ export default function PaymentPage() {
           });
           data.courses.forEach((c: { id: string; title: string; price: number }) => {
             db.logActivity({ type: 'purchase', userId: u?.id || 'guest', userName: u?.name || 'ناشناس', detail: `خرید دوره «${c.title}»`, meta: `${c.price.toLocaleString('fa-IR')} تومان` });
+            if (u?.id) {
+              const storeCourse = db.getCourseByDataId(c.id) || db.getCourses().find((sc) => sc.title === c.title);
+              if (storeCourse) {
+                db.addEnrollment({
+                  studentId: u.id,
+                  studentName: u.name || c.title,
+                  courseId: storeCourse.id,
+                  courseName: storeCourse.title,
+                  date: new Date().toLocaleDateString('fa-IR'),
+                  status: 'confirmed',
+                  amount: c.price,
+                });
+              }
+            }
           });
         } catch {}
       }

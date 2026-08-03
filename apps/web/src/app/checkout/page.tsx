@@ -179,6 +179,20 @@ export default function CheckoutPage() {
     });
     items.forEach((item) => {
       db.logActivity({ type: 'purchase', userId: u?.id || 'guest', userName: u?.name || 'ناشناس', detail: `خرید دوره «${item.course.title}»`, meta: `${item.course.price.toLocaleString('fa-IR')} تومان` });
+      if (u?.id) {
+        const storeCourse = db.getCourseByDataId(item.course.id) || db.getCourses().find((c) => c.title === item.course.title);
+        if (storeCourse) {
+          db.addEnrollment({
+            studentId: u.id,
+            studentName: u.name || item.course.title,
+            courseId: storeCourse.id,
+            courseName: storeCourse.title,
+            date: new Date().toLocaleDateString('fa-IR'),
+            status: 'confirmed',
+            amount: item.course.price,
+          });
+        }
+      }
     });
     setLastInvoiceId(invoice.id);
     clearCart();

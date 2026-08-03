@@ -22,6 +22,7 @@ import {
 import toast from 'react-hot-toast';
 import { db, initializeDB, type User } from '@/lib/store';
 import { useHydrated } from '@/hooks/use-hydrated';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 export default function StudentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,15 +33,29 @@ export default function StudentsPage() {
   const [newStudent, setNewStudent] = useState({ fullName: '', email: '', mobile: '', password: '' });
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
 
+  const currentUser = useCurrentUser();
+  const isAdmin = currentUser?.role === 'admin';
+  const teacherId = currentUser?.role === 'teacher' ? currentUser.id : null;
+
   const students = useMemo(() => {
     initializeDB();
-    return db.getUsers().filter((u) => u.role === 'student');
-  }, []);
+    const all = db.getUsers().filter((u) => u.role === 'student');
+    if (teacherId) {
+      const ids = new Set(db.getStudentsByTeacher(teacherId).map((s) => s.id));
+      return all.filter((s) => ids.has(s.id));
+    }
+    return all;
+  }, [teacherId]);
 
   const courses = useMemo(() => {
     initializeDB();
-    return db.getCourses();
-  }, []);
+    const all = db.getCourses();
+    if (teacherId) {
+      const ids = new Set(db.getCoursesByTeacher(teacherId).map((c) => c.id));
+      return all.filter((c) => ids.has(c.id));
+    }
+    return all;
+  }, [teacherId]);
 
   const hydrated = useHydrated();
   if (!hydrated) return <div className="p-6 text-muted-foreground">در حال بارگذاری...</div>;
@@ -127,18 +142,20 @@ export default function StudentsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">مدیریت دانش‌آموزان</h1>
+          <h1 className="text-2xl font-bold">{isAdmin ? 'مدیریت دانش‌آموزان' : 'دانش‌آموزان من'}</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {filteredStudents.length} دانش‌آموز از {students.length} ثبت‌شده
           </p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-        >
-          <FiUserPlus className="h-4 w-4" />
-          دانش‌آموز جدید
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            <FiUserPlus className="h-4 w-4" />
+            دانش‌آموز جدید
+          </button>
+        )}
       </div>
 
       {/* Filters */}
@@ -214,18 +231,22 @@ export default function StudentsPage() {
 
               <div className="mt-4 flex items-center justify-between">
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => setEditingStudent(student)}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm border hover:bg-muted transition-colors"
-                  >
-                    <FiEdit2 className="h-3.5 w-3.5" /> ویرایش
-                  </button>
-                  <button
-                    onClick={() => handleDeleteStudent(student.id, student.fullName)}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm text-red-600 border border-red-200 hover:bg-red-50 transition-colors"
-                  >
-                    <FiTrash2 className="h-3.5 w-3.5" /> حذف
-                  </button>
+                  {isAdmin && (
+                    <>
+                      <button
+                        onClick={() => setEditingStudent(student)}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm border hover:bg-muted transition-colors"
+                      >
+                        <FiEdit2 className="h-3.5 w-3.5" /> ویرایش
+                      </button>
+                      <button
+                        onClick={() => handleDeleteStudent(student.id, student.fullName)}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm text-red-600 border border-red-200 hover:bg-red-50 transition-colors"
+                      >
+                        <FiTrash2 className="h-3.5 w-3.5" /> حذف
+                      </button>
+                    </>
+                  )}
                 </div>
                 <button
                   onClick={() => setSelectedStudent(student)}
@@ -237,12 +258,14 @@ export default function StudentsPage() {
 
               <div className="mt-3 pt-3 border-t flex items-center justify-between text-xs text-muted-foreground">
                 <span>عضویت: {student.joinDate}</span>
-                <button
-                  onClick={() => handleStatusChange(student.id, student.status === 'active' ? 'inactive' : 'active')}
-                  className="text-xs text-primary hover:underline"
-                >
-                  {student.status === 'active' ? 'غیرفعال کردن' : 'فعال کردن'}
-                </button>
+                {isAdmin && (
+                  <button
+                    onClick={() => handleStatusChange(student.id, student.status === 'active' ? 'inactive' : 'active')}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    {student.status === 'active' ? 'غیرفعال کردن' : 'فعال کردن'}
+                  </button>
+                )}
               </div>
             </motion.div>
           );

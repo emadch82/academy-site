@@ -37,8 +37,10 @@ export default function LoginPage() {
 
       if (user.role === 'admin') {
         router.push('/admin');
+      } else if (user.role === 'teacher') {
+        router.push('/admin');
       } else {
-        router.push('/');
+        router.push('/profile');
       }
     } else {
       toast.error('نام کاربری یا رمز عبور اشتباه است');

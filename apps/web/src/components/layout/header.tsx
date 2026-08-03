@@ -150,6 +150,18 @@ export function Header() {
                     پنل مدیریت
                   </Link>
                 )}
+                {user.role === 'teacher' && (
+                  <Link href="/admin" className={`flex items-center gap-1.5 text-sm font-medium transition-colors px-3 py-2 rounded-lg ${isHome ? 'text-white/80 hover:text-white hover:bg-white/10' : 'hover:text-primary hover:bg-primary/5'}`}>
+                    <FiShield className="h-4 w-4" />
+                    پنل استاد
+                  </Link>
+                )}
+                {user.role === 'student' && (
+                  <Link href="/profile" className={`flex items-center gap-1.5 text-sm font-medium transition-colors px-3 py-2 rounded-lg ${isHome ? 'text-white/80 hover:text-white hover:bg-white/10' : 'hover:text-primary hover:bg-primary/5'}`}>
+                    <FiUser className="h-4 w-4" />
+                    پنل دانشجویی
+                  </Link>
+                )}
                 <span className="text-sm font-medium">{user.name}</span>
                 <button onClick={logout} className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50">
                   <FiLogOut className="h-4 w-4" />
@@ -235,6 +247,16 @@ export function Header() {
                       {user.role === 'admin' && (
                         <Link href="/admin" className={`flex-1 text-center py-3 text-sm font-medium border rounded-xl transition-colors ${isHome ? 'border-white/20 text-white active:bg-white/10' : 'active:bg-muted'}`} onClick={() => setMobileMenuOpen(false)}>
                           پنل مدیریت
+                        </Link>
+                      )}
+                      {user.role === 'teacher' && (
+                        <Link href="/admin" className={`flex-1 text-center py-3 text-sm font-medium border rounded-xl transition-colors ${isHome ? 'border-white/20 text-white active:bg-white/10' : 'active:bg-muted'}`} onClick={() => setMobileMenuOpen(false)}>
+                          پنل استاد
+                        </Link>
+                      )}
+                      {user.role === 'student' && (
+                        <Link href="/profile" className={`flex-1 text-center py-3 text-sm font-medium border rounded-xl transition-colors ${isHome ? 'border-white/20 text-white active:bg-white/10' : 'active:bg-muted'}`} onClick={() => setMobileMenuOpen(false)}>
+                          پنل دانشجویی
                         </Link>
                       )}
                       <button onClick={() => { logout(); setMobileMenuOpen(false); }} className="flex-1 text-center py-3 text-sm font-medium bg-red-500 text-white rounded-xl active:bg-red-600 transition-colors">

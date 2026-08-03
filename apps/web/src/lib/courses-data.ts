@@ -14,6 +14,7 @@ export interface Course {
   highlights: string[];
   imageUrl: string;
   ageRange?: string;
+  level?: string;
 }
 
 export const courses: Course[] = [

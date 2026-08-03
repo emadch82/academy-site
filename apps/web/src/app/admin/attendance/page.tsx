@@ -14,6 +14,7 @@ import {
 import toast from 'react-hot-toast';
 import { db, initializeDB } from '@/lib/store';
 import { useHydrated } from '@/hooks/use-hydrated';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 const STATUS_LABELS: Record<string, string> = {
   present: 'حاضر',
@@ -33,10 +34,18 @@ export default function AttendancePage() {
   const [records, setRecords] = useState<Record<string, string>>({});
   const [savedFor, setSavedFor] = useState<string>('');
 
+  const currentUser = useCurrentUser();
+  const teacherId = currentUser?.role === 'teacher' ? currentUser.id : null;
+
   const courses = useMemo(() => {
     initializeDB();
-    return db.getCourses().filter((c) => c.status === 'active');
-  }, []);
+    const all = db.getCourses().filter((c) => c.status === 'active');
+    if (teacherId) {
+      const ids = new Set(db.getCoursesByTeacher(teacherId).map((c) => c.id));
+      return all.filter((c) => ids.has(c.id));
+    }
+    return all;
+  }, [teacherId]);
 
   const hydrated = useHydrated();
   useEffect(() => {

@@ -76,6 +76,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, []);
 
   const isAdmin = user?.role === 'admin';
+  const isTeacher = user?.role === 'teacher';
+
+  useEffect(() => {
+    if (user && !isAdmin && !isTeacher) {
+      router.push('/profile');
+    }
+  }, [user, isAdmin, isTeacher, router]);
+
+  if (user && !isAdmin && !isTeacher) {
+    return null;
+  }
+
   const links = isAdmin ? sidebarLinks : teacherLinks;
   const userName = user?.name || (isAdmin ? 'مدیر سیستم' : 'استاد');
 

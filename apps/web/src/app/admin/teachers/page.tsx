@@ -19,12 +19,16 @@ import {
 import toast from 'react-hot-toast';
 import { db, initializeDB, type User } from '@/lib/store';
 import { useHydrated } from '@/hooks/use-hydrated';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 export default function TeachersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingTeacher, setEditingTeacher] = useState<User | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTeacher, setNewTeacher] = useState({ fullName: '', email: '', mobile: '', password: '' });
+
+  const currentUser = useCurrentUser();
+  const isAdmin = currentUser?.role === 'admin';
 
   const teachers = useMemo(() => {
     initializeDB();
@@ -33,6 +37,15 @@ export default function TeachersPage() {
 
   const hydrated = useHydrated();
   if (!hydrated) return <div className="p-6 text-muted-foreground">در حال بارگذاری...</div>;
+
+  if (!isAdmin) {
+    return (
+      <div className="text-center py-16 text-muted-foreground">
+        <FiAward className="h-12 w-12 mx-auto mb-3 opacity-40" />
+        <p>دسترسی این صفحه فقط برای مدیر است</p>
+      </div>
+    );
+  }
 
   const getTeacherCourses = (teacherId: string) => db.getCoursesByTeacher(teacherId);
 

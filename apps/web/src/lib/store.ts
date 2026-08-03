@@ -476,10 +476,12 @@ export const db = {
 
   // Enrollments
   getEnrollments: () => getCollection<Enrollment>('enrollments'),
+  getEnrollmentsByStudent: (studentId: string) => getCollection<Enrollment>('enrollments').filter((e) => e.studentId === studentId),
   addEnrollment: (enrollment: Omit<Enrollment, 'id'>) => addItem<Enrollment>('enrollments', { ...enrollment, id: generateId('e') }),
 
   // Transactions
   getTransactions: () => getCollection<Transaction>('transactions'),
+  getTransactionsByUser: (userId: string) => getCollection<Transaction>('transactions').filter((t) => t.userId === userId),
   addTransaction: (tx: Omit<Transaction, 'id'>) => addItem<Transaction>('transactions', { ...tx, id: generateId('t') }),
   deleteTransaction: (id: string) => deleteItem<Transaction>('transactions', id),
 
@@ -491,6 +493,7 @@ export const db = {
 
   // Attendance
   getAttendance: () => getCollection<Attendance>('attendance'),
+  getAttendanceByStudent: (studentId: string) => getCollection<Attendance>('attendance').filter((a) => a.studentId === studentId),
   getAttendanceByCourse: (courseId: string) => getCollection<Attendance>('attendance').filter((a) => a.courseId === courseId),
   addAttendance: (a: Omit<Attendance, 'id'>) => addItem<Attendance>('attendance', { ...a, id: generateId('a') }),
 
@@ -573,6 +576,41 @@ export const db = {
     const enrollments = getCollection<Enrollment>('enrollments').filter((e) => e.courseId === courseId && e.status === 'confirmed');
     const studentIds = enrollments.map((e) => e.studentId);
     return getCollection<User>('users').filter((u) => studentIds.includes(u.id));
+  },
+
+  // Map public course id (courses-data) to store course
+  getCourseByDataId: (dataId: string) => {
+    const map: Record<string, string> = {
+      children: 'c1',
+      junior: 'c2',
+      adult: 'c3',
+      conversation: 'c4',
+      ttc: 'c5',
+      moc: 'c6',
+      book_movie: 'c8',
+      'book-movie': 'c8',
+      online: 'c7',
+    };
+    const storeId = map[dataId];
+    if (storeId) {
+      const found = getCollection<Course>('courses').find((c) => c.id === storeId);
+      if (found) return found;
+    }
+    const categoryMap: Record<string, string> = {
+      'کودکان': 'c1',
+      'نوجوانان': 'c2',
+      'بزرگسالان': 'c3',
+      'مکالمه': 'c4',
+      'TTC': 'c5',
+      'آزمون': 'c6',
+      'آنلاین': 'c7',
+      'فرهنگی': 'c8',
+    };
+    const cat = categoryMap[dataId];
+    if (cat) {
+      return getCollection<Course>('courses').find((c) => c.id === cat);
+    }
+    return undefined;
   },
 
   // Activity Logs

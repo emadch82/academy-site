@@ -13,12 +13,21 @@ import {
 } from 'react-icons/fi';
 import { db, initializeDB } from '@/lib/store';
 import { useHydrated } from '@/hooks/use-hydrated';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 export default function AdminDashboard() {
+  const currentUser = useCurrentUser();
+  const isAdmin = currentUser?.role === 'admin';
+  const teacherId = currentUser?.role === 'teacher' ? currentUser.id : null;
+
   const stats = useMemo(() => {
     initializeDB();
-    const users = db.getUsers();
-    const courses = db.getCourses();
+    let users = db.getUsers();
+    let courses = db.getCourses();
+    if (teacherId) {
+      courses = db.getCoursesByTeacher(teacherId);
+      users = db.getStudentsByTeacher(teacherId);
+    }
     const transactions = db.getTransactions();
 
     const activeCourses = courses.filter((c) => c.status === 'active').length;
@@ -31,7 +40,7 @@ export default function AdminDashboard() {
       courses,
       transactions,
     };
-  }, []);
+  }, [teacherId]);
 
   const topCourses = useMemo(() => {
     return stats.courses
@@ -75,8 +84,8 @@ export default function AdminDashboard() {
         animate={{ opacity: 1, y: 0 }}
         className="bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-6 text-primary-foreground"
       >
-        <h1 className="text-2xl font-bold mb-2">داشبورد مدیریت</h1>
-        <p className="opacity-90">خوش آمدید. وضعیت کلی آموزشگاه زبان ویرا را مشاهده کنید.</p>
+        <h1 className="text-2xl font-bold mb-2">{isAdmin ? 'داشبورد مدیریت' : 'داشبورد استاد'}</h1>
+        <p className="opacity-90">خوش آمدید{isAdmin ? '. وضعیت کلی آموزشگاه زبان ویرا را مشاهده کنید.' : '. دوره‌ها و دانش‌آموزان خود را مدیریت کنید.'}</p>
       </motion.div>
 
       {/* Stats Grid */}
