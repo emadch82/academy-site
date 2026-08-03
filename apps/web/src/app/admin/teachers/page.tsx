@@ -17,6 +17,8 @@ import {
   FiUsers as FiStudentIcon,
   FiEye,
   FiStar,
+  FiCalendar,
+  FiClock,
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { db, initializeDB, type User } from '@/lib/store';
@@ -128,6 +130,7 @@ export default function TeachersPage() {
         {filteredTeachers.map((teacher) => {
           const teacherCourses = getTeacherCourses(teacher.id);
           const teacherStudents = db.getStudentsByTeacher(teacher.id);
+          const teacherClasses = db.getScheduleByTeacher(teacher.id);
           return (
             <motion.div
               key={teacher.id}
@@ -158,6 +161,10 @@ export default function TeachersPage() {
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
                   <FiStudentIcon className="h-4 w-4 text-primary" />
                   <span>{teacherStudents.length} دانش‌آموز</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50 col-span-2">
+                  <FiCalendar className="h-4 w-4 text-green-500" />
+                  <span>{teacherClasses.length} کلاس ({teacherClasses.map((c) => c.day).filter((d, i, a) => a.indexOf(d) === i).join('، ') || '—'})</span>
                 </div>
               </div>
 
@@ -346,6 +353,7 @@ export default function TeachersPage() {
             {(() => {
               const tc = db.getCoursesByTeacher(selectedTeacher.id);
               const ts = db.getStudentsByTeacher(selectedTeacher.id);
+              const tClasses = db.getScheduleByTeacher(selectedTeacher.id);
               const tReviews = db.getReviewsByTeacher(selectedTeacher.id);
               const tHomework = db.getHomework().filter((h) => h.teacherId === selectedTeacher.id);
               const avgRating = tReviews.length > 0 ? (tReviews.reduce((s, r) => s + r.rating, 0) / tReviews.length).toFixed(1) : '—';
@@ -380,6 +388,27 @@ export default function TeachersPage() {
                       <p className="text-xl font-bold text-orange-500">{pendingHw}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">تکلیف در انتظار</p>
                     </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-bold mb-2 flex items-center gap-2">
+                      <FiCalendar className="h-4 w-4 text-green-500" /> کلاس‌ها ({tClasses.length})
+                    </h3>
+                    {tClasses.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {tClasses.map((cl) => (
+                          <div key={cl.id} className="flex items-center justify-between p-2 rounded-lg border text-xs">
+                            <span className="font-medium">{cl.courseName}</span>
+                            <span className="flex items-center gap-1 text-muted-foreground">
+                              <FiClock className="h-3 w-3" />
+                              {cl.day} {cl.time} — {cl.room}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground text-xs">کلاسی ثبت نشده</p>
+                    )}
                   </div>
 
                   <div>

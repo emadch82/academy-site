@@ -47,7 +47,7 @@ const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: 'quiz', label: 'آزمون‌ها', icon: FiAward },
   { id: 'attendance', label: 'حاضری و غیاب', icon: FiCalendar },
   { id: 'materials', label: 'جزوات', icon: FiFileText },
-  { id: 'appointments', label: 'رزرو مشاوره', icon: FiClock },
+  { id: 'appointments', label: 'رزرو کلاس', icon: FiClock },
   { id: 'leave', label: 'غیبت موجه', icon: FiUserX },
   { id: 'certificates', label: 'گواهینامه‌ها', icon: FiAward },
   { id: 'invoices', label: 'فاکتورها', icon: FiDollarSign },
@@ -240,15 +240,15 @@ export default function ProfilePage() {
       createdAt: new Date().toLocaleDateString('fa-IR'),
     });
     db.addNotification({
-      title: 'درخواست رزرو مشاوره جدید',
-      message: `${user.name} جلسه مشاوره ${apptDate} ساعت ${apptTime} با شما رزرو کرد.`,
+      title: 'درخواست رزرو کلاس جدید',
+      message: `${user.name} جلسه کلاس ${apptDate} ساعت ${apptTime} با شما رزرو کرد.`,
       type: 'info',
       target: 'individual',
       recipientId: teacher.id,
       status: 'sent',
       date: new Date().toLocaleDateString('fa-IR'),
     });
-    toast.success('رزرو مشاوره ثبت شد و به استاد اطلاع داده شد');
+    toast.success('رزرو کلاس ثبت شد و به استاد اطلاع داده شد');
     setApptTeacherId('');
     setApptCourseId('');
     setApptDate('');
@@ -641,7 +641,7 @@ export default function ProfilePage() {
             <div className="space-y-6">
               <div className="bg-background border rounded-2xl p-6">
                 <h2 className="font-bold mb-4 flex items-center gap-2">
-                  <FiClock className="h-4 w-4 text-primary" /> رزرو جلسه مشاوره
+                  <FiClock className="h-4 w-4 text-primary" /> رزرو جلسه کلاس
                 </h2>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
@@ -692,12 +692,12 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="text-sm font-medium mb-1 block">موضوع مشاوره</label>
+                    <label className="text-sm font-medium mb-1 block">موضوع کلاس</label>
                     <textarea
                       value={apptReason}
                       onChange={(e) => setApptReason(e.target.value)}
                       rows={2}
-                      placeholder="موضوع جلسه مشاوره..."
+                      placeholder="موضوع جلسه کلاس..."
                       className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
                     />
                   </div>
@@ -706,7 +706,7 @@ export default function ProfilePage() {
                   onClick={addAppointment}
                   className="mt-4 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
                 >
-                  ثبت رزرو مشاوره
+                  ثبت رزرو کلاس
                 </button>
               </div>
 

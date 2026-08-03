@@ -7,20 +7,36 @@ import Cookies from 'js-cookie';
 import {
   FiHome,
   FiUsers,
-  FiShield,
+  FiCalendar,
+  FiEdit3,
+  FiAward,
+  FiFileText,
+  FiClock,
+  FiUserCheck,
+  FiStar,
+  FiMessageCircle,
   FiLogOut,
   FiMenu,
   FiX,
-  FiUserCheck,
+  FiBookOpen,
 } from 'react-icons/fi';
 
-const sidebarLinks = [
-  { icon: FiHome, label: 'داشبورد', href: '/admin' },
-  { icon: FiUsers, label: 'مدیریت کاربران', href: '/admin/users' },
-  { icon: FiUserCheck, label: 'مدیریت اساتید', href: '/admin/teachers' },
+const teacherLinks = [
+  { icon: FiHome, label: 'داشبورد', href: '/teacher' },
+  { icon: FiUsers, label: 'دانش‌آموزان من', href: '/teacher/students' },
+  { icon: FiCalendar, label: 'حاضری و غیاب', href: '/teacher/attendance' },
+  { icon: FiEdit3, label: 'تکالیف', href: '/teacher/homework' },
+  { icon: FiAward, label: 'آزمون‌ها', href: '/teacher/quiz' },
+  { icon: FiFileText, label: 'جزوات دوره‌ها', href: '/teacher/materials' },
+  { icon: FiClock, label: 'برنامه کلاسی', href: '/teacher/schedule' },
+  { icon: FiUserCheck, label: 'درخواست‌های غیبت', href: '/teacher/leave-requests' },
+  { icon: FiCalendar, label: 'رزرو کلاس', href: '/teacher/appointments' },
+  { icon: FiStar, label: 'نظرات دوره‌ها', href: '/teacher/reviews' },
+  { icon: FiMessageCircle, label: 'چت پشتیبانی', href: '/teacher/chats' },
+  { icon: FiBookOpen, label: 'پروفایل', href: '/teacher/profile' },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function TeacherLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -35,19 +51,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, []);
 
-  const isAdmin = user?.role === 'admin';
+  const isTeacher = user?.role === 'teacher';
 
   useEffect(() => {
-    if (user && !isAdmin) {
-      if (user.role === 'teacher') {
-        router.push('/teacher');
+    if (user && !isTeacher) {
+      if (user.role === 'admin') {
+        router.push('/admin');
       } else {
         router.push('/profile');
       }
     }
-  }, [user, isAdmin, router]);
+  }, [user, isTeacher, router]);
 
-  if (user && !isAdmin) {
+  if (user && !isTeacher) {
     return null;
   }
 
@@ -62,11 +78,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           >
             {sidebarOpen ? <FiX className="h-5 w-5" /> : <FiMenu className="h-5 w-5" />}
           </button>
-          <Link href="/admin" className="flex items-center gap-2">
+          <Link href="/teacher" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <FiShield className="h-4 w-4 text-primary-foreground" />
+              <FiBookOpen className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg hidden sm:inline">پنل مدیریت</span>
+            <span className="font-bold text-lg hidden sm:inline">پنل استاد</span>
           </Link>
         </div>
         <div className="flex items-center gap-4">
@@ -83,9 +99,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <FiShield className="h-4 w-4 text-primary" />
+              <FiBookOpen className="h-4 w-4 text-primary" />
             </div>
-            <span className="text-sm font-medium hidden sm:inline">{user?.name || 'مدیر سیستم'}</span>
+            <span className="text-sm font-medium hidden sm:inline">{user?.name || 'استاد'}</span>
           </div>
         </div>
       </header>
@@ -106,7 +122,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           }`}
         >
           <nav className="p-4 space-y-1 overflow-y-auto h-full">
-            {sidebarLinks.map((link) => {
+            {teacherLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link

@@ -60,8 +60,8 @@ export default function AppointmentsPage() {
     db.updateAppointment(ap.id, { status });
     if (status !== 'pending') {
       db.addNotification({
-        title: status === 'approved' ? 'رزرو مشاوره تایید شد' : status === 'rejected' ? 'رزرو مشاوره رد شد' : 'مشاوره انجام شد',
-        message: `رزرو مشاوره ${ap.date} ساعت ${ap.time} با ${ap.teacherName} ${status === 'approved' ? 'تایید' : status === 'rejected' ? 'رد' : 'انجام'} شد.`,
+        title: status === 'approved' ? 'رزرو کلاس تایید شد' : status === 'rejected' ? 'رزرو کلاس رد شد' : 'کلاس انجام شد',
+        message: `رزرو کلاس ${ap.date} ساعت ${ap.time} با ${ap.teacherName} ${status === 'approved' ? 'تایید' : status === 'rejected' ? 'رد' : 'انجام'} شد.`,
         type: status === 'approved' ? 'success' : status === 'rejected' ? 'error' : 'info',
         target: 'individual',
         recipientId: ap.studentId,
@@ -77,7 +77,7 @@ export default function AppointmentsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">رزرو مشاوره</h1>
+          <h1 className="text-2xl font-bold">رزرو کلاس</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {pendingCount > 0 ? `${pendingCount} درخواست در انتظار تایید` : 'درخواستی در انتظار نیست'}
           </p>
@@ -102,7 +102,7 @@ export default function AppointmentsPage() {
         <div className="text-center py-16 bg-background border rounded-2xl">
           <FiCalendar className="h-12 w-12 mx-auto mb-3 opacity-40" />
           <p className="font-bold">رزروی وجود ندارد</p>
-          <p className="text-sm text-muted-foreground mt-1">دانش‌آموزان می‌توانند جلسه مشاوره رزرو کنند</p>
+          <p className="text-sm text-muted-foreground mt-1">دانش‌آموزان می‌توانند جلسه کلاس رزرو کنند</p>
         </div>
       ) : (
         <div className="space-y-3">
