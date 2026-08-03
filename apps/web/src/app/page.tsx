@@ -152,16 +152,17 @@ function MobileHome() {
 
       const idx = findSection();
 
-      if (idx === 0) {
-        if (!heroVisible) switchToHero();
-        const el = sectionRefs.current[0];
-        if (el && hero) {
-          const rect = el.getBoundingClientRect();
-          const progress = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / (window.innerHeight + rect.height)));
-          hero.currentTime = Math.min(progress * hero.duration || 4, 3.9);
-          if (hero.paused) hero.play().catch(() => {});
-        }
-      } else if (heroVisible) {
+        if (idx === 0) {
+          if (!heroVisible) switchToHero();
+          const el = sectionRefs.current[0];
+          if (el && hero) {
+            const rect = el.getBoundingClientRect();
+            const rawProgress = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / (window.innerHeight + rect.height)));
+            const p = Math.max(0, Math.min(1, (rawProgress - 0.5) * 2));
+            hero.currentTime = Math.min(p * (hero.duration || 4), 3.9);
+            if (hero.paused) hero.play().catch(() => {});
+          }
+        } else if (heroVisible) {
         switchToMain(idx);
       }
 
@@ -181,8 +182,8 @@ function MobileHome() {
           const el = sectionRefs.current[0];
           if (el) {
             const rect = el.getBoundingClientRect();
-            if (Math.abs(rect.top) < 10) {
-              hero.pause();
+            if (Math.abs(rect.top) < 10 && hero.paused && hero.readyState >= 2) {
+              hero.play().catch(() => {});
             }
           }
         }
@@ -216,6 +217,8 @@ function MobileHome() {
           ref={heroVideoRef}
           muted
           playsInline
+          loop
+          autoPlay
           preload="auto"
           style={{
             willChange: 'transform',
