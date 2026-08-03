@@ -42,6 +42,35 @@ function MobileHome() {
   const [heroVisible, setHeroVisible] = useState(true);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  const heroContainerVariants = {
+    hidden: {},
+    show: {
+      transition: { staggerChildren: 0.14, delayChildren: 0.2 },
+    },
+  };
+
+  const heroItemVariants = {
+    hidden: { opacity: 0, y: 70, scale: 0.88, filter: 'blur(10px)' },
+    show: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      filter: 'blur(0px)',
+      transition: { type: 'spring' as const, stiffness: 110, damping: 15 },
+    },
+  };
+
+  const heroButtonsVariants = {
+    hidden: { opacity: 0, y: 90, scale: 0.8, filter: 'blur(14px)' },
+    show: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      filter: 'blur(0px)',
+      transition: { type: 'spring' as const, stiffness: 90, damping: 13 },
+    },
+  };
+
   const SECTIONS = [
     { start: 0, end: 4 },
     { start: 4, end: 7.5 },
@@ -294,24 +323,27 @@ function MobileHome() {
               </div>
             </div>
           </div>
-          {/* After VIRA fades: everything slides up to center */}
+          {/* After VIRA fades: everything springs to center with stagger */}
           <motion.div
-            initial={{ opacity: 0, y: 90, scale: 0.94 }}
-            animate={showButtons ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 90, scale: 0.94 }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            initial="hidden"
+            animate={showButtons ? 'show' : 'hidden'}
+            variants={heroContainerVariants}
             className={`absolute inset-0 flex flex-col items-center justify-center gap-3 text-center ${showButtons ? 'pointer-events-auto' : 'pointer-events-none'}`}
           >
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 text-xs font-medium text-white">
+            <motion.div
+              variants={heroItemVariants}
+              className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 text-xs font-medium text-white"
+            >
               <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
               ثبت‌نام دوره‌های جدید آغاز شد
-            </div>
+            </motion.div>
             <div className="inline-flex flex-col items-center gap-3">
-              <p className="text-sm text-white/80 leading-relaxed">
+              <motion.p variants={heroItemVariants} className="text-sm text-white/80 leading-relaxed">
                 آموزش تخصصی زبان انگلیسی از پایه تا پیشرفته
                 <br />
                 با بهترین اساتید در اصفهان
-              </p>
-              <div className="inline-flex flex-col gap-2.5 w-64">
+              </motion.p>
+              <motion.div variants={heroButtonsVariants} className="inline-flex flex-col gap-2.5 w-64">
                 <Link href="/courses" className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white text-black px-5 py-2.5 text-sm font-bold hover:bg-white/90 transition-all hover:scale-105 shadow-xl">
                   ثبت‌نام دوره‌ها
                   <FiArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
@@ -320,7 +352,7 @@ function MobileHome() {
                   <FiPhone className="h-4 w-4" />
                   ۰۳۱-۳۷۷۵۹۵۵۶
                 </Link>
-              </div>
+              </motion.div>
             </div>
           </motion.div>
         </div>
